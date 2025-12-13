@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Financial Report – Premium</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body{
+        margin:0;
+        padding:0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg,#e3f2fd,#f1f8e9);
+    }
+
+    .container{
+        max-width:1050px;
+        margin:20px auto;
+        padding:20px;
+    }
+
+    h1{
+        text-align:center;
+        font-size:28px;
+        color:#1a237e;
+        margin-bottom:15px;
+    }
+
+    .card{
+        background:rgba(255,255,255,0.85);
+        padding:20px;
+        border-radius:14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        margin-bottom:20px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* Filter Area */
+    .filters{
+        display:flex;
+        flex-wrap:wrap;
+        gap:15px;
+        align-items:flex-end;
+    }
+    .filters div{
+        flex:1;
+        min-width:120px;
+    }
+    label{
+        font-size:13px;
+        font-weight:600;
+        color:#0d47a1;
+    }
+    select,input{
+        width:100%;
+        padding:8px;
+        border-radius:6px;
+        border:1px solid #90caf9;
+        outline:none;
+    }
+
+    button{
+        padding:9px 16px;
+        border:none;
+        border-radius:6px;
+        color:#fff;
+        font-weight:600;
+        cursor:pointer;
+    }
+
+    .btn-apply{ background:#1e88e5; }
+    .btn-reset{ background:#c62828; }
+    .btn-export{ background:#2e7d32; }
+    .btn-print{ background:#ef6c00; }
+
+    /* Summary Bar */
+    .summary{
+        background:#e3f2fd;
+        padding:12px;
+        border-radius:10px;
+        font-size:16px;
+        font-weight:600;
+        color:#0d47a1;
+        margin-bottom:10px;
+    }
+    .summary span{
+        margin-right:20px;
+    }
+
+    /* Table */
+    .table-wrapper{
+        max-height:380px;
+        overflow-y:auto;
+        border-radius:10px;
+        border:1px solid #bbdefb;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+        font-size:13px;
+    }
+    th{
+        background:#64b5f6;
+        color:#fff;
+        font-weight:700;
+        position:sticky;
+        top:0;
+        z-index:10;
+        padding:10px 6px;
+        border-bottom:1px solid #42a5f5;
+    }
+    td{
+        padding:8px 6px;
+        border-bottom:1px solid #e3f2fd;
+        white-space:nowrap;
+    }
+    tr:nth-child(even){
+        background:#f5f5f5;
+    }
+    tr:hover{
+        background:#e1f5fe;
+    }
+
+    @media(max-width:600px){
+        h1{ font-size:22px; }
+        .filters{ flex-direction:column; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>📊 Financial Report (Income & Expense)</h1>
+
+    <!-- FILTER CARD -->
+    <div class="card">
+        <div class="filters">
+            <div>
+                <label>Month:</label>
+                <select id="monthFilter">
+                    <option value="">All</option>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Year:</label>
+                <input type="number" id="yearFilter" placeholder="2025">
+            </div>
+
+            <div>
+                <button class="btn-apply" id="applyBtn">APPLY</button>
+            </div>
+            <div>
+                <button class="btn-reset" id="resetBtn">RESET</button>
+            </div>
+            <div>
+                <button class="btn-export" id="exportBtn">EXPORT CSV</button>
+            </div>
+            <div>
+                <button class="btn-print" onclick="window.print()">PRINT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="summary" id="summaryBar">
+        Total Income: 0 | Total Expense: 0 | Net Profit: 0
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill</th>
+                        <th>Name</th>
+                        <th>ID</th>
+                        <th>Class</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Income</th>
+                        <th>Expense</th>
+                        <th>Mode</th>
+                    </tr>
+                </thead>
+                <tbody id="reportBody">
+                    <!-- Data by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Load Fees from IndexedDB
+function openFeeDB(){
+    return new Promise((resolve,reject)=>{
+        let req = indexedDB.open("feeDB_v1",1);
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = e => reject(e);
+    });
+}
+
+async function getAllFees(){
+    let db = await openFeeDB();
+    return new Promise((resolve)=>{
+        let tx = db.transaction("fees","readonly");
+        let store = tx.objectStore("fees");
+        let req = store.getAll();
+        req.onsuccess = ()=> resolve(req.result || []);
+    });
+}
+
+function monthName(m){
+    const list = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    let i = parseInt(m)-1;
+    return list[i] || "";
+}
+
+async function loadReport(){
+    let month = document.getElementById("monthFilter").value;
+    let year = document.getElementById("yearFilter").value.trim();
+
+    let data = await getAllFees();
+
+    let tbody = document.getElementById("reportBody");
+    tbody.innerHTML = "";
+
+    let income = 0, expense = 0;
+
+    data.forEach(r=>{
+        if(month && r.payMonth !== month) return;
+        if(year && r.payYear !== year) return;
+
+        let rowIncome = Number(r.totalAmount || 0);
+        let rowExpense = Number(r.expenseTotal || 0);
+
+        income += rowIncome;
+        expense += rowExpense;
+
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${r.billNo}</td>
+            <td>${r.studentName}</td>
+            <td>${r.studentId}</td>
+            <td>${r.className}</td>
+            <td>${monthName(r.payMonth)}</td>
+            <td>${r.payYear}</td>
+            <td>${rowIncome}</td>
+            <td>${rowExpense}</td>
+            <td>${r.paymentMode}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    let net = income - expense;
+
+    document.getElementById("summaryBar").innerHTML =
+        `Total Income: <b>${income}</b>  |  
+         Total Expense: <b>${expense}</b>  |  
+         Net Profit: <b>${net}</b>`;
+}
+
+document.getElementById("applyBtn").onclick = loadReport;
+document.getElementById("resetBtn").onclick = ()=>{
+    document.getElementById("monthFilter").value = "";
+    document.getElementById("yearFilter").value = "";
+    loadReport();
+};
+
+function exportCSV(){
+    let rows = document.querySelectorAll("table tr");
+    let csv = [];
+    rows.forEach(r=>{
+        let cols = [...r.children].map(td => `"${td.innerText}"`);
+        csv.push(cols.join(","));
+    });
+    let blob = new Blob([csv.join("\n")],{type:"text/csv"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "financial_report.csv";
+    a.click();
+}
+document.getElementById("exportBtn").onclick = exportCSV;
+
+loadReport();
+</script>
+
+</body>
+</html>

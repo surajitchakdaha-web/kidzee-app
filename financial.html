@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KIDZEE - Financial Tracker (Updated)</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+/* ---- SAME BEAUTIFUL DESIGN YOU PROVIDED ---- */
+:root{
+  --primary:#6C63FF;
+  --primary-soft:#E8E7FF;
+  --accent:#FF6B6B;
+  --success:#51CF66;
+  --warning:#FFA94D;
+  --danger:#FF6B6B;
+  --muted:#777;
+  --bg-gradient:linear-gradient(135deg,#dfe9ff,#fff0f6);
+  --card-bg:#ffffffee;
+  --border:#ece8ff;
+  --chip-bg:#f5f3ff;
+}
+*{box-sizing:border-box;}
+body{
+  font-family:'Poppins',sans-serif;
+  margin:0;
+  background:var(--bg-gradient);
+  color:#222;
+}
+.wrap{
+  max-width:1100px;
+  margin:22px auto;
+  padding:20px 18px 26px;
+  background:var(--card-bg);
+  border-radius:18px;
+  box-shadow:0 16px 45px rgba(15,23,42,0.18);
+  border:1px solid var(--border);
+}
+header{
+  display:flex;
+  gap:16px;
+}
+header img{
+  height:64px;width:64px;border-radius:10px;
+}
+h1{margin:0;font-size:22px;color:var(--primary);}
+.card{background:#fff;padding:12px;border-radius:12px;border:1px solid #ece9ff;}
+label{font-size:13px;color:#666;margin-bottom:4px;display:block;}
+input,select{
+  width:100%;padding:7px;border:1px solid #ddd;border-radius:8px;
+}
+.btn{
+  padding:8px 12px;border-radius:10px;border:none;color:#fff;
+  font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+.btn.green{background:linear-gradient(135deg,#51CF66,#2f9e44);}
+.btn.red{background:linear-gradient(135deg,#FF6B6B,#d62828);}
+.btn.orange{background:linear-gradient(135deg,#FFA94D,#f76707);}
+.btn.blue{background:linear-gradient(135deg,#6C63FF,#4c6fff);}
+.small{font-size:12px;color:#777;}
+table{width:100%;border-collapse:collapse;margin-top:6px;}
+th,td{border:1px solid #eee;padding:6px;font-size:13px;}
+th{background:#f5f3ff;}
+.tab{display:none;}
+.tab.active{display:block;}
+.tabbar{display:flex;background:#f5f3ff;padding:6px;border-radius:999px;margin:15px 0;}
+.tabbtn{flex:1;padding:9px;border-radius:999px;background:none;border:0;cursor:pointer;}
+.tabbtn.active{background:var(--primary);color:#fff;}
+.customBox{
+  background:#f9f8ff;
+  padding:8px;
+  border:1px dashed #bfbaff;
+  border-radius:8px;
+  margin-top:6px;
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <img src="logo.png" onerror="this.style.display='none'">
+  <div>
+    <h1>KIDZEE Financial Tracker</h1>
+    <div class="small">Income + Expense + Charts + Report (UPDATED VERSION)</div>
+  </div>
+</header>
+
+<div class="tabbar">
+  <button class="tabbtn active" onclick="openTab('incomeTab',this)">💰 Income</button>
+  <button class="tabbtn" onclick="openTab('expenseTab',this)">💸 Expense</button>
+  <button class="tabbtn" onclick="openTab('reportTab',this)">📊 Report</button>
+  <button class="tabbtn" onclick="openTab('chartTab',this)">📈 Charts</button>
+</div>
+
+<!-- ============================= INCOME TAB ============================= -->
+<div id="incomeTab" class="tab active">
+
+<div class="card">
+  <label>Date</label>
+  <input type="date" id="incomeDate">
+
+  <label style="margin-top:6px;">Income Source</label>
+  <select id="incomeSource" onchange="toggleCustomIncome()">
+    <option>Tuition Fee</option>
+    <option>Admission Fee</option>
+    <option>Exam Fee</option>
+    <option>Annual/Development Fee</option>
+    <option>Library Fee</option>
+    <option>Transport Fee</option>
+    <option>Tiffin Fee</option>
+    <option>Games/Sports Fee</option>
+    <option>Cultural Activity Fee</option>
+    <option>Books & Copies</option>
+    <option>Govt Grant</option>
+    <option>Donation</option>
+    <option>Other Income</option>
+    <option>Custom Income</option>
+  </select>
+
+  <div id="customIncomeBox" class="customBox" style="display:none;">
+    <label>Enter Income Title:</label>
+    <input type="text" id="customIncomeName" placeholder="Type income category">
+  </div>
+
+  <label style="margin-top:6px;">Amount (₹)</label>
+  <input type="number" id="incomeAmount" placeholder="0.00">
+
+  <button class="btn green" style="margin-top:10px;" onclick="addIncome()">➕ Add Income</button>
+</div>
+
+<div class="card" style="margin-top:14px;max-height:350px;overflow:auto;">
+  <h3>Recent Incomes</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Save</th><th>Del</th></tr></thead>
+    <tbody id="incomeTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<!-- ============================= EXPENSE TAB ============================= -->
+<div id="expenseTab" class="tab">
+
+<div class="card">
+  <label>Date</label>
+  <input type="date" id="expenseDate">
+
+  <label style="margin-top:6px;">Expense Head</label>
+  <select id="expenseHead" onchange="toggleCustomExpense()">
+    <option>Salary</option>
+    <option>Night Guard</option>
+    <option>Bonus</option>
+    <option>PF Contribution</option>
+    <option>Cleaning/Maintenance</option>
+    <option>Repairs & Upkeep</option>
+    <option>Stationery</option>
+    <option>Utility Bills</option>
+    <option>Transport Cost</option>
+    <option>Event Expenses</option>
+    <option>Other Expense</option>
+    <option>Custom Expense</option>
+  </select>
+
+  <div id="customExpenseBox" class="customBox" style="display:none;">
+    <label>Enter Expense Title:</label>
+    <input type="text" id="customExpenseName" placeholder="Type expense category">
+  </div>
+
+  <label style="margin-top:6px;">Amount (₹)</label>
+  <input type="number" id="expenseAmount" placeholder="0.00">
+
+  <button class="btn orange" style="margin-top:10px;" onclick="addExpense()">➕ Add Expense</button>
+</div>
+
+<div class="card" style="margin-top:14px;max-height:350px;overflow:auto;">
+  <h3>Recent Expenses</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Head</th><th>Amount</th><th>Save</th><th>Del</th></tr></thead>
+    <tbody id="expenseTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<!-- ============================= REPORT TAB ============================= -->
+<div id="reportTab" class="tab">
+
+<button class="btn blue" onclick="downloadPDF()">📄 PDF</button>
+<button class="btn green" onclick="window.print()">🖨️ Print</button>
+<button class="btn orange" onclick="downloadCSV()">📁 CSV</button>
+
+<div class="card" id="reportArea" style="margin-top:12px;">
+
+<h2 style="text-align:center;color:var(--primary);">Financial Report</h2>
+<div style="text-align:center;font-size:12px;">Generated: <span id="reportDate"></span></div>
+
+<h3>Income Summary</h3>
+<table><tbody id="reportIncomeTable"></tbody></table>
+
+<h3>Expense Summary</h3>
+<table><tbody id="reportExpenseTable"></tbody></table>
+
+<div style="text-align:center;margin-top:10px;">
+  <canvas id="reportPie" width="240" height="200"></canvas>
+</div>
+
+<h3 style="text-align:center;">
+  Total Income: ₹<span id="repTotalIncome"></span><br>
+  Total Expense: ₹<span id="repTotalExpense"></span><br>
+  Balance: ₹<span id="repBalance"></span>
+</h3>
+
+</div>
+</div>
+
+<!-- ============================= CHART TAB ============================= -->
+<div id="chartTab" class="tab">
+
+<label>From: <input type="date" id="chartFrom"></label>
+<label>To: <input type="date" id="chartTo"></label>
+<button class="btn blue" onclick="applyChartFilter()">Apply</button>
+
+<div class="card" style="margin-top:12px;">
+  <canvas id="barChart" height="200"></canvas>
+</div>
+
+<div class="card" style="margin-top:12px;">
+  <canvas id="pieChart" height="200"></canvas>
+</div>
+
+<div class="card" style="margin-top:12px;">
+  <canvas id="incomeCatChart" height="200"></canvas>
+</div>
+
+<div class="card" style="margin-top:12px;">
+  <canvas id="expenseCatChart" height="200"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ======= Database ======= */
+let incomes = JSON.parse(localStorage.getItem("incomes")||"[]");
+let expenses = JSON.parse(localStorage.getItem("expenses")||"[]");
+
+function saveAll(){
+  localStorage.setItem("incomes",JSON.stringify(incomes));
+  localStorage.setItem("expenses",JSON.stringify(expenses));
+}
+
+/* ======= Tabs ======= */
+function openTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ======= Custom Income Toggle ======= */
+function toggleCustomIncome(){
+  let v = document.getElementById("incomeSource").value;
+  document.getElementById("customIncomeBox").style.display =
+    (v=="Other Income" || v=="Custom Income") ? "block":"none";
+}
+
+/* ======= Custom Expense Toggle ======= */
+function toggleCustomExpense(){
+  let v = document.getElementById("expenseHead").value;
+  document.getElementById("customExpenseBox").style.display =
+    (v=="Other Expense" || v=="Custom Expense") ? "block":"none";
+}
+
+/* ================= ADD INCOME ================= */
+function addIncome(){
+  let date = document.getElementById("incomeDate").value;
+  let src = document.getElementById("incomeSource").value;
+  let amt = parseFloat(document.getElementById("incomeAmount").value);
+
+  if(!date || !amt){
+    alert("Enter valid date & amount");
+    return;
+  }
+
+  if(src=="Other Income" || src=="Custom Income"){
+    let custom = document.getElementById("customIncomeName").value.trim();
+    if(!custom){ alert("Enter custom income title"); return; }
+    src = custom;
+  }
+
+  incomes.push({id:Date.now(),date,source:src,amount:amt});
+  saveAll();
+  renderTables();
+  renderReport();
+  renderCharts();
+  document.getElementById("incomeAmount").value="";
+}
+
+/* ================= ADD EXPENSE ================= */
+function addExpense(){
+  let date = document.getElementById("expenseDate").value;
+  let head = document.getElementById("expenseHead").value;
+  let amt = parseFloat(document.getElementById("expenseAmount").value);
+
+  if(!date || !amt){
+    alert("Enter valid date & amount");
+    return;
+  }
+
+  if(head=="Other Expense" || head=="Custom Expense"){
+    let custom = document.getElementById("customExpenseName").value.trim();
+    if(!custom){ alert("Enter custom expense title"); return; }
+    head = custom;
+  }
+
+  expenses.push({id:Date.now(),date,head,amount:amt});
+  saveAll();
+  renderTables();
+  renderReport();
+  renderCharts();
+  document.getElementById("expenseAmount").value="";
+}
+
+/* ================= Render Tables ================= */
+function renderTables(){
+
+  /* Income Table */
+  const iBody=document.getElementById("incomeTable");
+  iBody.innerHTML="";
+  incomes.slice().reverse().forEach(x=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${x.date}</td>
+      <td>${x.source}</td>
+      <td><input type="number" value="${x.amount}" 
+           onchange="updateIncome(${x.id},this.value)"></td>
+      <td><button class="btn orange" onclick="updateIncome(${x.id})">Save</button></td>
+      <td><button class="btn red" onclick="deleteIncome(${x.id})">X</button></td>
+    `;
+    iBody.appendChild(tr);
+  });
+
+  /* Expense Table */
+  const eBody=document.getElementById("expenseTable");
+  eBody.innerHTML="";
+  expenses.slice().reverse().forEach(x=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${x.date}</td>
+      <td>${x.head}</td>
+      <td><input type="number" value="${x.amount}"
+           onchange="updateExpense(${x.id},this.value)"></td>
+      <td><button class="btn orange" onclick="updateExpense(${x.id})">Save</button></td>
+      <td><button class="btn red" onclick="deleteExpense(${x.id})">X</button></td>
+    `;
+    eBody.appendChild(tr);
+  });
+}
+
+function updateIncome(id,val){
+  let x=incomes.find(i=>i.id==id);
+  if(!x) return;
+  let rows=[...document.querySelectorAll("#incomeTable tr")];
+  let row=rows.find(r=>r.innerHTML.includes(id));
+  if(row){
+    let v=parseFloat(row.querySelector("input").value);
+    if(!isNaN(v) && v>0) x.amount=v;
+  }
+  saveAll(); renderTables(); renderReport(); renderCharts();
+}
+function updateExpense(id,val){
+  let x=expenses.find(i=>i.id==id);
+  if(!x) return;
+  let rows=[...document.querySelectorAll("#expenseTable tr")];
+  let row=rows.find(r=>r.innerHTML.includes(id));
+  if(row){
+    let v=parseFloat(row.querySelector("input").value);
+    if(!isNaN(v) && v>0) x.amount=v;
+  }
+  saveAll(); renderTables(); renderReport(); renderCharts();
+}
+
+function deleteIncome(id){
+  incomes=incomes.filter(i=>i.id!=id);
+  saveAll(); renderTables(); renderReport(); renderCharts();
+}
+function deleteExpense(id){
+  expenses=expenses.filter(i=>i.id!=id);
+  saveAll(); renderTables(); renderReport(); renderCharts();
+}
+
+/* ================= Report ================= */
+function renderReport(){
+  document.getElementById("reportDate").innerHTML=
+    new Date().toLocaleString();
+
+  /* Income summary */
+  const incAgg={};
+  incomes.forEach(i=>incAgg[i.source]=(incAgg[i.source]||0)+i.amount);
+  const incBody=document.getElementById("reportIncomeTable");
+  incBody.innerHTML="";
+  Object.keys(incAgg).forEach(k=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`<td>${k}</td><td>${incAgg[k].toFixed(2)}</td>`;
+    incBody.appendChild(tr);
+  });
+
+  /* Expense summary */
+  const expAgg={};
+  expenses.forEach(e=>expAgg[e.head]=(expAgg[e.head]||0)+e.amount);
+  const expBody=document.getElementById("reportExpenseTable");
+  expBody.innerHTML="";
+  Object.keys(expAgg).forEach(k=>{
+    let tr=document.createElement("tr");
+    tr.innerHTML=`<td>${k}</td><td>${expAgg[k].toFixed(2)}</td>`;
+    expBody.appendChild(tr);
+  });
+
+  const ti=incomes.reduce((a,b)=>a+b.amount,0);
+  const te=expenses.reduce((a,b)=>a+b.amount,0);
+
+  document.getElementById("repTotalIncome").textContent=ti.toFixed(2);
+  document.getElementById("repTotalExpense").textContent=te.toFixed(2);
+  document.getElementById("repBalance").textContent=(ti-te).toFixed(2);
+
+  drawReportPie(ti,te);
+}
+
+/* ================= Report Pie ================= */
+let reportPieInstance=null;
+function drawReportPie(ti,te){
+  const ctx=document.getElementById("reportPie");
+  if(reportPieInstance) reportPieInstance.destroy();
+  reportPieInstance=new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:['Income','Expense'],datasets:[{data:[ti,te],backgroundColor:['#6C63FF','#FF6B6B']}]},
+    options:{responsive:true,maintainAspectRatio:false}
+  });
+}
+
+/* ================= Charts ================= */
+let barChart=null;
+let pieChart=null;
+let incomeCatChart=null;
+let expenseCatChart=null;
+
+function renderCharts(){
+  let labels=[...new Set([...incomes.map(i=>i.date),...expenses.map(e=>e.date)])].sort();
+  let inc=labels.map(d=>incomes.filter(i=>i.date==d).reduce((a,b)=>a+b.amount,0));
+  let exp=labels.map(d=>expenses.filter(i=>i.date==d).reduce((a,b)=>a+b.amount,0));
+
+  /* Bar Chart */
+  const ctx1=document.getElementById("barChart");
+  if(barChart) barChart.destroy();
+  barChart=new Chart(ctx1,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Income',data:inc,borderColor:'#6C63FF',fill:true},
+      {label:'Expense',data:exp,borderColor:'#FF6B6B',fill:true}
+    ]}
+  });
+
+  /* Pie */
+  const ti=incomes.reduce((a,b)=>a+b.amount,0);
+  const te=expenses.reduce((a,b)=>a+b.amount,0);
+  const ctx2=document.getElementById("pieChart");
+  if(pieChart) pieChart.destroy();
+  pieChart=new Chart(ctx2,{
+    type:'doughnut',
+    data:{labels:['Income','Expense'],datasets:[{data:[ti,te],backgroundColor:['#6C63FF','#FF6B6B']}]}
+  });
+
+  /* Income Cat Chart */
+  const incAgg={};
+  incomes.forEach(i=>incAgg[i.source]=(incAgg[i.source]||0)+i.amount);
+  const ctx3=document.getElementById("incomeCatChart");
+  if(incomeCatChart) incomeCatChart.destroy();
+  incomeCatChart=new Chart(ctx3,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(incAgg),
+      datasets:[{data:Object.values(incAgg),backgroundColor:['#6C63FF','#4c6fff','#00b4d8','#ffa94d','#2ecc71','#ff6b6b','#845ef7']}]
+    }
+  });
+
+  /* Expense Cat Chart */
+  const expAgg={};
+  expenses.forEach(e=>expAgg[e.head]=(expAgg[e.head]||0)+e.amount);
+  const ctx4=document.getElementById("expenseCatChart");
+  if(expenseCatChart) expenseCatChart.destroy();
+  expenseCatChart=new Chart(ctx4,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(expAgg),
+      datasets:[{data:Object.values(expAgg),backgroundColor:['#ff6b6b','#ffe066','#4dabf7','#20c997','#845ef7','#ffd43b']}]
+    }
+  });
+}
+
+/* ================= CSV ================= */
+function downloadCSV(){
+  let csv="Type,Category,Amount\n";
+  incomes.forEach(i=>csv+=`Income,${i.source},${i.amount}\n`);
+  expenses.forEach(e=>csv+=`Expense,${e.head},${e.amount}\n`);
+
+  let blob=new Blob([csv],{type:"text/csv"});
+  let a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="Financial_Report.csv";
+  a.click();
+}
+
+/* ================= PDF ================= */
+function downloadPDF(){
+  renderReport();
+  let el=document.getElementById("reportArea");
+  html2pdf().from(el).save("Financial_Report.pdf");
+}
+
+/* INIT */
+document.getElementById("incomeDate").value=new Date().toISOString().slice(0,10);
+document.getElementById("expenseDate").value=new Date().toISOString().slice(0,10);
+renderTables();
+renderReport();
+renderCharts();
+
+</script>
+
+</body>
+</html>

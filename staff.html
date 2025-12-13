@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Staff Detail (PWA – Final Version)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#004d40" />
+<link rel="manifest" href="manifest.json">
+
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin:0 auto;
+    padding:20px;
+    background:linear-gradient(135deg,#e8f5e9,#e3f2fd);
+  }
+  h1{ text-align:center; color:#004d40; }
+  .status-bar{
+    padding:6px 12px;
+    background:#c8e6c9;
+    color:#1b5e20;
+    border-radius:6px;
+    font-size:12px;
+    margin-bottom:10px;
+  }
+  .card{
+    background:#fff;
+    padding:20px;
+    border-radius:8px;
+    position:relative;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  }
+  form{
+    display:grid;
+    grid-template-columns:1fr 2fr;
+    gap:10px 15px;
+  }
+  label{ font-weight:bold; color:#1b5e20; }
+  input,select,textarea{
+    width:100%; padding:6px 8px; box-sizing:border-box;
+    border-radius:4px; border:1px solid #b2dfdb;
+  }
+  textarea{ resize:vertical; }
+  #preview{
+    max-width:110px; max-height:130px;
+    object-fit:cover; position:absolute;
+    right:20px; top:20px;
+    border-radius:6px; border:1px solid #80cbc4;
+  }
+  .full-row{ grid-column:1/3; }
+
+  .toolbar{
+    display:flex; flex-wrap:wrap;
+    gap:10px; margin-top:20px;
+  }
+  .btn{
+    padding:8px 14px; border:none;
+    border-radius:4px; color:#fff;
+    font-weight:600; cursor:pointer;
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+  }
+  .btn-add{background:#2e7d32;}
+  .btn-edit{background:#0277bd;}
+  .btn-delete{background:#c62828;}
+  .btn-home{background:#6a1b9a;}
+  .btn-csv{background:#00897b;}
+  .btn-print{background:#ef6c00;}
+  .btn-prev{background:#5d4037;}
+  .btn-next{background:#00796b;}
+  .btn-search{background:#1e88e5;}
+  .btn-json-export{background:#004d40;}
+  .btn-json-import{background:#ad1457;}
+
+  .search-box{ display:flex; gap:6px; align-items:center; }
+
+  @media(max-width:600px){
+    form{ grid-template-columns:1fr; }
+    .full-row{ grid-column:1/2; }
+    #preview{ position:static; margin-bottom:10px; }
+    .toolbar{ flex-direction:column; align-items:flex-start; }
+  }
+
+  @media print{
+    .toolbar,.status-bar{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<h1>Staff Detail (FINAL)</h1>
+
+<div class="status-bar">Status: <span id="statusText">Loading...</span></div>
+
+<div class="card">
+
+<img id="preview">
+
+<form id="staffForm">
+
+  <label>STAFF NAME:</label>
+  <input type="text" id="staffName">
+
+  <label>PICTURE:</label>
+  <input type="file" id="staffPicture" accept="image/*">
+
+  <label>STAFF ID:</label>
+  <input type="text" id="staffId" readonly>
+
+  <label>DOB:</label>
+  <input type="date" id="dob">
+
+  <label>DOB (Formatted):</label>
+  <span class="full-row" id="dobFancy"></span>
+
+  <label>DATE OF JOINING:</label>
+  <input type="date" id="doj">
+
+  <label>JOINING (Formatted):</label>
+  <span class="full-row" id="dojFancy"></span>
+
+  <label>STAFF CATEGORY:</label>
+  <select id="category">
+    <option value="">Select</option>
+    <option>TEACHER</option>
+    <option>CLERK</option>
+    <option>CLASS-IV</option>
+    <option>OTHER</option>
+  </select>
+
+  <label>QUALIFICATION:</label>
+  <input type="text" id="qualification">
+
+  <label>EXPERIENCE (Years):</label>
+  <input type="number" id="experience">
+
+  <label>SALARY (Monthly):</label>
+  <input type="number" id="salary">
+
+  <label>FATHER NAME:</label>
+  <input type="text" id="father">
+
+  <label>MOTHER NAME:</label>
+  <input type="text" id="mother">
+
+  <label>CONTACT:</label>
+  <input type="tel" id="contact">
+
+  <label>EMAIL:</label>
+  <input type="email" id="email" value="@gmail.com">
+
+  <label class="full-row">ADDRESS:</label>
+  <textarea class="full-row" id="address"></textarea>
+
+</form>
+
+<div class="toolbar">
+
+  <button class="btn btn-add" id="addBtn">SAVE</button>
+  <button class="btn btn-edit" id="editBtn">EDIT</button>
+  <button class="btn btn-delete" id="deleteBtn">DELETE</button>
+  <button class="btn btn-home" id="homeBtn">HOME</button>
+  <button class="btn btn-csv" id="csvBtn">CSV</button>
+  <button class="btn btn-print" id="printBtn">PRINT</button>
+
+  <button class="btn btn-prev" id="prevBtn">PREV</button>
+  <button class="btn btn-next" id="nextBtn">NEXT</button>
+
+  <div class="search-box">
+    <input type="text" id="searchId" placeholder="Search ID">
+    <button class="btn btn-search" id="searchBtn">SEARCH</button>
+  </div>
+
+  <button class="btn btn-json-export" id="jsonExportBtn">EXPORT JSON</button>
+  <button class="btn btn-json-import" id="jsonImportBtn">IMPORT JSON</button>
+  <input type="file" id="jsonFileInput" accept="application/json" style="display:none" />
+
+</div>
+
+</div>
+
+<!-- ---------------- STAFF LIST SECTION ---------------- -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="color:#004d40;margin-top:0;">Staff List</h3>
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr style="background:#e0f2f1;">
+        <th style="border:1px solid #b2dfdb;padding:6px;">ID</th>
+        <th style="border:1px solid #b2dfdb;padding:6px;">Name</th>
+        <th style="border:1px solid #b2dfdb;padding:6px;">Category</th>
+        <th style="border:1px solid #b2dfdb;padding:6px;">Contact</th>
+      </tr>
+    </thead>
+    <tbody id="staffListTable"></tbody>
+  </table>
+</div>
+
+<script>
+// ---------- Fancy Date ----------
+function ordinal(n){ let s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function fancy(d){
+  if(!d) return "";
+  const [y,m,day]=d.split("-");
+  const dt=new Date(y,m-1,day);
+  const mnames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${ordinal(dt.getDate())} ${mnames[dt.getMonth()]}, ${dt.getFullYear()}`;
+}
+
+// ---------- Status ----------
+function status(t){ document.getElementById("statusText").textContent=t; }
+
+// ---------- IndexedDB ----------
+const DB="staffDB_v1"; const VER=1; let idb=null;
+
+function openDb(){
+  return new Promise(res=>{
+    if(idb) return res(idb);
+    const req=indexedDB.open(DB,VER);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains("staff"))
+        db.createObjectStore("staff",{keyPath:"staffId"});
+    };
+    req.onsuccess=()=>{ idb=req.result; res(idb); };
+  });
+}
+
+async function saveStaff(s){
+  const db=await openDb();
+  return new Promise(res=>{
+    const tx=db.transaction("staff","readwrite");
+    tx.objectStore("staff").put(s);
+    tx.oncomplete=async ()=>{
+      const all=await allStaff();
+      localStorage.setItem("staff",JSON.stringify(all));
+      loadStaffList();
+      res();
+    };
+  });
+}
+
+async function getStaff(id){
+  const db=await openDb();
+  return new Promise(res=>{
+    const tx=db.transaction("staff","readonly");
+    const req=tx.objectStore("staff").get(id);
+    req.onsuccess=()=>res(req.result||null);
+  });
+}
+
+async function deleteStaff(id){
+  const db=await openDb();
+  return new Promise(res=>{
+    const tx=db.transaction("staff","readwrite");
+    tx.objectStore("staff").delete(id);
+    tx.oncomplete=async ()=>{
+      const all=await allStaff();
+      localStorage.setItem("staff",JSON.stringify(all));
+      loadStaffList();
+      res();
+    };
+  });
+}
+
+async function allStaff(){
+  const db=await openDb();
+  return new Promise(res=>{
+    const tx=db.transaction("staff","readonly");
+    const req=tx.objectStore("staff").getAll();
+    req.onsuccess=()=>res(req.result||[]);
+  });
+}
+
+async function sortedIds(){
+  const all=await allStaff();
+  let ids=all.map(s=>s.staffId);
+  ids.sort();
+  return ids;
+}
+
+async function nextId(){
+  const ids=await sortedIds();
+  if(!ids.length) return "SF0001";
+  const last=ids[ids.length-1];
+  const n=parseInt(last.substring(2))+1;
+  return "SF"+n.toString().padStart(4,"0");
+}
+
+// ---------- Picture ----------
+let pic="";
+document.getElementById("staffPicture").addEventListener("change",function(){
+  const f=this.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    pic=e.target.result;
+    document.getElementById("preview").src=pic;
+  };
+  r.readAsDataURL(f);
+});
+
+// ---------- Form ----------
+function getForm(){
+  return {
+    staffId:document.getElementById("staffId").value,
+    staffName:document.getElementById("staffName").value,
+    dob:document.getElementById("dob").value,
+    doj:document.getElementById("doj").value,
+    category:document.getElementById("category").value,
+    qualification:document.getElementById("qualification").value,
+    experience:document.getElementById("experience").value,
+    salary:document.getElementById("salary").value,
+    father:document.getElementById("father").value,
+    mother:document.getElementById("mother").value,
+    contact:document.getElementById("contact").value,
+    email:document.getElementById("email").value,
+    address:document.getElementById("address").value,
+    picture:pic
+  };
+}
+
+function fillForm(s){
+  document.getElementById("staffId").value=s.staffId;
+  document.getElementById("staffName").value=s.staffName;
+  document.getElementById("dob").value=s.dob;
+  document.getElementById("dobFancy").textContent=fancy(s.dob);
+  document.getElementById("doj").value=s.doj;
+  document.getElementById("dojFancy").textContent=fancy(s.doj);
+  document.getElementById("category").value=s.category;
+  document.getElementById("qualification").value=s.qualification;
+  document.getElementById("experience").value=s.experience;
+  document.getElementById("salary").value=s.salary;
+  document.getElementById("father").value=s.father;
+  document.getElementById("mother").value=s.mother;
+  document.getElementById("contact").value=s.contact;
+  document.getElementById("email").value=s.email;
+  document.getElementById("address").value=s.address;
+  pic=s.picture;
+  document.getElementById("preview").src=pic;
+}
+
+
+async function clearForm(){
+  document.getElementById("staffForm").reset();
+  pic = "";
+  document.getElementById("preview").src = "";
+
+  const id = await nextId();
+  document.getElementById("staffId").value = id;
+
+  const t = new Date();
+  const y = t.getFullYear(), m = ("0" + (t.getMonth() + 1)).slice(-2), d = ("0" + t.getDate()).slice(-2);
+  document.getElementById("doj").value = `${y}-${m}-${d}`;
+  document.getElementById("dojFancy").textContent = fancy(`${y}-${m}-${d}`);
+
+  document.getElementById("staffName").focus();
+  status("Ready");
+}
+-${m}-${d}`;
+  document.getElementById("dojFancy").textContent=fancy(`${y}-${m}-${d}`);
+}
+
+// ---------- Load Index ----------
+let index=-1;
+
+async function loadIndex(i){
+  const ids=await sortedIds();
+  if(!ids.length){status("No data"); return;}
+  if(i<0)i=0; if(i>=ids.length)i=ids.length-1;
+  index=i;
+  const s=await getStaff(ids[i]);
+  if(s) fillForm(s);
+}
+
+// ---------- STAFF LIST LOADING ----------
+function loadStaffList(){
+  allStaff().then(list=>{
+    const t=document.getElementById("staffListTable");
+    t.innerHTML="";
+    list.forEach(x=>{
+      t.innerHTML+=`
+        <tr>
+          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.staffId}</td>
+          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.staffName}</td>
+          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.category||''}</td>
+          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.contact||''}</td>
+        </tr>
+      `;
+    });
+  });
+}
+
+// ---------- INIT ----------
+(async ()=>{
+  await openDb();
+  document.getElementById("staffId").value=await nextId();
+
+  const t=new Date();
+  const y=t.getFullYear(), m=("0"+(t.getMonth()+1)).slice(-2), d=("0"+t.getDate()).slice(-2);
+  document.getElementById("doj").value=`${y}-${m}-${d}`;
+  document.getElementById("dojFancy").textContent=fancy(`${y}-${m}-${d}`);
+
+  const ids=await sortedIds();
+  if(ids.length) loadIndex(0);
+
+  loadStaffList();
+  status("Ready");
+})();
+
+// ---------- Buttons ----------
+document.getElementById("addBtn").onclick = async()=>{
+  const s=getForm();
+  if(!s.staffName){alert("Name empty!"); return;}
+  await saveStaff(s);
+  alert("Saved: "+s.staffId);
+  await clearForm();
+};
+
+document.getElementById("editBtn").onclick = async()=>{
+  const id=prompt("Enter Staff ID:");
+  const s=await getStaff(id);
+  if(!s){alert("Not found"); return;}
+  fillForm(s);
+  const ids=await sortedIds();
+  index=ids.indexOf(id);
+};
+
+document.getElementById("deleteBtn").onclick = async()=>{
+  const id=document.getElementById("staffId").value;
+  if(!confirm("Delete "+id+"?")) return;
+  await deleteStaff(id);
+  alert("Deleted");
+  const ids=await sortedIds();
+  if(ids.length) loadIndex(0); else clearForm();
+};
+
+document.getElementById("nextBtn").onclick = async()=>{
+  const ids=await sortedIds();
+  if(index<ids.length-1){ index++; loadIndex(index); }
+};
+document.getElementById("prevBtn").onclick = async()=>{
+  if(index>0){ index--; loadIndex(index); }
+};
+
+document.getElementById("searchBtn").onclick = async()=>{
+  const id=document.getElementById("searchId").value;
+  const s=await getStaff(id);
+  if(!s){alert("Not found"); return;}
+  fillForm(s);
+};
+
+document.getElementById("printBtn").onclick=()=>window.print();
+document.getElementById("homeBtn").onclick=()=>location.href="index.html";
+
+// CSV EXPORT
+document.getElementById("csvBtn").onclick=()=>{
+  const s=getForm();
+  const headers=["ID","NAME","DOB","DOJ","CATEGORY","QUALIFICATION","EXPERIENCE","SALARY","FATHER","MOTHER","CONTACT","EMAIL","ADDRESS"];
+  const vals=[s.staffId,s.staffName,s.dob,s.doj,s.category,s.qualification,s.experience,s.salary,s.father,s.mother,s.contact,s.email,s.address];
+  const csv=headers.join(",")+"\n"+vals.map(v=>`"${v||""}"`).join(",");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download=s.staffId+"_staff.csv"; a.click();
+};
+
+// JSON Export
+document.getElementById("jsonExportBtn").onclick=async()=>{
+  const all=await allStaff();
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(all,null,2)],{type:"application/json"}));
+  a.download="staff_backup.json"; a.click();
+};
+
+// JSON Import
+document.getElementById("jsonImportBtn").onclick=()=>{
+  document.getElementById("jsonFileInput").click();
+};
+document.getElementById("jsonFileInput").addEventListener("change",function(){
+  const f=this.files[0];
+  const r=new FileReader();
+  r.onload=async e=>{
+    const arr=JSON.parse(e.target.result);
+    for(const s of arr) await saveStaff(s);
+    alert("Import Done");
+    loadIndex(0);
+    loadStaffList();
+  };
+  r.readAsText(f);
+});
+</script>
+
+</body>
+</html>
+
+
+<script>
+document.getElementById("staffPicture").addEventListener("change", e=>{
+ const file=e.target.files[0];
+ if(file){
+   let r=new FileReader();
+   r.onload=()=>{ document.getElementById("preview").src=r.result; };
+   r.readAsDataURL(file);
+ }
+});
+</script>

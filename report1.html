@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Financial Report</title>
+
+<style>
+    body{
+        background:#e8f5e9;
+        font-family:Arial;
+        margin:0;
+        padding:0;
+    }
+    header{
+        background:#2e7d32;
+        color:white;
+        padding:18px;
+        text-align:center;
+        font-size:22px;
+    }
+    .box{
+        background:white;
+        width:90%;
+        margin:15px auto;
+        padding:15px;
+        border-radius:12px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    }
+    .row{
+        display:flex;
+        justify-content:space-between;
+        padding:8px 0;
+        font-size:17px;
+    }
+    .title{font-weight:bold;color:#1b5e20;}
+    .income{color:#00796b;font-weight:bold;}
+    .expense{color:#c62828;font-weight:bold;}
+    .profit{color:#2e7d32;font-weight:bold;}
+</style>
+
+</head>
+
+<body>
+
+<header>📊 KIDZEE Financial Report</header>
+
+<div class="box">
+    <div class="row"><div class="title">Total Fee Income:</div> <div id="feeIncome">0</div></div>
+    <div class="row"><div class="title">Extra Income:</div> <div id="extraIncome">0</div></div>
+    <div class="row"><div class="title">Total Income:</div> <div id="totalIncome" class="income">0</div></div>
+</div>
+
+<div class="box">
+    <div class="row"><div class="title">Salary Expense:</div> <div id="salaryExpense">0</div></div>
+    <div class="row"><div class="title">Extra Expense:</div> <div id="extraExpense">0</div></div>
+    <div class="row"><div class="title">Total Expense:</div> <div id="totalExpense" class="expense">0</div></div>
+</div>
+
+<div class="box">
+    <div class="row"><div class="title">NET PROFIT / LOSS:</div> <div id="netProfit" class="profit">0</div></div>
+</div>
+
+<script>
+// ================================
+// 1) FEE DB থেকে Total Income
+// ================================
+async function getFeeIncome(){
+    return new Promise(resolve=>{
+        const req = indexedDB.open("feeDB_v1",1);
+        req.onsuccess = e=>{
+            const db = e.target.result;
+            const tx = db.transaction("fees","readonly");
+            const store = tx.objectStore("fees");
+            const getAll = store.getAll();
+            getAll.onsuccess = () => {
+                let total = 0;
+                getAll.result.forEach(r=>{
+                    total += Number(r.totalAmount || 0);
+                });
+                resolve(total);
+            };
+        };
+        req.onerror = ()=>resolve(0);
+    });
+}
+
+// ================================
+// 2) SALARY DB থেকে মোট Salary Expense
+// ================================
+async function getSalaryExpense(){
+    return new Promise(resolve=>{
+        const req = indexedDB.open("salaryDB_v1",1);
+        req.onsuccess = e=>{
+            const db = e.target.result;
+            const tx = db.transaction("salary","readonly");
+            const store = tx.objectStore("salary");
+            const getAll = store.getAll();
+            getAll.onsuccess = () => {
+                let total = 0;
+                getAll.result.forEach(r=>{
+                    total += Number(r.totalSalary || 0);
+                });
+                resolve(total);
+            };
+        };
+        req.onerror = ()=>resolve(0);
+    });
+}
+
+// ================================
+// 3) Extra Income/Expense (LocalStorage Key)
+// ================================
+function getExtraData(){
+    let raw = localStorage.getItem("unified_investment_income_v1");
+    if(!raw) return {income:0, expense:0};
+
+    try{
+        const arr = JSON.parse(raw);
+        let inc = 0, exp = 0;
+
+        arr.forEach(x=>{
+            if(x.type === "income") inc += Number(x.amount||0);
+            if(x.type === "expense") exp += Number(x.amount||0);
+        });
+
+        return { income: inc, expense: exp };
+    } catch{
+        return {income:0, expense:0};
+    }
+}
+
+// ================================
+// 4) FINAL REPORT CALCULATION
+// ================================
+async function loadReport(){
+
+    const feeIncome     = await getFeeIncome();
+    const salaryExpense = await getSalaryExpense();
+    const extra         = getExtraData();
+
+    const extraIncome  = extra.income;
+    const extraExpense = extra.expense;
+
+    // TOTALS
+    const totalIncome  = feeIncome + extraIncome;
+    const totalExpense = salaryExpense + extraExpense;
+    const profit       = totalIncome - totalExpense;
+
+    // SHOW UI
+    document.getElementById("feeIncome").textContent    = feeIncome.toFixed(2);
+    document.getElementById("extraIncome").textContent  = extraIncome.toFixed(2);
+    document.getElementById("totalIncome").textContent  = totalIncome.toFixed(2);
+
+    document.getElementById("salaryExpense").textContent = salaryExpense.toFixed(2);
+    document.getElementById("extraExpense").textContent  = extraExpense.toFixed(2);
+    document.getElementById("totalExpense").textContent  = totalExpense.toFixed(2);
+
+    // PROFIT+
+    const np = document.getElementById("netProfit");
+    np.textContent = profit.toFixed(2);
+    if(profit >= 0){
+        np.style.color = "#2e7d32";
+    } else {
+        np.style.color = "#c62828";
+    }
+}
+
+loadReport();
+</script>
+
+</body>
+</html>

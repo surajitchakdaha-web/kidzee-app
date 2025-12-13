@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fee Collection (PWA) – FINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    margin:0 auto;
+    max-width:900px;
+    padding:20px;
+    background:linear-gradient(135deg,#f1f8e9,#e3f2fd);
+  }
+  h1{
+    text-align:center;
+    color:#1b5e20;
+    font-size:24px;
+    margin-bottom:8px;
+  }
+  .bill-header{
+    text-align:center;
+    background:#ffffff;
+    padding:15px;
+    border-radius:8px;
+    border:2px solid #c8e6c9;
+    margin-bottom:15px;
+    position:relative;
+  }
+  .bill-header img{
+    position:absolute;
+    right:20px;
+    top:20px;
+    width:60px;
+    height:60px;
+  }
+  .status-bar{
+    padding:8px;
+    background:#e8f5e9;
+    border-radius:6px;
+    margin-bottom:15px;
+    color:#2e7d32;
+    font-size:12px;
+  }
+  .card{
+    background:#fff;
+    border-radius:8px;
+    padding:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    margin-bottom:20px;
+  }
+  form{
+    display:grid;
+    grid-template-columns:1fr 2fr;
+    gap:10px 15px;
+  }
+  label{
+    font-weight:bold;
+    color:#1b5e20;
+  }
+  input,select,textarea{
+    width:100%;
+    padding:7px;
+    border-radius:4px;
+    border:1px solid #a5d6a7;
+    box-sizing:border-box;
+  }
+  textarea{ resize:vertical; }
+  .full-row{ grid-column:1/3; }
+
+  .fee-section{
+    margin-top:10px;
+    padding:10px;
+    background:#f9fbe7;
+    border-radius:6px;
+    border-left:4px solid #cddc39;
+  }
+
+  .inline-row{
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .inline-row input[type="number"]{
+    max-width:120px;
+  }
+
+  .admission-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    margin-top:6px;
+  }
+  .admission-row label.small{
+    font-size:12px;
+    font-weight:normal;
+    color:#33691e;
+  }
+
+  .tag-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:4px;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid #a5d6a7;
+    background:#e8f5e9;
+    font-size:12px;
+    white-space:nowrap;
+  }
+  .tag input{
+    width:auto;
+    margin:0;
+  }
+
+  .toolbar{
+    margin-top:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .btn{
+    padding:8px 14px;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+    border-radius:4px;
+    font-weight:600;
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    font-size:13px;
+  }
+  .btn-save{background:#2e7d32;}
+  .btn-edit{background:#0277bd;}
+  .btn-delete{background:#c62828;}
+  .btn-print{background:#ef6c00;}
+  .btn-prev{background:#5d4037;}
+  .btn-next{background:#00897b;}
+  .btn-home{background:#6a1b9a;}
+  .btn-search{background:#1e88e5;}
+  .btn-student{background:#00838f;}
+  .btn-financial{background:#558b2f;}
+  .btn-json-export{background:#004d40;}
+  .btn-json-import{background:#ad1457;}
+
+  .search-box{
+    display:flex;
+    gap:5px;
+    align-items:center;
+    margin-top:10px;
+  }
+  .search-box input{ width:140px; }
+
+  .section-title{
+    margin-top:0;
+    margin-bottom:8px;
+    color:#1b5e20;
+  }
+  .filter-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:10px;
+    align-items:flex-end;
+  }
+  .filter-field{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .filter-field label{
+    font-size:12px;
+    color:#33691e;
+    font-weight:600;
+  }
+  .table-wrapper{
+    max-height:260px;
+    overflow:auto;
+    border:1px solid #c8e6c9;
+    border-radius:6px;
+  }
+  table.fee-table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:12px;
+  }
+  table.fee-table th,
+  table.fee-table td{
+    padding:6px 5px;
+    border:1px solid #a5d6a7;
+    text-align:left;
+    white-space:nowrap;
+  }
+  table.fee-table th{
+    background:#a5d6a7;
+    color:#1b5e20;
+    position:sticky;
+    top:0;
+    z-index:1;
+  }
+  table.fee-table tr:nth-child(even){ background:#f1f8e9; }
+  table.fee-table tr:hover{ background:#dcedc8; }
+
+  .small-btn{
+    padding:3px 6px;
+    border:none;
+    border-radius:3px;
+    font-size:11px;
+    color:#fff;
+    cursor:pointer;
+  }
+  .sb-print{background:#ef6c00;}
+  .sb-edit{background:#0277bd;}
+  .sb-del{background:#c62828;}
+
+  @media(max-width:600px){
+    form{ grid-template-columns:1fr; }
+    .full-row{ grid-column:1/2; }
+    .toolbar{ flex-direction:column; }
+    .filter-bar{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<h1>FEE COLLECTION</h1>
+
+<div class="bill-header">
+  <strong style="font-size:18px;">CHATUSHPATHI FOUNDATION</strong><br>
+  True education uplifts the self<br>
+  Regd. Office : Chhatimtala, P.O.- Chakdaha, Dist.- Nadia, PIN-741222<br>
+  Contact- 9064880703 | Email : chatushpathifoundation@gmail.com
+  <img src="logo.png" alt="School Logo">
+</div>
+
+<div class="status-bar">
+  Status: <span id="statusText">Loading...</span>
+</div>
+
+<div class="card">
+
+<form id="feeForm">
+  <!-- BILL NUMBER -->
+  <label>BILL NUMBER:</label>
+  <input type="text" id="billNo" readonly>
+
+  <!-- STUDENT NAME -->
+  <label>STUDENT NAME:</label>
+  <input type="text" id="studentName" readonly>
+
+  <!-- UNIQUE ID -->
+  <label>UNIQUE ID (Student ID):</label>
+  <input type="text" id="studentId">
+
+  <!-- CLASS -->
+  <label>CLASS:</label>
+  <input type="text" id="className" readonly>
+
+  <!-- SECTION -->
+  <label>SECTION:</label>
+  <input type="text" id="section" readonly>
+
+  <!-- ROLL -->
+  <label>ROLL:</label>
+  <input type="text" id="roll" readonly>
+
+  <!-- PAYMENT DATE -->
+  <label>DATE OF PAYMENT:</label>
+  <input type="date" id="payDate">
+
+  <label>Formatted Date:</label>
+  <span id="payDateFancy" class="full-row" style="font-size:13px;color:#33691e;"></span>
+
+  <!-- NEW FEE MONTH -->
+  <label>MONTH:</label>
+  <select id="feeMonth">
+    <option value="">Select</option>
+    <option value="01">January</option>
+    <option value="02">February</option>
+    <option value="03">March</option>
+    <option value="04">April</option>
+    <option value="05">May</option>
+    <option value="06">June</option>
+    <option value="07">July</option>
+    <option value="08">August</option>
+    <option value="09">September</option>
+    <option value="10">October</option>
+    <option value="11">November</option>
+    <option value="12">December</option>
+  </select>
+
+  <!-- NEW FEE YEAR -->
+  <label>YEAR:</label>
+  <input type="number" id="feeYear" placeholder="2025">
+
+  <!-- ADMISSION FEES -->
+  <div class="fee-section full-row">
+    <label class="full-row">ADMISSION FEES:</label>
+    <div class="admission-row">
+      <select id="admissionType">
+        <option value="">Select</option>
+        <option value="FULL PAYMENT">FULL PAYMENT</option>
+        <option value="INSTALLMENT">INSTALLMENT</option>
+      </select>
+      <input type="number" id="admissionAmount" placeholder="Amount" value="0" disabled>
+      <label class="small">INSTALLMENT MONTH/YEAR:</label>
+      <input type="month" id="installMonth" disabled>
+    </div>
+  </div>
+
+  <!-- DEVELOPMENT FEES -->
+  <label>DEVELOPMENT FEES:</label>
+  <div class="inline-row">
+    <select id="developmentType">
+      <option value="">Select</option>
+      <option value="EARLY SESSION">EARLY SESSION</option>
+      <option value="REGULAR SESSION">REGULAR SESSION</option>
+    </select>
+    <input type="number" id="developmentAmount" placeholder="Amount" value="0">
+  </div>
+
+  <!-- UNIFORM -->
+  <label>SCHOOL UNIFORM:</label>
+  <div class="inline-row">
+    <select id="uniformType">
+      <option value="">Select</option>
+      <option value="WINTER">WINTER</option>
+      <option value="REGULAR">REGULAR</option>
+    </select>
+    <input type="number" id="uniformSets" placeholder="No. of sets" value="0">
+  </div>
+
+  <!-- SCHOOL KIT -->
+  <div class="fee-section full-row" id="kitSection">
+    <label class="full-row">SCHOOL KIT:</label>
+    <div style="font-size:12px;font-weight:bold;color:#33691e;margin-top:4px;">DELIVERED:</div>
+    <div class="tag-row">
+      <label class="tag"><input type="checkbox" class="kit-given" value="BOOKS">BOOKS</label>
+      <label class="tag"><input type="checkbox" class="kit-given" value="SHOE">SHOE</label>
+      <label class="tag"><input type="checkbox" class="kit-given" value="BAG">BAG</label>
+      <label class="tag"><input type="checkbox" class="kit-given" value="STATIONERY">STATIONERY</label>
+      <label class="tag"><input type="checkbox" class="kit-given" value="DRESS">1 SET DRESS</label>
+    </div>
+    <div style="font-size:12px;font-weight:bold;color:#33691e;margin-top:6px;">DUE ITEMS:</div>
+    <div class="tag-row">
+      <label class="tag"><input type="checkbox" class="kit-due" value="BOOKS">BOOKS</label>
+      <label class="tag"><input type="checkbox" class="kit-due" value="SHOE">SHOE</label>
+      <label class="tag"><input type="checkbox" class="kit-due" value="BAG">BAG</label>
+      <label class="tag"><input type="checkbox" class="kit-due" value="STATIONERY">STATIONERY</label>
+      <label class="tag"><input type="checkbox" class="kit-due" value="DRESS">1 SET DRESS</label>
+    </div>
+  </div>
+
+  <!-- OTHER FEES -->
+  <label>TIFFIN / FOOD CHARGE:</label>
+  <input type="number" id="tiffin" value="0">
+
+  <label>MISC. FEE:</label>
+  <input type="number" id="misc" value="0">
+
+  <label>PICNIC:</label>
+  <input type="number" id="picnic" value="0">
+
+  <label>FIELD TRIP:</label>
+  <input type="number" id="fieldtrip" value="0">
+
+  <label>SPORTS:</label>
+  <input type="number" id="sports" value="0">
+
+  <!-- MODE OF PAYMENT -->
+  <label>PAYMENT MODE:</label>
+  <select id="paymentMode">
+    <option value="CASH">CASH</option>
+    <option value="ONLINE">ONLINE</option>
+    <option value="UPI">UPI</option>
+  </select>
+
+  <!-- TOTAL AMOUNT -->
+  <label>TOTAL AMOUNT:</label>
+  <input type="number" id="totalAmount" readonly>
+
+  <label>Total (in words):</label>
+  <span id="totalInWords" class="full-row" style="font-size:13px;color:#33691e;"></span>
+
+</form>
+
+<div class="toolbar">
+  <button class="btn btn-save" id="saveBtn">SAVE</button>
+  <button class="btn btn-edit" id="editBtn">EDIT</button>
+  <button class="btn btn-delete" id="deleteBtn">DELETE</button>
+  <button class="btn btn-print" id="printBtn">PRINT</button>
+  <button class="btn btn-home" id="homeBtn">HOME</button>
+  <button class="btn btn-student" id="studentBtn">STUDENT PAGE</button>
+  <button class="btn btn-financial" id="financialBtn">FINANCIAL PAGE</button>
+  <button class="btn btn-prev" id="prevBtn">PREV</button>
+  <button class="btn btn-next" id="nextBtn">NEXT</button>
+  <div class="search-box">
+    <input type="text" id="searchBill" placeholder="Bill No">
+    <button class="btn btn-search" id="searchBtn">SEARCH</button>
+  </div>
+  <button class="btn btn-json-export" id="jsonExportBtn">EXPORT JSON</button>
+  <button class="btn btn-json-import" id="jsonImportBtn">IMPORT JSON</button>
+  <input type="file" id="jsonFileInput" accept="application/json" style="display:none">
+</div>
+
+</div> <!-- /card main -->
+
+<!-- SAVED FEE RECORDS -->
+<div class="card">
+  <h3 class="section-title">Student Payment History (Current ID)</h3>
+  <div class="table-wrapper" style="max-height:160px;margin-bottom:15px;">
+    <table class="fee-table">
+      <thead>
+        <tr>
+          <th>Bill</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Mode</th>
+        </tr>
+      </thead>
+      <tbody id="studentHistoryBody">
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="section-title">All Fee Records</h3>
+
+  <div class="filter-bar">
+    <div class="filter-field">
+      <label for="filterName">Name</label>
+      <input type="text" id="filterName" placeholder="Student name">
+    </div>
+    <div class="filter-field">
+      <label for="filterId">Student ID</label>
+      <input type="text" id="filterId" placeholder="ST0001">
+    </div>
+    <div class="filter-field">
+      <label for="filterClass">Class</label>
+      <input type="text" id="filterClass" placeholder="CLASS – I">
+    </div>
+    <div class="filter-field">
+      <label for="filterMonth">Month</label>
+      <select id="filterMonth">
+        <option value="">All</option>
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label for="filterYear">Year</label>
+      <input type="number" id="filterYear" placeholder="2025">
+    </div>
+    <div class="filter-field">
+      <button class="btn btn-search" type="button" id="filterApply">APPLY</button>
+    </div>
+    <div class="filter-field">
+      <button class="btn btn-delete" type="button" id="filterReset">RESET</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="fee-table" id="feeTable">
+      <thead>
+        <tr>
+          <th>Bill</th>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Month</th>
+          <th>Year</th>
+          <th>Admission</th>
+          <th>Develop.</th>
+          <th>Uniform</th>
+          <th>Tiffin</th>
+          <th>Misc</th>
+          <th>Picnic</th>
+          <th>FieldTrip</th>
+          <th>Sports</th>
+          <th>Total</th>
+          <th>Mode</th>
+          <th>Print</th>
+          <th>Edit</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="feeTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function setStatus(msg){ document.getElementById("statusText").textContent = msg; }
+
+function ordinal(n){
+  var s=["th","st","nd","rd"], v=n%100;
+  return n+(s[(v-20)%10]||s[v]||s[0]);
+}
+function formatFancy(iso){
+  if(!iso) return "";
+  var parts = iso.split("-");
+  if(parts.length!==3) return "";
+  var y=parseInt(parts[0],10), m=parseInt(parts[1],10), d=parseInt(parts[2],10);
+  var dt=new Date(y,m-1,d);
+  var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return ordinal(dt.getDate())+" "+months[dt.getMonth()]+", "+dt.getFullYear();
+}
+
+var STUD_DB_NAME="schoolDB_v1";
+var STUD_DB_VERSION=1;
+var studDb=null;
+
+function openStudentDb(){
+  return new Promise(function(resolve,reject){
+    if(studDb) return resolve(studDb);
+    var req=indexedDB.open(STUD_DB_NAME,STUD_DB_VERSION);
+    req.onerror=function(){reject(req.error);};
+    req.onupgradeneeded=function(e){
+      var db=e.target.result;
+      if(!db.objectStoreNames.contains("students")){
+        db.createObjectStore("students",{keyPath:"studentId"});
+      }
+    };
+    req.onsuccess=function(e){
+      studDb=e.target.result;
+      resolve(studDb);
+    };
+  });
+}
+async function getStudentById(id){
+  if(!id) return null;
+  var db=await openStudentDb();
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction("students","readonly");
+    var req=tx.objectStore("students").get(id);
+    req.onsuccess=function(){ resolve(req.result||null); };
+    req.onerror=function(){ reject(req.error); };
+  });
+}
+
+document.getElementById("studentId").addEventListener("change",async function(){
+  var id=this.value.trim();
+  if(!id) return;
+  var s=await getStudentById(id);
+  if(s){
+    document.getElementById("studentName").value = s.studentName || "";
+    document.getElementById("className").value   = s.className || "";
+    document.getElementById("section").value     = s.section || "";
+    document.getElementById("roll").value        = s.roll || "";
+    setStatus("Student loaded");
+  }else{
+    document.getElementById("studentName").value = "";
+    document.getElementById("className").value   = "";
+    document.getElementById("section").value     = "";
+    document.getElementById("roll").value        = "";
+    setStatus("Student not found");
+  }
+  await refreshStudentHistory(id);
+});
+
+function updateAdmissionControls(){
+  var type = document.getElementById("admissionType").value;
+  var amt  = document.getElementById("admissionAmount");
+  var mon  = document.getElementById("installMonth");
+  if(type==="FULL PAYMENT"){
+    amt.disabled=false;
+    mon.disabled=true;
+    mon.value="";
+  }else if(type==="INSTALLMENT"){
+    amt.disabled=false;
+    mon.disabled=false;
+  }else{
+    amt.disabled=true;
+    mon.disabled=true;
+    amt.value="0";
+    mon.value="";
+  }
+}
+document.getElementById("admissionType").addEventListener("change",updateAdmissionControls);
+
+function setTodayPaymentDate(){
+  var t=new Date();
+  var y=t.getFullYear();
+  var m=("0"+(t.getMonth()+1)).slice(-2);
+  var d=("0"+t.getDate()).slice(-2);
+  var iso=y+"-"+m+"-"+d;
+  document.getElementById("payDate").value=iso;
+  document.getElementById("payDateFancy").textContent=formatFancy(iso);
+}
+document.getElementById("payDate").addEventListener("change",function(){
+  document.getElementById("payDateFancy").textContent=formatFancy(this.value);
+});
+
+function kitKey(studentId,year){
+  return "kitGiven_"+studentId+"_"+year;
+}
+function getKitYearRecord(studentId,year){
+  if(!studentId || !year) return {items:[]};
+  var raw=localStorage.getItem(kitKey(studentId,year));
+  if(!raw) return {items:[]};
+  try{return JSON.parse(raw);}catch(e){return {items:[]};}
+}
+function saveKitYearRecord(studentId,year,rec){
+  if(!studentId || !year) return;
+  localStorage.setItem(kitKey(studentId,year),JSON.stringify(rec));
+}
+function applyKitLocks(){
+  var sid=document.getElementById("studentId").value.trim();
+  var pd=document.getElementById("payDate").value;
+  var year = pd ? pd.split("-")[0] : "";
+  var rec=getKitYearRecord(sid,year);
+  var givenBoxes=document.querySelectorAll(".kit-given");
+  givenBoxes.forEach(function(chk){
+    if(rec.items.indexOf(chk.value)!==-1){
+      chk.checked=true;
+      chk.disabled=true;
+    }else{
+      chk.disabled=false;
+    }
+  });
+}
+document.getElementById("studentId").addEventListener("change",applyKitLocks);
+document.getElementById("payDate").addEventListener("change",applyKitLocks);
+
+var FEE_DB_NAME="feeDB_v1";
+var FEE_DB_VERSION=1;
+var feeDb=null;
+
+function openFeeDb(){
+  return new Promise(function(resolve,reject){
+    if(feeDb) return resolve(feeDb);
+    var req=indexedDB.open(FEE_DB_NAME,FEE_DB_VERSION);
+    req.onerror=function(){reject(req.error);};
+    req.onupgradeneeded=function(e){
+      var db=e.target.result;
+      if(!db.objectStoreNames.contains("fees")){
+        db.createObjectStore("fees",{keyPath:"billNo"});
+      }
+    };
+    req.onsuccess=function(e){
+      feeDb=e.target.result;
+      resolve(feeDb);
+    };
+  });
+}
+async function saveFee(rec){
+  var db=await openFeeDb();
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction("fees","readwrite");
+    tx.objectStore("fees").put(rec);
+    tx.oncomplete=function(){resolve();};
+    tx.onerror=function(){reject(tx.error);};
+  });
+}
+async function getFee(billNo){
+  var db=await openFeeDb();
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction("fees","readonly");
+    var req=tx.objectStore("fees").get(billNo);
+    req.onsuccess=function(){resolve(req.result||null);};
+    req.onerror=function(){reject(req.error);};
+  });
+}
+async function deleteFee(billNo){
+  var db=await openFeeDb();
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction("fees","readwrite");
+    tx.objectStore("fees").delete(billNo);
+    tx.oncomplete=function(){resolve();};
+    tx.onerror=function(){reject(tx.error);};
+  });
+}
+async function getAllFees(){
+  var db=await openFeeDb();
+  return new Promise(function(resolve,reject){
+    var tx=db.transaction("fees","readonly");
+    var req=tx.objectStore("fees").getAll();
+    req.onsuccess=function(){resolve(req.result||[]);};
+    req.onerror=function(){reject(req.error);};
+  });
+}
+
+async function generateNextBillNo(){
+  var all = await getAllFees();
+  if(!all.length) return "BL0001";
+  var nums = all
+    .map(function(r){return r.billNo;})
+    .filter(function(b){return /^BL\d{4}$/.test(b);})
+    .map(function(b){return parseInt(b.substring(2),10);});
+  if(!nums.length) return "BL0001";
+  var max = Math.max.apply(null,nums);
+  var next = max+1;
+  return "BL"+String(next).padStart(4,"0");
+}
+
+function getKitData(){
+  var given=document.querySelectorAll(".kit-given");
+  var due  =document.querySelectorAll(".kit-due");
+  var kitSelected=[], kitDue=[];
+  given.forEach(function(chk){ if(chk.checked) kitSelected.push(chk.value); });
+  due.forEach(function(chk){ if(chk.checked) kitDue.push(chk.value); });
+  return {kitSelected:kitSelected, kitDue:kitDue};
+}
+function setKitData(sel,due){
+  sel=sel||[]; due=due||[];
+  var given=document.querySelectorAll(".kit-given");
+  var dueEls=document.querySelectorAll(".kit-due");
+  given.forEach(function(chk){ chk.checked = sel.indexOf(chk.value)!==-1; });
+  dueEls.forEach(function(chk){ chk.checked = due.indexOf(chk.value)!==-1; });
+  applyKitLocks();
+}
+
+
+function numberToIndianWords(n){
+  n = Math.round(Number(n)||0);
+  if(n===0) return "zero rupees";
+  var ones=["","one","two","three","four","five","six","seven","eight","nine",
+            "ten","eleven","twelve","thirteen","fourteen","fifteen",
+            "sixteen","seventeen","eighteen","nineteen"];
+  var tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  function twoDigits(num){
+    if(num===0) return "";
+    if(num<20) return ones[num];
+    return tens[Math.floor(num/10)] + (num%10? " "+ones[num%10] : "");
+  }
+  function threeDigits(num){
+    var h=Math.floor(num/100);
+    var rest=num%100;
+    var parts=[];
+    if(h>0) parts.push(ones[h]+" hundred");
+    if(rest>0){
+      if(parts.length) parts.push("and");
+      parts.push(twoDigits(rest));
+    }
+    return parts.join(" ");
+  }
+  var parts=[];
+  var crore=Math.floor(n/10000000); n%=10000000;
+  var lakh=Math.floor(n/100000); n%=100000;
+  var thousand=Math.floor(n/1000); n%=1000;
+  var hundred=n;
+  if(crore) parts.push(threeDigits(crore)+" crore");
+  if(lakh) parts.push(threeDigits(lakh)+" lakh");
+  if(thousand) parts.push(threeDigits(thousand)+" thousand");
+  if(hundred) parts.push(threeDigits(hundred));
+  return parts.join(" ")+" rupees";
+}
+function updateTotalInWords(total){
+  var span=document.getElementById("totalInWords");
+  if(!span) return;
+  var n=Math.round(Number(total)||0);
+  if(!n){
+    span.textContent="";
+    return;
+  }
+  span.textContent = numberToIndianWords(n) + " only";
+}
+
+function calculateTotal(){
+  var total=0;
+  function num(id){ return Number(document.getElementById(id).value||0); }
+  total+=num("admissionAmount");
+  total+=num("developmentAmount");
+  // uniformSets ফিল্ডটাকেই আমরা amount হিসেবে নিচ্ছি
+  total+=num("uniformSets");
+  total+=num("tiffin");
+  total+=num("misc");
+  total+=num("picnic");
+  total+=num("fieldtrip");
+  total+=num("sports");
+  document.getElementById("totalAmount").value = total.toFixed(2);
+  updateTotalInWords(total);
+}
+["admissionAmount","developmentAmount","uniformSets","tiffin","misc","picnic","fieldtrip","sports"]
+.forEach(function(id){
+  document.getElementById(id).addEventListener("input",calculateTotal);
+});
+
+function getFormData(){
+  var kit=getKitData();
+  var payDate=document.getElementById("payDate").value;
+  var payMonth="", payYear="";
+
+  var fm=document.getElementById("feeMonth").value;
+  var fy=document.getElementById("feeYear").value.trim();
+  if(fm && fy){
+    payMonth=fm;
+    payYear=fy;
+  }else if(payDate){
+    var p=payDate.split("-");
+    if(p.length===3){ payYear=p[0]; payMonth=p[1]; }
+  }
+
+  return {
+    billNo:document.getElementById("billNo").value.trim(),
+    studentName:document.getElementById("studentName").value.trim(),
+    studentId:document.getElementById("studentId").value.trim(),
+    className:document.getElementById("className").value.trim(),
+    section:document.getElementById("section").value.trim(),
+    roll:document.getElementById("roll").value.trim(),
+    payDate:payDate,
+    payMonth:payMonth,
+    payYear:payYear,
+    admissionType:document.getElementById("admissionType").value,
+    admissionAmount:Number(document.getElementById("admissionAmount").value||0),
+    installMonth:document.getElementById("installMonth").value,
+    developmentType:document.getElementById("developmentType").value,
+    developmentAmount:Number(document.getElementById("developmentAmount").value||0),
+    uniformType:document.getElementById("uniformType").value,
+    uniformSets:Number(document.getElementById("uniformSets").value||0),
+    kitSelected:kit.kitSelected,
+    kitDue:kit.kitDue,
+    tiffin:Number(document.getElementById("tiffin").value||0),
+    misc:Number(document.getElementById("misc").value||0),
+    picnic:Number(document.getElementById("picnic").value||0),
+    fieldtrip:Number(document.getElementById("fieldtrip").value||0),
+    sports:Number(document.getElementById("sports").value||0),
+    paymentMode:document.getElementById("paymentMode").value,
+    totalAmount:Number(document.getElementById("totalAmount").value||0)
+  };
+}
+function fillForm(d){
+  document.getElementById("billNo").value = d.billNo||"";
+  document.getElementById("studentName").value = d.studentName||"";
+  document.getElementById("studentId").value = d.studentId||"";
+  document.getElementById("className").value = d.className||"";
+  document.getElementById("section").value = d.section||"";
+  document.getElementById("roll").value = d.roll||"";
+  document.getElementById("payDate").value = d.payDate||"";
+  document.getElementById("payDateFancy").textContent = formatFancy(d.payDate||"");
+  document.getElementById("feeMonth").value = d.payMonth||"";
+  document.getElementById("feeYear").value = d.payYear||"";
+
+  document.getElementById("admissionType").value = d.admissionType||"";
+  document.getElementById("admissionAmount").value = d.admissionAmount!=null?d.admissionAmount:0;
+  document.getElementById("installMonth").value = d.installMonth||"";
+
+  document.getElementById("developmentType").value = d.developmentType||"";
+  document.getElementById("developmentAmount").value = d.developmentAmount!=null?d.developmentAmount:0;
+
+  document.getElementById("uniformType").value = d.uniformType||"";
+  document.getElementById("uniformSets").value = d.uniformSets!=null?d.uniformSets:0;
+
+  setKitData(d.kitSelected||[], d.kitDue||[]);
+
+  document.getElementById("tiffin").value = d.tiffin!=null?d.tiffin:0;
+  document.getElementById("misc").value = d.misc!=null?d.misc:0;
+  document.getElementById("picnic").value = d.picnic!=null?d.picnic:0;
+  document.getElementById("fieldtrip").value = d.fieldtrip!=null?d.fieldtrip:0;
+  document.getElementById("sports").value = d.sports!=null?d.sports:0;
+  document.getElementById("paymentMode").value = d.paymentMode||"CASH";
+  document.getElementById("totalAmount").value = d.totalAmount!=null?d.totalAmount:0;
+  updateTotalInWords(d.totalAmount||0);
+  updateAdmissionControls();
+  calculateTotal();
+  applyKitLocks();
+}
+
+async function clearForm(){
+  document.getElementById("feeForm").reset();
+  document.getElementById("admissionAmount").value="0";
+  document.getElementById("developmentAmount").value="0";
+  document.getElementById("tiffin").value="0";
+  document.getElementById("misc").value="0";
+  document.getElementById("picnic").value="0";
+  document.getElementById("fieldtrip").value="0";
+  document.getElementById("sports").value="0";
+  document.getElementById("totalAmount").value="0";
+  updateTotalInWords(0);
+  document.getElementById("paymentMode").value="CASH";
+  document.getElementById("feeMonth").value="";
+  document.getElementById("feeYear").value="";
+  document.getElementById("billNo").value = await generateNextBillNo();
+  setTodayPaymentDate();
+  updateAdmissionControls();
+  calculateTotal();
+  applyKitLocks();
+}
+
+var currentIndex=-1;
+
+async function loadByIndex(i){
+  var all=await getAllFees();
+  all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
+  if(!all.length){ setStatus("No records"); return; }
+  if(i<0)i=0;
+  if(i>=all.length)i=all.length-1;
+  currentIndex=i;
+  var rec=all[i];
+  if(rec) fillForm(rec);
+  setStatus("Loaded bill: "+rec.billNo);
+  await refreshStudentHistory(document.getElementById("studentId").value.trim());
+}
+
+(async function initFee(){
+  try{
+    await openFeeDb();
+    document.getElementById("billNo").value = await generateNextBillNo();
+    setTodayPaymentDate();
+    updateAdmissionControls();
+    calculateTotal();
+    var all=await getAllFees();
+    if(all.length>0) await loadByIndex(0);
+    await refreshTable();
+    await refreshStudentHistory(document.getElementById("studentId").value.trim());
+    setStatus("Ready");
+  }catch(e){
+    console.error(e);
+    setStatus("Error opening database");
+  }
+})();
+
+document.getElementById("saveBtn").onclick = async function(){
+  var rec=getFormData();
+  if(!rec.billNo){
+    rec.billNo = await generateNextBillNo();
+    document.getElementById("billNo").value = rec.billNo;
+  }
+  if(!rec.studentId){
+    alert("Student ID is empty");
+    return;
+  }
+  if(!rec.payMonth || !rec.payYear){
+    alert("Please select Month & Year");
+    return;
+  }
+  calculateTotal();
+  rec.totalAmount = Number(document.getElementById("totalAmount").value||0);
+
+  var year = rec.payYear;
+  var kitRec = getKitYearRecord(rec.studentId,year);
+  rec.kitSelected.forEach(function(it){
+    if(kitRec.items.indexOf(it)===-1) kitRec.items.push(it);
+  });
+  saveKitYearRecord(rec.studentId,year,kitRec);
+
+  await saveFee(rec);
+  alert("Fee entry saved for Bill: "+rec.billNo);
+  await clearForm();
+  await refreshTable();
+  await refreshStudentHistory(rec.studentId);
+  setStatus("Saved "+rec.billNo);
+};
+
+document.getElementById("editBtn").onclick = async function(){
+  var bill = prompt("Enter Bill Number to load:", document.getElementById("billNo").value);
+  if(!bill) return;
+  var rec=await getFee(bill.trim());
+  if(!rec){ alert("Bill not found"); return; }
+  fillForm(rec);
+  var all=await getAllFees();
+  all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
+  currentIndex=all.findIndex(function(r){return r.billNo===bill.trim();});
+  setStatus("Loaded bill: "+bill.trim());
+  await refreshStudentHistory(rec.studentId);
+};
+
+document.getElementById("deleteBtn").onclick = async function(){
+  var bill=document.getElementById("billNo").value.trim();
+  if(!bill){ alert("No Bill Selected"); return; }
+  if(!confirm("Delete Bill "+bill+" ?")) return;
+  await deleteFee(bill);
+  alert("Deleted: "+bill);
+  var all=await getAllFees();
+  if(all.length>0) await loadByIndex(0);
+  else await clearForm();
+  await refreshTable();
+  await refreshStudentHistory(document.getElementById("studentId").value.trim());
+};
+
+document.getElementById("searchBtn").onclick = async function(){
+  var bill=document.getElementById("searchBill").value.trim();
+  if(!bill){ alert("Enter Bill No"); return; }
+  var rec=await getFee(bill);
+  if(!rec){ alert("Not found"); return; }
+  fillForm(rec);
+  var all=await getAllFees();
+  all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
+  currentIndex=all.findIndex(function(r){return r.billNo===bill;});
+  setStatus("Loaded bill: "+bill);
+  await refreshStudentHistory(rec.studentId);
+};
+
+document.getElementById("nextBtn").onclick = async function(){
+  var all=await getAllFees();
+  all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
+  if(currentIndex<all.length-1){
+    currentIndex++;
+    fillForm(all[currentIndex]);
+    await refreshStudentHistory(all[currentIndex].studentId);
+  }else alert("Last record");
+};
+document.getElementById("prevBtn").onclick = async function(){
+  var all=await getAllFees();
+  all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
+  if(currentIndex>0){
+    currentIndex--;
+    fillForm(all[currentIndex]);
+    await refreshStudentHistory(all[currentIndex].studentId);
+  }else alert("First record");
+};
+
+document.getElementById("jsonExportBtn").onclick = async function(){
+  var all=await getAllFees();
+  var blob=new Blob([JSON.stringify(all,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="fee_backup.json";a.click();
+  URL.revokeObjectURL(url);
+};
+document.getElementById("jsonImportBtn").onclick=function(){
+  document.getElementById("jsonFileInput").click();
+};
+document.getElementById("jsonFileInput").addEventListener("change",function(){
+  var f=this.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=async function(e){
+    var arr=JSON.parse(e.target.result);
+    for(var i=0;i<arr.length;i++) await saveFee(arr[i]);
+    alert("Import done");
+    location.reload();
+  };
+  r.readAsText(f);
+});
+
+document.getElementById("homeBtn").onclick=function(){ window.location.href="index.html"; };
+document.getElementById("studentBtn").onclick=function(){ window.location.href="student.html"; };
+document.getElementById("financialBtn").onclick=function(){ window.location.href="financial.html"; };
+
+document.getElementById("printBtn").onclick = async ()=>{
+    const rec = getFormData();
+    window.location.href = "print_fee.html?bill=" + rec.billNo;
+};
+
+async function refreshTable(){
+  var all=await getAllFees();
+  var nameF=document.getElementById("filterName").value.toLowerCase();
+  var idF  =document.getElementById("filterId").value.toLowerCase();
+  var clsF =document.getElementById("filterClass").value.toLowerCase();
+  var mF   =document.getElementById("filterMonth").value;
+  var yF   =document.getElementById("filterYear").value.trim();
+
+  var filtered=all.filter(function(r){
+    if(nameF && String(r.studentName||"").toLowerCase().indexOf(nameF)===-1) return false;
+    if(idF   && String(r.studentId||"").toLowerCase().indexOf(idF)===-1) return false;
+    if(clsF  && String(r.className||"").toLowerCase().indexOf(clsF)===-1) return false;
+    if(mF    && r.payMonth!==mF) return false;
+    if(yF    && String(r.payYear)!==yF) return false;
+    return true;
+  });
+
+  var tbody=document.getElementById("feeTableBody");
+  tbody.innerHTML="";
+  filtered.sort(function(a,b){ return a.billNo.localeCompare(b.billNo); });
+
+  var monthsFull=["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  filtered.forEach(function(r){
+    var mName="";
+    if(r.payMonth){
+      var mIndex=parseInt(r.payMonth,10)-1;
+      if(mIndex>=0 && mIndex<12) mName=monthsFull[mIndex];
+    }
+    var tr=document.createElement("tr");
+    tr.innerHTML=
+      "<td>"+(r.billNo||"")+"</td>"+
+      "<td>"+(r.studentId||"")+"</td>"+
+      "<td>"+(r.studentName||"")+"</td>"+
+      "<td>"+(r.className||"")+"</td>"+
+      "<td>"+mName+"</td>"+
+      "<td>"+(r.payYear||"")+"</td>"+
+      "<td>"+(r.admissionAmount||0)+"</td>"+
+      "<td>"+(r.developmentAmount||0)+"</td>"+
+      "<td>"+(r.uniformSets||0)+"</td>"+
+      "<td>"+(r.tiffin||0)+"</td>"+
+      "<td>"+(r.misc||0)+"</td>"+
+      "<td>"+(r.picnic||0)+"</td>"+
+      "<td>"+(r.fieldtrip||0)+"</td>"+
+      "<td>"+(r.sports||0)+"</td>"+
+      "<td>"+(r.totalAmount||0)+"</td>"+
+      "<td>"+(r.paymentMode||"")+"</td>"+
+      "<td><button class='small-btn sb-print' data-bill='"+r.billNo+"'>Print</button></td>"+
+      "<td><button class='small-btn sb-edit' data-bill='"+r.billNo+"'>Edit</button></td>"+
+      "<td><button class='small-btn sb-del' data-bill='"+r.billNo+"'>Del</button></td>";
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById("filterApply").addEventListener("click",refreshTable);
+document.getElementById("filterReset").addEventListener("click",function(){
+  document.getElementById("filterName").value="";
+  document.getElementById("filterId").value="";
+  document.getElementById("filterClass").value="";
+  document.getElementById("filterMonth").value="";
+  document.getElementById("filterYear").value="";
+  refreshTable();
+});
+
+document.getElementById("feeTableBody").addEventListener("click",async function(e){
+  var btn=e.target;
+  if(!(btn instanceof HTMLButtonElement)) return;
+  var bill=btn.getAttribute("data-bill");
+  if(!bill) return;
+  var rec=await getFee(bill);
+  if(!rec) return;
+
+  if(btn.classList.contains("sb-print")){
+    window.location.href = "print_fee.html?bill=" + bill;
+  }else if(btn.classList.contains("sb-edit")){
+    fillForm(rec);
+    setStatus("Loaded "+bill+" for edit");
+    await refreshStudentHistory(rec.studentId);
+  }else if(btn.classList.contains("sb-del")){
+    if(confirm("Delete "+bill+" ?")){
+      await deleteFee(bill);
+      await refreshTable();
+      await refreshStudentHistory(rec.studentId);
+      setStatus("Deleted "+bill);
+    }
+  }
+});
+
+async function refreshStudentHistory(studentId){
+  var tbody=document.getElementById("studentHistoryBody");
+  tbody.innerHTML="";
+  if(!studentId) return;
+  var all=await getAllFees();
+  var filtered=all.filter(function(r){ return r.studentId===studentId; });
+  filtered.sort(function(a,b){ return (a.payDate||"").localeCompare(b.payDate||""); });
+
+  filtered.forEach(function(r){
+    var tr=document.createElement("tr");
+    tr.innerHTML =
+      "<td>"+(r.billNo||"")+"</td>"+
+      "<td>"+formatFancy(r.payDate||"")+"</td>"+
+      "<td>"+(r.totalAmount||0)+"</td>"+
+      "<td>"+(r.paymentMode||"")+"</td>";
+    tbody.appendChild(tr);
+  });
+}
+</script>
+
+</body>
+</html>

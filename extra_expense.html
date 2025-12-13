@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extra Expense Entry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#fff3e0;
+}
+
+header{
+    background:#ef6c00;
+    padding:20px;
+    text-align:center;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.logo{
+    width:90px;
+    margin-top:-10px;
+}
+
+.top-btn{
+    background:#004d40;
+    color:white;
+    padding:8px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    margin-right:6px;
+    font-size:15px;
+}
+
+.top-btn2{
+    background:#8e24aa;
+    color:white;
+    padding:8px 14px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:15px;
+}
+
+.box{
+    padding:14px;
+}
+input,select{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    font-size:16px;
+}
+.btn-save{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#c62828;
+    color:white;
+    font-size:18px;
+    border:none;
+    border-radius:6px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+}
+th,td{
+    border:1px solid #ffccbc;
+    padding:8px;
+    text-align:center;
+}
+th{
+    background:#ffe0b2;
+}
+.customBox{
+    display:none;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <img src="logo.png" class="logo"><br>
+    Extra Expense Entry
+</header>
+
+<div class="box">
+
+    <a href="index.html" class="top-btn">🏠 Home</a>
+    <a href="report.html" class="top-btn2">📊 Report</a>
+    <br><br>
+
+    <!-- EXPENSE CATEGORY -->
+    <label>Expense Head</label>
+    <select id="expCategory" onchange="toggleCustomExpense()">
+        <option>Salary</option>
+        <option>Night Guard</option>
+        <option>Bonus</option>
+        <option>PF Contribution</option>
+        <option>Cleaning/Maintenance</option>
+        <option>Repairs & Upkeep</option>
+        <option>Stationery</option>
+        <option>Utility Bills</option>
+        <option>Transport Cost</option>
+        <option>Event Expenses</option>
+        <option>Other Expense</option>
+        <option>Custom Expense</option>
+    </select>
+
+    <!-- CUSTOM BOX -->
+    <div id="customExpenseBox" class="customBox">
+        <label>Enter Expense Title:</label>
+        <input type="text" id="customExpenseName" placeholder="Type expense category">
+    </div>
+
+    <!-- AMOUNT -->
+    <label>Amount</label>
+    <input type="number" id="expAmount" placeholder="Amount">
+
+    <!-- DATE -->
+    <label>Date</label>
+    <input type="date" id="expDate">
+
+    <button class="btn-save" onclick="saveExpense()">Save Expense</button>
+
+    <h3>Expense List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody id="expList"></tbody>
+    </table>
+
+</div>
+
+<script>
+
+// Auto-Date
+document.getElementById("expDate").value = new Date().toISOString().split("T")[0];
+
+// Show Custom Expense Box
+function toggleCustomExpense(){
+    let c = document.getElementById("expCategory").value;
+    document.getElementById("customExpenseBox").style.display =
+        (c === "Custom Expense") ? "block" : "none";
+}
+
+// Load Expense List
+function loadExpense(){
+    let data = JSON.parse(localStorage.getItem("unified_investment_income_v1") || "[]");
+    let list = document.getElementById("expList");
+    list.innerHTML = "";
+
+    data.filter(x=>x.type==="expense").forEach(d=>{
+        list.innerHTML += `
+            <tr>
+                <td>${d.date}</td>
+                <td>${d.category}</td>
+                <td>${d.amount}</td>
+            </tr>`;
+    });
+}
+
+// Save Expense
+function saveExpense(){
+    let cat = document.getElementById("expCategory").value;
+
+    if(cat === "Custom Expense"){
+        cat = document.getElementById("customExpenseName").value.trim();
+        if(cat === ""){
+            alert("Enter custom expense title");
+            return;
+        }
+    }
+
+    let amt = document.getElementById("expAmount").value;
+    let dt = document.getElementById("expDate").value;
+
+    if(amt=="" || dt==""){
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let old = JSON.parse(localStorage.getItem("unified_investment_income_v1") || "[]");
+
+    old.push({
+        date: dt,
+        category: cat,
+        amount: Number(amt),
+        type: "expense"
+    });
+
+    localStorage.setItem("unified_investment_income_v1", JSON.stringify(old));
+    loadExpense();
+    alert("Expense Saved Successfully!");
+}
+
+loadExpense();
+
+</script>
+
+</body>
+</html>

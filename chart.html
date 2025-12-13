@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Income & Expense Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #E3F2FD, #E8F5E9);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 30px 10px;
+        box-sizing: border-box;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1000px;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 0;
+        font-size: 26px;
+        color: #0D47A1;
+        letter-spacing: 0.5px;
+        margin-bottom: 25px;
+        font-weight: 700;
+    }
+
+    /* Filter Section */
+    .filter-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .filter-box div {
+        display: flex;
+        flex-direction: column;
+        font-size: 14px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #0D47A1;
+    }
+
+    select, input[type="number"] {
+        padding: 8px;
+        border: 1px solid #90CAF9;
+        border-radius: 6px;
+        background: white;
+        width: 140px;
+    }
+
+    button {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+        transition: 0.2s;
+        font-size: 14px;
+    }
+
+    #applyBtn { background: #0D47A1; }
+    #resetBtn { background: #C62828; }
+
+    button:hover { opacity: 0.8; }
+
+    /* Totals */
+    .total-box {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        border-left: 6px solid #0D47A1;
+        font-size: 17px;
+        color: #0D47A1;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Chart Card */
+    .chart-card {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+
+    canvas {
+        width: 100% !important;
+        height: 420px !important;
+        max-height: 420px;
+    }
+
+    @media(max-width:600px){
+        canvas {
+            height: 320px !important;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Income & Expense Dashboard</h2>
+
+    <!-- FILTERS -->
+    <div class="filter-box">
+        <div>
+            <label>MONTH</label>
+            <select id="filterMonth">
+                <option value="">All</option>
+                <option value="01">January</option><option value="02">February</option>
+                <option value="03">March</option><option value="04">April</option>
+                <option value="05">May</option><option value="06">June</option>
+                <option value="07">July</option><option value="08">August</option>
+                <option value="09">September</option><option value="10">October</option>
+                <option value="11">November</option><option value="12">December</option>
+            </select>
+        </div>
+
+        <div>
+            <label>YEAR</label>
+            <input type="number" id="filterYear" placeholder="2025">
+        </div>
+
+        <div style="padding-top:23px;">
+            <button id="applyBtn" onclick="applyFilter()">APPLY</button>
+        </div>
+
+        <div style="padding-top:23px;">
+            <button id="resetBtn" onclick="resetFilter()">RESET</button>
+        </div>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="total-box" id="totalBox">
+        Total Income: 0 | Total Expense: 0
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card">
+        <canvas id="pieChart"></canvas>
+    </div>
+
+</div>
+
+
+<script>
+/* ================================================================
+   EXPENSE SECTION  (all categories merged)
+================================================================== */
+function loadAllExpensesFiltered(month, year){
+    let total = 0;
+
+    Object.keys(localStorage).forEach(key=>{
+        if(key.startsWith("expense_record_")){
+            try{
+                let rec = JSON.parse(localStorage.getItem(key));
+                if(!rec || !rec.date) return;
+
+                let [y,m] = rec.date.split("-");
+
+                if(month && m !== month) return;
+                if(year && y !== year) return;
+
+                total += Number(rec.amount || 0);
+            }catch(e){}
+        }
+    });
+
+    return total;
+}
+
+
+/* ================================================================
+   INCOME FROM feeDB_v1 (Fee Collection)
+================================================================== */
+function openFeeDb(){
+    return new Promise(resolve=>{
+        let req = indexedDB.open("feeDB_v1", 1);
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = () => resolve(null);
+    });
+}
+
+async function loadFeeIncomeFiltered(month, year){
+    let db = await openFeeDb();
+    if(!db) return 0;
+
+    return new Promise(resolve=>{
+        let tx = db.transaction("fees","readonly");
+        let store = tx.objectStore("fees");
+        let req = store.getAll();
+
+        req.onsuccess = ()=> {
+            let rows = req.result || [];
+            let total = 0;
+
+            rows.forEach(r=>{
+                if(!r.payDate) return;
+
+                let [y,m] = r.payDate.split("-");
+
+                if(month && m !== month) return;
+                if(year && y !== year) return;
+
+                total += Number(r.totalAmount || 0);
+            });
+
+            resolve(total);
+        };
+
+        req.onerror = ()=> resolve(0);
+    });
+}
+
+
+/* ================================================================
+   DRAW PIE CHART
+================================================================== */
+let chart = null;
+
+async function drawChart(){
+    let month = document.getElementById("filterMonth").value;
+    let year  = document.getElementById("filterYear").value.trim();
+
+    let income = await loadFeeIncomeFiltered(month, year);
+    let expense = loadAllExpensesFiltered(month, year);
+
+    document.getElementById("totalBox").innerHTML =
+        `Total Income: <b>${income}</b> | Total Expense: <b>${expense}</b>`;
+
+    let ctx = document.getElementById("pieChart").getContext("2d");
+
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+            labels: ["Income", "Expense"],
+            datasets: [{
+                data: [income, expense],
+                backgroundColor: ["#1E88E5", "#E53935"],
+                borderColor: "#ffffff",
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "bottom" }
+            }
+        }
+    });
+}
+
+function applyFilter(){
+    drawChart();
+}
+
+function resetFilter(){
+    document.getElementById("filterMonth").value = "";
+    document.getElementById("filterYear").value = "";
+    drawChart();
+}
+
+window.onload = drawChart;
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Premium Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background:#f4f7fb;
+}
+
+/* HEADER */
+.header-box{
+    text-align:center;
+    padding:25px 10px;
+    background:white;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    border-bottom:3px solid #4dabf7;
+}
+.header-box img{
+    width:95px;
+    margin-bottom:10px;
+}
+.header-title{
+    font-size:28px;
+    font-weight:700;
+    color:#1565c0;
+}
+.header-sub{
+    font-size:16px;
+    color:#555;
+}
+
+/* MENU GRID */
+.menu-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:15px;
+    padding:20px;
+}
+.menu-btn{
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    text-align:center;
+    font-size:17px;
+    font-weight:600;
+    text-decoration:none;
+    color:#1565c0;
+    box-shadow:0 3px 12px rgba(0,0,0,0.12);
+    transition:0.2s;
+}
+.menu-btn:hover{
+    background:#e8f4ff;
+}
+
+/* STATS GRID */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:15px;
+    padding:20px;
+}
+.stat-card{
+    background:white;
+    padding:18px;
+    border-radius:14px;
+    text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+.stat-card span{
+    display:block;
+    font-size:22px;
+    font-weight:700;
+    color:#2e7d32;
+}
+.stat-card label{
+    font-size:14px;
+    color:#777;
+}
+
+/* Backup Section */
+.backup-container{
+    width:90%;
+    margin:30px auto;
+    padding:25px;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.1);
+    border:1px solid #d0eaff;
+    text-align:center;
+}
+.backup-title{
+    font-size:24px;
+    font-weight:700;
+    color:#0277bd;
+    margin-bottom:20px;
+}
+.backup-btn{
+    width:100%;
+    padding:15px;
+    margin:10px 0;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:600;
+    color:white;
+    cursor:pointer;
+    transition:0.2s;
+}
+.backup{
+    background:#43a047;
+}
+.backup:hover{
+    background:#2e7d32;
+}
+.restore{
+    background:#0288d1;
+}
+.restore:hover{
+    background:#01579b;
+}
+</style>
+</head>
+<body>
+
+<div class='header-box'>
+    <img src='logo.png'>
+    <div class='header-title'>CHATUSHPATHI FOUNDATION</div>
+    <div class='header-sub'>True education uplifts the self</div>
+    <div class='header-sub'>Chhatimtala, Chakdaha, Nadia - 741222</div>
+    <div class='header-sub'>Phone: 9064880703 | Email: chatushpathifoundation@gmail.com</div>
+</div>
+
+<h2 style='padding-left:20px;color:#1565c0;'>Quick Menu</h2>
+<div class='menu-grid'>
+    <a class='menu-btn' href='student.html'>😊 Student Page</a>
+    <a class='menu-btn' href='staff.html'>👨‍🏫 Staff Page</a>
+    <a class='menu-btn' href='salary.html'>💳 Salary</a>
+    <a class='menu-btn' href='fee.html'>🧾 Fee</a>
+    <a class='menu-btn' href='id_card.html'>🪪 Student ID</a>
+    <a class='menu-btn' href='teacher_id.html'>🪪 Teacher ID</a>
+    <a class='menu-btn' href='extra_expense.html'>💰 Extra Expense</a>
+    <a class='menu-btn' href='extra_income.html'>💰 Extra Income</a>
+    <a class='menu-btn' href='report.html'>📑 Reports</a>
+    <a class='menu-btn' href='chart.html'>📊 Chart</a>
+</div>
+
+<h2 style='padding-left:20px;color:#1565c0;'>Dashboard Stats</h2>
+<div class='stats-grid'>
+  <div class='stat-card'><span id="studentCount">--</span><label>Total Students</label></div>
+  <div class='stat-card'><span id="staffCount">--</span><label>Total Staff</label></div>
+  <div class='stat-card'><span id="totalIncome">--</span><label>Total Income</label></div>
+  <div class='stat-card'><span id="totalExpense">--</span><label>Total Expense</label></div>
+  <div class='stat-card'><span id="netProfit">--</span><label>Net Profit</label></div>
+  <div class='stat-card'><span id="todayCollection">--</span><label>Today Collection</label></div>
+  <div class='stat-card'><span id="monthCollection">--</span><label>Monthly Collection</label></div>
+  <div class='stat-card'><span id="yearCollection">--</span><label>Yearly Collection</label></div>
+</div>
+
+<div class="backup-container">
+    <h2 class="backup-title">☁ Cloud Backup & Restore</h2>
+    <button id="backupBtn" class="backup-btn backup">🔄 Backup Now</button>
+    <button id="restoreBtn" class="backup-btn restore">♻ Restore Now</button>
+    <p id="backupStatus"></p>
+</div>
+
+</body>
+</html>

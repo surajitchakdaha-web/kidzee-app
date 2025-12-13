@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extra Income Entry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#fff8e1;
+}
+
+header{
+    background:#ffb300;
+    padding:20px;
+    text-align:center;
+    color:#1b5e20;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.logo{
+    width:90px;
+    margin-top:-10px;
+}
+
+.top-btn{
+    background:#00695c;
+    color:white;
+    padding:8px 16px;
+    border-radius:6px;
+    text-decoration:none;
+    margin-right:6px;
+    font-size:15px;
+}
+.top-btn2{
+    background:#6a1b9a;
+    color:white;
+    padding:8px 14px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:15px;
+}
+
+.box{
+    padding:14px;
+}
+input,select{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    font-size:16px;
+}
+.btn-save{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#2e7d32;
+    color:white;
+    font-size:18px;
+    border:none;
+    border-radius:6px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
+}
+th,td{
+    border:1px solid #ffe082;
+    padding:8px;
+    text-align:center;
+}
+th{
+    background:#ffecb3;
+}
+.customBox{
+    display:none;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <img src="logo.png" class="logo"><br>
+    Extra Income Entry
+</header>
+
+<div class="box">
+
+    <a href="index.html" class="top-btn">🏠 Home</a>
+    <a href="report.html" class="top-btn2">📊 Report</a>
+    <br><br>
+
+    <!-- CATEGORY -->
+    <label>Category</label>
+    <select id="incCategory" onchange="toggleCustomBox()">
+        <option>Tuition Fee</option>
+        <option>Admission Fee</option>
+        <option>Exam Fee</option>
+        <option>Annual/Development Fee</option>
+        <option>Library Fee</option>
+        <option>Transport Fee</option>
+        <option>Tiffin Fee</option>
+        <option>Games/Sports Fee</option>
+        <option>Cultural Activity Fee</option>
+        <option>Books & Copies</option>
+        <option>Govt Grant</option>
+        <option>Donation</option>
+        <option>Other Income</option>
+        <option>Custom Income</option>
+    </select>
+
+    <!-- CUSTOM CATEGORY BOX -->
+    <div id="customBox" class="customBox">
+        <label>Enter Custom Category:</label>
+        <input type="text" id="customName" placeholder="Type custom category">
+    </div>
+
+    <!-- AMOUNT -->
+    <label>Amount</label>
+    <input type="number" id="incAmount" placeholder="Amount">
+
+    <!-- DATE -->
+    <label>Date</label>
+    <input type="date" id="incDate">
+
+    <button class="btn-save" onclick="saveIncome()">Save Income</button>
+
+    <h3>Income List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody id="incomeList"></tbody>
+    </table>
+
+</div>
+
+<script>
+
+// Auto Date Set
+document.getElementById("incDate").value = new Date().toISOString().split("T")[0];
+
+// Show Custom Box
+function toggleCustomBox(){
+    let cat = document.getElementById("incCategory").value;
+    document.getElementById("customBox").style.display =
+        (cat === "Custom Income") ? "block" : "none";
+}
+
+// Fetch List
+function loadIncome(){
+    let data = JSON.parse(localStorage.getItem("unified_investment_income_v1") || "[]");
+    let list = document.getElementById("incomeList");
+    list.innerHTML = "";
+
+    data.filter(x=>x.type==="income").forEach(d=>{
+        list.innerHTML += `
+            <tr>
+                <td>${d.date}</td>
+                <td>${d.category}</td>
+                <td>${d.amount}</td>
+            </tr>`;
+    });
+}
+
+// Save Income
+function saveIncome(){
+    let cat = document.getElementById("incCategory").value;
+    if(cat === "Custom Income"){
+        cat = document.getElementById("customName").value.trim();
+        if(cat===""){ alert("Enter custom category"); return; }
+    }
+
+    let amt = document.getElementById("incAmount").value;
+    let dt = document.getElementById("incDate").value;
+
+    if(amt=="" || dt==""){
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let old = JSON.parse(localStorage.getItem("unified_investment_income_v1") || "[]");
+
+    old.push({
+        date: dt,
+        category: cat,
+        amount: Number(amt),
+        type: "income"
+    });
+
+    localStorage.setItem("unified_investment_income_v1", JSON.stringify(old));
+    loadIncome();
+    alert("Income Saved Successfully!");
+}
+
+loadIncome();
+
+</script>
+
+</body>
+</html>

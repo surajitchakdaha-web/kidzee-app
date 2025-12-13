@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student ID Cards (Select 6 Students)</title>
+
+<style>
+body{
+    margin:0;
+    padding:20px;
+    background:#e3f2fd;
+    font-family:Arial, sans-serif;
+}
+
+/* MAIN BOX */
+.container{
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* TITLE */
+h2{
+    text-align:center;
+    color:#0d47a1;
+    margin-top:0;
+}
+
+/* STUDENT TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+table th{
+    background:#1565c0;
+    color:white;
+    padding:10px;
+    position:sticky;
+    top:0;
+}
+
+table td{
+    border:1px solid #bbdefb;
+    padding:8px;
+}
+
+table tr:nth-child(even){
+    background:#eaf3ff;
+}
+
+.student-photo{
+    width:50px;
+    height:60px;
+    object-fit:cover;
+    border:2px solid #0d47a1;
+    border-radius:4px;
+}
+
+/* SELECT BOX */
+select-limit-msg{
+    color:red;
+    font-weight:bold;
+}
+
+/* GENERATE BUTTON */
+#generateBtn{
+    padding:12px 20px;
+    background:#0d47a1;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    display:block;
+    margin:20px auto;
+}
+
+#generateBtn:hover{
+    background:#002f6c;
+}
+
+/* PRINT AREA */
+@media print{
+    body{
+        background:white;
+    }
+    .container{
+        display:none;
+    }
+    #printArea{
+        display:grid;
+    }
+}
+
+/* A4 Sheet Grid */
+#printArea{
+    display:none;
+    width:210mm;
+    min-height:297mm;
+    grid-template-columns:repeat(2, 1fr);
+    grid-template-rows:repeat(3, auto);
+    gap:10px;
+}
+
+/* ID CARD DESIGN */
+.id-card{
+    width:3.37in;
+    height:2.2in;
+    background:linear-gradient(135deg,#e3f2fd,#bbdefb);
+    border:3px solid #0d47a1;
+    border-radius:12px;
+    padding:10px;
+    box-sizing:border-box;
+    position:relative;
+}
+
+.school-logo{
+    width:40px;
+    position:absolute;
+    top:8px;
+    right:8px;
+}
+
+.id-title{
+    font-size:16px;
+    font-weight:bold;
+    color:#0d47a1;
+    margin-bottom:6px;
+}
+
+.photo-box{
+    width:80px;
+    height:100px;
+    border:2px solid #0d47a1;
+    border-radius:8px;
+    overflow:hidden;
+    position:absolute;
+    right:10px;
+    top:38px;
+}
+
+.photo-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.row{
+    font-size:13px;
+    color:#0d47a1;
+    margin-bottom:3px;
+}
+
+.footer{
+    position:absolute;
+    bottom:4px;
+    text-align:center;
+    width:100%;
+    font-size:11px;
+    font-weight:bold;
+    color:#0d47a1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Select 6 Students for ID Cards</h2>
+
+    <p style="color:#d32f2f; font-weight:bold;">
+        (Maximum 6 students can be selected)
+    </p>
+
+    <!-- STUDENT LIST TABLE -->
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Photo</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Roll</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody">
+            <!-- Loaded by JS -->
+        </tbody>
+    </table>
+
+    <button id="generateBtn">GENERATE 6 ID CARDS</button>
+</div>
+
+<!-- PRINT AREA (ID Cards) -->
+<div id="printArea"></div>
+<script>
+// ============================
+// OPEN STUDENT DATABASE
+// ============================
+function openStudentDB(){
+    return new Promise((resolve)=>{
+        let req = indexedDB.open("schoolDB_v1",1);
+        req.onsuccess = e => resolve(e.target.result);
+    });
+}
+
+// ============================
+// LOAD ALL STUDENTS INTO TABLE
+// ============================
+async function loadStudents(){
+    let db = await openStudentDB();
+    let tx = db.transaction("students","readonly");
+    let store = tx.objectStore("students");
+
+    let req = store.getAll();
+
+    req.onsuccess = ()=>{
+        let students = req.result;
+        renderStudentTable(students);
+    };
+}
+
+function renderStudentTable(list){
+    const tbody = document.getElementById("studentTableBody");
+    tbody.innerHTML = "";
+
+    list.forEach(st=>{
+        let tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td><input type="checkbox" class="selectStudent" data-id="${st.studentId}"></td>
+            <td><img src="${st.picture || ''}" class="student-photo"></td>
+            <td>${st.studentId}</td>
+            <td>${st.studentName}</td>
+            <td>${st.className}</td>
+            <td>${st.section}</td>
+            <td>${st.roll}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+// ============================
+// LIMIT MAX 6 STUDENTS
+// ============================
+document.addEventListener("change", function(e){
+    if(e.target.classList.contains("selectStudent")){
+        let selected = document.querySelectorAll(".selectStudent:checked");
+
+        if(selected.length > 6){
+            alert("You can select maximum 6 students!");
+            e.target.checked = false;
+        }
+    }
+});
+
+// ============================
+// GENERATE 6 ID CARDS
+// ============================
+document.getElementById("generateBtn").onclick = async function(){
+    let selected = document.querySelectorAll(".selectStudent:checked");
+
+    if(selected.length !== 6){
+        alert("Please select exactly 6 students!");
+        return;
+    }
+
+    let ids = [...selected].map(x=>x.getAttribute("data-id"));
+
+    let db = await openStudentDB();
+    let tx = db.transaction("students","readonly");
+    let store = tx.objectStore("students");
+
+    let printArea = document.getElementById("printArea");
+    printArea.innerHTML = "";
+    printArea.style.display = "grid";
+
+    for(let id of ids){
+        let studentData = await new Promise(res=>{
+            let r = store.get(id);
+            r.onsuccess = ()=> res(r.result);
+        });
+
+        printArea.innerHTML += makeCard(studentData);
+    }
+
+    window.print();
+}
+
+
+// ============================
+// GENERATE ONE CARD HTML
+// ============================
+function makeCard(s){
+    return `
+    <div class="id-card">
+        <img src="logo.png" class="school-logo">
+        <div class="id-title">KIDZEE SCHOOL</div>
+
+        <div class="photo-box">
+            <img src="${s.picture || ''}">
+        </div>
+
+        <div class="row"><b>Name:</b> ${s.studentName}</div>
+        <div class="row"><b>ID:</b> ${s.studentId}</div>
+        <div class="row"><b>Class:</b> ${s.className} - ${s.section}</div>
+        <div class="row"><b>Roll:</b> ${s.roll}</div>
+        <div class="row"><b>DOB:</b> ${s.dob}</div>
+        <div class="row"><b>Father:</b> ${s.fatherName}</div>
+        <div class="row"><b>Contact:</b> ${s.contact}</div>
+
+        <div class="footer">Valid for 2025–26</div>
+    </div>
+    `;
+}
+
+// ============================
+// INITIAL LOAD
+// ============================
+loadStudents();
+</script>
+
+</body>
+</html>
