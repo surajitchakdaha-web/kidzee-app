@@ -36,8 +36,10 @@ function numberToWords(num){
     return out.trim()+" Only";
 }
 
-/* STAFF DATABASE (Corrected) */
-const STAFF_DB = "staffDB_finalClean";
+/* ======================================================
+   STAFF DATABASE (Corrected)
+====================================================== */
+const STAFF_DB = "staffDB_finalClean";   // ✅ Corrected DB name
 let staffDB = null;
 
 function openStaffDB(){
@@ -54,6 +56,15 @@ function openStaffDB(){
             staffDB = e.target.result;
             res(staffDB);
         };
+    });
+}
+
+async function getStaffById(id){
+    const db = await openStaffDB();
+    return new Promise(res=>{
+        const tx = db.transaction("staff","readonly");
+        const req = tx.objectStore("staff").get(id);
+        req.onsuccess = () => res(req.result || null);
     });
 }
 
@@ -616,18 +627,11 @@ function openSalarySlip(r){
             th{background:#ffb74d;}
             .box{border:1px solid #ffcc80;border-radius:6px;padding:8px;margin-top:10px;}
             .signature{text-align:right;margin-top:40px;font-weight:bold;}
-            .backBtn{
-                position:fixed;bottom:20px;left:20px;padding:10px 20px;
-                background:#0277bd;color:white;font-weight:bold;border:none;
-                border-radius:6px;cursor:pointer;font-size:14px;
-            }
         </style>
     </head>
     <body>
 
-        <button class="backBtn" onclick="window.close()">⬅ Back</button>
-
-        <img src="logo.png" class="logo" alt="Logo">
+        <img src="logo.png" class="logo">
 
         <div class="header">CHATUSHPATHI FOUNDATION</div>
         <div class="sub">True education uplifts the self</div>
