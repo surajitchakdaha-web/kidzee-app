@@ -873,6 +873,8 @@ function fillForm(d){
 }
 
 async function clearForm(){
+document.getElementById("billNo").value = await generateNextBillNo();
+setTodayPaymentDate();
   document.getElementById("feeForm").reset();
   document.getElementById("admissionAmount").value="0";
   document.getElementById("developmentAmount").value="0";
@@ -925,6 +927,10 @@ async function loadByIndex(i){
     setStatus("Error opening database");
   }
 })();
+window.addEventListener("load", async () => {
+  document.getElementById("billNo").value = await generateNextBillNo();
+  setTodayPaymentDate();
+});
 
 document.getElementById("saveBtn").onclick = async function(){
   var rec=getFormData();
