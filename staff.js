@@ -1,6 +1,6 @@
-/* =======================================
+/* ======================================================
    DATE HELPERS
-======================================= */
+====================================================== */
 function ordinal(n){
   let s=["th","st","nd","rd"], v=n%100;
   return n+(s[(v-20)%10]||s[v]||s[0]);
@@ -16,19 +16,17 @@ function fancy(d){
 
 function today(){
   const t = new Date();
-  const y = t.getFullYear();
-  const m = String(t.getMonth()+1).padStart(2,"0");
-  const d = String(t.getDate()).padStart(2,"0");
-  return `${y}-${m}-${d}`;
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
 }
 
 function status(msg){
   document.getElementById("statusText").textContent = msg;
 }
 
-/* =======================================
-   PICTURE PREVIEW
-======================================= */
+
+/* ======================================================
+   PHOTO PREVIEW
+====================================================== */
 let pic = "";
 
 document.getElementById("staffPicture").addEventListener("change", function(){
@@ -43,72 +41,40 @@ document.getElementById("staffPicture").addEventListener("change", function(){
   r.readAsDataURL(f);
 });
 
-/* =======================================
-   INDEXEDDB SETUP
-======================================= */
-let db;
-const DB = "staffDB_fullV1";
 
-const req = indexedDB.open(DB, 1);
+/* ======================================================
+   INDEXEDDB SETUP
+====================================================== */
+let db;
+const req = indexedDB.open("staffDB_finalClean", 1);
 
 req.onupgradeneeded = e => {
   db = e.target.result;
-  if(!db.objectStoreNames.contains("staff")){
-    db.createObjectStore("staff", { keyPath: "staffId" });
-  }
+  db.createObjectStore("staff", { keyPath: "staffId" });
 };
 
-req.onsuccess = e => {
-  db = e.target.result;
-  status("Ready");
+req.onsuccess = () => {
+  db = req.result;
   init();
 };
 
-req.onerror = () => alert("Database failed");
 
-/* =======================================
+/* ======================================================
    DB FUNCTIONS
-======================================= */
+====================================================== */
 function allStaff(){
-  return new Promise(res => {
+  return new Promise(res=>{
     const tx = db.transaction("staff","readonly");
-    const st = tx.objectStore("staff");
-    const q = st.getAll();
+    const store = tx.objectStore("staff");
+    const q = store.getAll();
     q.onsuccess = () => res(q.result);
   });
 }
 
-async function nextId(){
-  const arr = await allStaff();
-  if(arr.length === 0) return "SF0001";
-
-  arr.sort((a,b)=>a.staffId.localeCompare(b.staffId));
-  const last = arr[arr.length-1].staffId;
-  async function nextId(){
-  const arr = await allStaff();
-  if(arr.length === 0) return "SF0001";
-
-  // filter only valid IDs
-  let ids = arr
-    .map(s => s.staffId)
-    .filter(id => /^SF\d{4}$/.test(id));
-
-  if(ids.length === 0) return "SF0001";
-
-  // sort numerically
-  ids.sort((a,b)=> parseInt(a.slice(2)) - parseInt(b.slice(2)));
-
-  let last = ids[ids.length - 1];
-  let num = parseInt(last.slice(2)) + 1;
-
-  return "SF" + String(num).padStart(4,"0");
-}
-
-
-function saveStaff(rec){
+function saveStaff(s){
   return new Promise(res=>{
     const tx = db.transaction("staff","readwrite");
-    tx.objectStore("staff").put(rec);
+    tx.objectStore("staff").put(s);
     tx.oncomplete = res;
   });
 }
@@ -129,9 +95,34 @@ function deleteStaff(id){
   });
 }
 
-/* =======================================
+
+/* ======================================================
+   AUTO ID GENERATOR (NO DUPLICATE)
+====================================================== */
+async function nextId(){
+  const arr = await allStaff();
+  if(arr.length === 0) return "SF0001";
+
+  // only valid records
+  const ids = arr
+    .map(r => r.staffId)
+    .filter(id => /^SF\d{4}$/.test(id));
+
+  if(ids.length === 0) return "SF0001";
+
+  // numeric sort
+  ids.sort((a,b)=> parseInt(a.slice(2)) - parseInt(b.slice(2)));
+
+  const last = ids[ids.length - 1];
+  const num = parseInt(last.slice(2)) + 1;
+
+  return "SF" + String(num).padStart(4,"0");
+}
+
+
+/* ======================================================
    FORM FUNCTIONS
-======================================= */
+====================================================== */
 async function clearForm(){
   document.getElementById("staffForm").reset();
   pic = "";
@@ -140,6 +131,7 @@ async function clearForm(){
   document.getElementById("staffId").value = await nextId();
   document.getElementById("doj").value = today();
   document.getElementById("dojFancy").textContent = fancy(today());
+  document.getElementById("dobFancy").textContent = "";
 }
 
 function getForm(){
@@ -167,9 +159,9 @@ function fillForm(s){
   staffId.value = s.staffId;
   staffName.value = s.staffName;
   dob.value = s.dob;
-  dobFancy.textContent = fancy(s.dob);
+  dobFancy.textContent = s.dobFancy;
   doj.value = s.doj;
-  dojFancy.textContent = fancy(s.doj);
+  dojFancy.textContent = s.dojFancy;
   category.value = s.category;
   qualification.value = s.qualification;
   experience.value = s.experience;
@@ -179,22 +171,23 @@ function fillForm(s){
   contact.value = s.contact;
   email.value = s.email;
   address.value = s.address;
-
   pic = s.picture;
+
   preview.src = pic;
 }
 
-/* =======================================
-   LIST TABLE
-======================================= */
+
+/* ======================================================
+   TABLE REFRESH
+====================================================== */
 async function refreshList(){
   const tbody = document.querySelector("#listTable tbody");
   tbody.innerHTML = "";
 
   const arr = await allStaff();
-  arr.sort((a,b)=>a.staffId.localeCompare(b.staffId));
+  arr.sort((a,b)=> a.staffId.localeCompare(b.staffId));
 
-  arr.forEach(s=>{
+  for(const s of arr){
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.staffId}</td>
@@ -204,40 +197,46 @@ async function refreshList(){
       <td>${s.address}</td>
     `;
     tbody.appendChild(tr);
-  });
+  }
 }
 
-/* =======================================
+
+/* ======================================================
    INIT
-======================================= */
+====================================================== */
 async function init(){
-  dobFancy.textContent = "";
-  doj.value = today();
-  dojFancy.textContent = fancy(today());
-  staffId.value = await nextId();
+  document.getElementById("staffId").value = await nextId();
+  document.getElementById("doj").value = today();
+  document.getElementById("dojFancy").textContent = fancy(today());
   refreshList();
 }
 
-/* =======================================
+
+/* ======================================================
    BUTTON ACTIONS
-======================================= */
+====================================================== */
+
+// SAVE
 addBtn.onclick = async () => {
   const s = getForm();
-  if(!s.staffName) return alert("Staff name required!");
+  if(!s.staffName) return alert("Staff name required");
+
   await saveStaff(s);
   alert("Saved!");
+
   await clearForm();
   refreshList();
 };
 
-editBtn.onclick = async () => {
+// EDIT
+editBtn.onclick = async() => {
   const id = prompt("Enter Staff ID:");
-  if(!id) return;
   const s = await getStaff(id);
-  if(!s) return alert("Not found!");
+  if(!s) return alert("Not found");
   fillForm(s);
 };
 
+// DELETE
 deleteBtn.onclick = async () => {
   const id = staffId.value;
   if(!confirm("Delete " + id + "?")) return;
@@ -247,48 +246,44 @@ deleteBtn.onclick = async () => {
   refreshList();
 };
 
+// SEARCH
 searchBtn.onclick = async () => {
   const id = searchId.value;
   const s = await getStaff(id);
-  if(!s) return alert("Not found!");
+  if(!s) return alert("Not found");
   fillForm(s);
 };
 
+// NEXT
 nextBtn.onclick = async () => {
   const arr = await allStaff();
-  arr.sort((a,b)=>a.staffId.localeCompare(b.staffId));
+  arr.sort((a,b)=> a.staffId.localeCompare(b.staffId));
 
-  let current = staffId.value;
-  let index = arr.findIndex(x=>x.staffId===current);
-
-  if(index < arr.length-1){
-    fillForm(arr[index+1]);
-  }
+  let i = arr.findIndex(x=> x.staffId === staffId.value);
+  if(i < arr.length-1) fillForm(arr[i+1]);
 };
 
+// PREV
 prevBtn.onclick = async () => {
   const arr = await allStaff();
-  arr.sort((a,b)=>a.staffId.localeCompare(b.staffId));
+  arr.sort((a,b)=> a.staffId.localeCompare(b.staffId));
 
-  let current = staffId.value;
-  let index = arr.findIndex(x=>x.staffId===current);
-
-  if(index > 0){
-    fillForm(arr[index-1]);
-  }
+  let i = arr.findIndex(x=> x.staffId === staffId.value);
+  if(i > 0) fillForm(arr[i-1]);
 };
 
+// CSV
 csvBtn.onclick = () => {
   const s = getForm();
-
-  const csv = 
+  const csv =
 `ID,NAME,DOB,DOJ,CATEGORY,QUALIFICATION,EXPERIENCE,SALARY,FATHER,MOTHER,CONTACT,EMAIL,ADDRESS
 ${s.staffId},"${s.staffName}",${s.dob},${s.doj},"${s.category}","${s.qualification}",${s.experience},${s.salary},"${s.father}","${s.mother}",${s.contact},"${s.email}","${s.address}"`;
 
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
   a.download = s.staffId + "_staff.csv";
   a.click();
 };
 
+// PRINT
 printBtn.onclick = () => window.print();
