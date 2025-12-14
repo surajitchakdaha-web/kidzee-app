@@ -84,9 +84,26 @@ async function nextId(){
 
   arr.sort((a,b)=>a.staffId.localeCompare(b.staffId));
   const last = arr[arr.length-1].staffId;
-  const num = parseInt(last.slice(2)) + 1;
+  async function nextId(){
+  const arr = await allStaff();
+  if(arr.length === 0) return "SF0001";
+
+  // filter only valid IDs
+  let ids = arr
+    .map(s => s.staffId)
+    .filter(id => /^SF\d{4}$/.test(id));
+
+  if(ids.length === 0) return "SF0001";
+
+  // sort numerically
+  ids.sort((a,b)=> parseInt(a.slice(2)) - parseInt(b.slice(2)));
+
+  let last = ids[ids.length - 1];
+  let num = parseInt(last.slice(2)) + 1;
+
   return "SF" + String(num).padStart(4,"0");
 }
+
 
 function saveStaff(rec){
   return new Promise(res=>{
