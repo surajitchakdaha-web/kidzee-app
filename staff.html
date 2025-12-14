@@ -69,8 +69,7 @@
   .btn-prev{background:#5d4037;}
   .btn-next{background:#00796b;}
   .btn-search{background:#1e88e5;}
-  .btn-json-export{background:#004d40;}
-  .btn-json-import{background:#ad1457;}
+  .btn-test{background:#ff9800;}
 
   .search-box{ display:flex; gap:6px; align-items:center; }
 
@@ -171,9 +170,8 @@
     <button class="btn btn-search" id="searchBtn">SEARCH</button>
   </div>
 
-  <button class="btn btn-json-export" id="jsonExportBtn">EXPORT JSON</button>
-  <button class="btn btn-json-import" id="jsonImportBtn">IMPORT JSON</button>
-  <input type="file" id="jsonFileInput" accept="application/json" style="display:none" />
+  <!-- Test Button for debugging -->
+  <button class="btn btn-test" id="testBtn">TEST: Add Sample</button>
 
 </div>
 
@@ -197,308 +195,610 @@
 
 <script>
 // ---------- Fancy Date ----------
-function ordinal(n){ let s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function ordinal(n){ 
+  let s=["th","st","nd","rd"]; 
+  let v = n % 100; 
+  return n + (s[(v-20)%10] || s[v] || s[0]); 
+}
+
 function fancy(d){
-  if(!d) return "";
-  const [y,m,day]=d.split("-");
-  const dt=new Date(y,m-1,day);
-  const mnames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  if(!d || d === "") return "";
+  const [y,m,day] = d.split("-");
+  const dt = new Date(y, m-1, day);
+  const mnames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   return `${ordinal(dt.getDate())} ${mnames[dt.getMonth()]}, ${dt.getFullYear()}`;
 }
 
 // ---------- Status ----------
-function status(t){ document.getElementById("statusText").textContent=t; }
+function status(t){ 
+  document.getElementById("statusText").textContent = t; 
+  console.log("Status:", t);
+}
 
 // ---------- IndexedDB ----------
-const DB="staffDB_v1"; const VER=1; let idb=null;
+const DB = "staffDB_v1";
+const VER = 1;
+let idb = null;
 
 function openDb(){
-  return new Promise(res=>{
-    if(idb) return res(idb);
-    const req=indexedDB.open(DB,VER);
-    req.onupgradeneeded=e=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains("staff"))
-        db.createObjectStore("staff",{keyPath:"staffId"});
+  return new Promise((resolve, reject) => {
+    if(idb) {
+      console.log("DB already open");
+      return resolve(idb);
+    }
+    
+    console.log("Opening DB...");
+    const req = indexedDB.open(DB, VER);
+    
+    req.onupgradeneeded = function(e) {
+      console.log("Upgrading DB...");
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains("staff")) {
+        const store = db.createObjectStore("staff", {keyPath: "staffId"});
+        console.log("Object store created");
+      }
     };
-    req.onsuccess=()=>{ idb=req.result; res(idb); };
+    
+    req.onsuccess = function() {
+      console.log("DB opened successfully");
+      idb = req.result;
+      resolve(idb);
+    };
+    
+    req.onerror = function(e) {
+      console.error("DB error:", e.target.error);
+      reject(e.target.error);
+    };
   });
 }
 
-async function saveStaff(s){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("staff","readwrite");
-    tx.objectStore("staff").put(s);
-    tx.oncomplete=async ()=>{
-      const all=await allStaff();
-      localStorage.setItem("staff",JSON.stringify(all));
-      loadStaffList();
-      res();
+async function saveStaff(staff){
+  console.log("Saving staff:", staff.staffId);
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("staff", "readwrite");
+    const store = tx.objectStore("staff");
+    store.put(staff);
+    
+    tx.oncomplete = async function() {
+      console.log("Staff saved:", staff.staffId);
+      const all = await allStaff();
+      localStorage.setItem("staff", JSON.stringify(all));
+      await loadStaffList();
+      resolve();
+    };
+    
+    tx.onerror = function(e) {
+      console.error("Save error:", e.target.error);
+      reject(e.target.error);
     };
   });
 }
 
 async function getStaff(id){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("staff","readonly");
-    const req=tx.objectStore("staff").get(id);
-    req.onsuccess=()=>res(req.result||null);
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("staff", "readonly");
+    const store = tx.objectStore("staff");
+    const req = store.get(id);
+    
+    req.onsuccess = function() {
+      resolve(req.result || null);
+    };
+    
+    req.onerror = function(e) {
+      console.error("Get staff error:", e.target.error);
+      reject(e.target.error);
+    };
   });
 }
 
 async function deleteStaff(id){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("staff","readwrite");
-    tx.objectStore("staff").delete(id);
-    tx.oncomplete=async ()=>{
-      const all=await allStaff();
-      localStorage.setItem("staff",JSON.stringify(all));
-      loadStaffList();
-      res();
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("staff", "readwrite");
+    const store = tx.objectStore("staff");
+    store.delete(id);
+    
+    tx.oncomplete = async function() {
+      console.log("Staff deleted:", id);
+      const all = await allStaff();
+      localStorage.setItem("staff", JSON.stringify(all));
+      await loadStaffList();
+      resolve();
+    };
+    
+    tx.onerror = function(e) {
+      console.error("Delete error:", e.target.error);
+      reject(e.target.error);
     };
   });
 }
 
 async function allStaff(){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("staff","readonly");
-    const req=tx.objectStore("staff").getAll();
-    req.onsuccess=()=>res(req.result||[]);
-  });
+  try {
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("staff", "readonly");
+      const store = tx.objectStore("staff");
+      const req = store.getAll();
+      
+      req.onsuccess = function() {
+        resolve(req.result || []);
+      };
+      
+      req.onerror = function(e) {
+        console.error("Get all staff error:", e.target.error);
+        reject(e.target.error);
+      };
+    });
+  } catch(error) {
+    console.error("Error in allStaff:", error);
+    return [];
+  }
 }
 
 async function sortedIds(){
-  const all=await allStaff();
-  let ids=all.map(s=>s.staffId);
+  const all = await allStaff();
+  let ids = all.map(s => s.staffId).filter(id => id);
   ids.sort();
   return ids;
 }
 
+// FIXED: nextId function
 async function nextId(){
-  const ids=await sortedIds();
-  if(!ids.length) return "SF0001";
-  const last=ids[ids.length-1];
-  const n=parseInt(last.substring(2))+1;
-  return "SF"+n.toString().padStart(4,"0");
+  try {
+    const all = await allStaff();
+    console.log("Total records:", all.length);
+    
+    if(all.length === 0) {
+      console.log("No records, returning SF0001");
+      return "SF0001";
+    }
+    
+    // Extract all staff IDs that start with SF
+    const ids = all.map(s => s.staffId).filter(id => id && id.startsWith('SF'));
+    console.log("All SF IDs:", ids);
+    
+    if(ids.length === 0) {
+      console.log("No SF IDs found, returning SF0001");
+      return "SF0001";
+    }
+    
+    // Find the highest number
+    let maxNum = 0;
+    for(let id of ids) {
+      if(id && id.startsWith('SF')) {
+        const numStr = id.substring(2);
+        const num = parseInt(numStr);
+        if(!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    }
+    
+    console.log("Max number found:", maxNum);
+    const nextNum = maxNum + 1;
+    const nextId = "SF" + nextNum.toString().padStart(4, "0");
+    console.log("Next ID will be:", nextId);
+    
+    return nextId;
+    
+  } catch(error) {
+    console.error("Error in nextId:", error);
+    return "SF0001";
+  }
 }
 
 // ---------- Picture ----------
-let pic="";
-document.getElementById("staffPicture").addEventListener("change",function(){
-  const f=this.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=e=>{
-    pic=e.target.result;
-    document.getElementById("preview").src=pic;
+let pic = "";
+document.getElementById("staffPicture").addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    pic = e.target.result;
+    document.getElementById("preview").src = pic;
+    console.log("Picture loaded");
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(file);
 });
 
 // ---------- Form ----------
 function getForm(){
   return {
-    staffId:document.getElementById("staffId").value,
-    staffName:document.getElementById("staffName").value,
-    dob:document.getElementById("dob").value,
-    doj:document.getElementById("doj").value,
-    category:document.getElementById("category").value,
-    qualification:document.getElementById("qualification").value,
-    experience:document.getElementById("experience").value,
-    salary:document.getElementById("salary").value,
-    father:document.getElementById("father").value,
-    mother:document.getElementById("mother").value,
-    contact:document.getElementById("contact").value,
-    email:document.getElementById("email").value,
-    address:document.getElementById("address").value,
-    picture:pic
+    staffId: document.getElementById("staffId").value,
+    staffName: document.getElementById("staffName").value,
+    dob: document.getElementById("dob").value,
+    doj: document.getElementById("doj").value,
+    category: document.getElementById("category").value,
+    qualification: document.getElementById("qualification").value,
+    experience: parseInt(document.getElementById("experience").value) || 0,
+    salary: parseInt(document.getElementById("salary").value) || 0,
+    father: document.getElementById("father").value,
+    mother: document.getElementById("mother").value,
+    contact: document.getElementById("contact").value,
+    email: document.getElementById("email").value,
+    address: document.getElementById("address").value,
+    picture: pic
   };
 }
 
-function fillForm(s){
-  document.getElementById("staffId").value=s.staffId;
-  document.getElementById("staffName").value=s.staffName;
-  document.getElementById("dob").value=s.dob;
-  document.getElementById("dobFancy").textContent=fancy(s.dob);
-  document.getElementById("doj").value=s.doj;
-  document.getElementById("dojFancy").textContent=fancy(s.doj);
-  document.getElementById("category").value=s.category;
-  document.getElementById("qualification").value=s.qualification;
-  document.getElementById("experience").value=s.experience;
-  document.getElementById("salary").value=s.salary;
-  document.getElementById("father").value=s.father;
-  document.getElementById("mother").value=s.mother;
-  document.getElementById("contact").value=s.contact;
-  document.getElementById("email").value=s.email;
-  document.getElementById("address").value=s.address;
-  pic=s.picture;
-  document.getElementById("preview").src=pic;
+function fillForm(staff){
+  document.getElementById("staffId").value = staff.staffId || "";
+  document.getElementById("staffName").value = staff.staffName || "";
+  document.getElementById("dob").value = staff.dob || "";
+  document.getElementById("dobFancy").textContent = fancy(staff.dob || "");
+  document.getElementById("doj").value = staff.doj || "";
+  document.getElementById("dojFancy").textContent = fancy(staff.doj || "");
+  document.getElementById("category").value = staff.category || "";
+  document.getElementById("qualification").value = staff.qualification || "";
+  document.getElementById("experience").value = staff.experience || "";
+  document.getElementById("salary").value = staff.salary || "";
+  document.getElementById("father").value = staff.father || "";
+  document.getElementById("mother").value = staff.mother || "";
+  document.getElementById("contact").value = staff.contact || "";
+  document.getElementById("email").value = staff.email || "";
+  document.getElementById("address").value = staff.address || "";
+  pic = staff.picture || "";
+  document.getElementById("preview").src = pic;
 }
 
-
 async function clearForm(){
+  console.log("Clearing form...");
   document.getElementById("staffForm").reset();
   pic = "";
   document.getElementById("preview").src = "";
 
-  const id = await nextId();
-  document.getElementById("staffId").value = id;
+  // Set next ID
+  const newId = await nextId();
+  document.getElementById("staffId").value = newId;
+  console.log("New ID set to:", newId);
 
-  const t = new Date();
-  const y = t.getFullYear(), m = ("0" + (t.getMonth() + 1)).slice(-2), d = ("0" + t.getDate()).slice(-2);
-  document.getElementById("doj").value = `${y}-${m}-${d}`;
-  document.getElementById("dojFancy").textContent = fancy(`${y}-${m}-${d}`);
-
-  document.getElementById("staffName").focus();
-  status("Ready");
-}
--${m}-${d}`;
-  document.getElementById("dojFancy").textContent=fancy(`${y}-${m}-${d}`);
+  // Set current date as DOJ
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = ("0" + (today.getMonth() + 1)).slice(-2);
+  const day = ("0" + today.getDate()).slice(-2);
+  const todayStr = `${year}-${month}-${day}`;
+  
+  document.getElementById("doj").value = todayStr;
+  document.getElementById("dojFancy").textContent = fancy(todayStr);
 }
 
 // ---------- Load Index ----------
-let index=-1;
+let currentIndex = -1;
 
-async function loadIndex(i){
-  const ids=await sortedIds();
-  if(!ids.length){status("No data"); return;}
-  if(i<0)i=0; if(i>=ids.length)i=ids.length-1;
-  index=i;
-  const s=await getStaff(ids[i]);
-  if(s) fillForm(s);
+async function loadIndex(index){
+  const ids = await sortedIds();
+  console.log("All IDs:", ids, "Requested index:", index);
+  
+  if(ids.length === 0) {
+    status("No data available");
+    return;
+  }
+  
+  if(index < 0) index = 0;
+  if(index >= ids.length) index = ids.length - 1;
+  
+  currentIndex = index;
+  const staff = await getStaff(ids[index]);
+  if(staff) {
+    fillForm(staff);
+    status(`Record ${index + 1} of ${ids.length}`);
+  }
 }
 
 // ---------- STAFF LIST LOADING ----------
-function loadStaffList(){
-  allStaff().then(list=>{
-    const t=document.getElementById("staffListTable");
-    t.innerHTML="";
-    list.forEach(x=>{
-      t.innerHTML+=`
-        <tr>
-          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.staffId}</td>
-          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.staffName}</td>
-          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.category||''}</td>
-          <td style='border:1px solid #b2dfdb;padding:6px;'>${x.contact||''}</td>
-        </tr>
+async function loadStaffList(){
+  try {
+    const list = await allStaff();
+    const table = document.getElementById("staffListTable");
+    table.innerHTML = "";
+    
+    if(list.length === 0) {
+      table.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#666;">No staff records found</td></tr>`;
+      return;
+    }
+    
+    list.forEach(staff => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style='border:1px solid #b2dfdb;padding:6px;'>${staff.staffId || ''}</td>
+        <td style='border:1px solid #b2dfdb;padding:6px;'>${staff.staffName || ''}</td>
+        <td style='border:1px solid #b2dfdb;padding:6px;'>${staff.category || ''}</td>
+        <td style='border:1px solid #b2dfdb;padding:6px;'>${staff.contact || ''}</td>
       `;
+      table.appendChild(row);
     });
-  });
+    
+    console.log("Staff list loaded:", list.length, "records");
+  } catch(error) {
+    console.error("Error loading staff list:", error);
+  }
 }
 
 // ---------- INIT ----------
-(async ()=>{
-  await openDb();
-  document.getElementById("staffId").value=await nextId();
+async function initialize(){
+  try {
+    console.log("Initializing application...");
+    status("Initializing...");
+    
+    await openDb();
+    
+    // Set initial ID
+    const initialId = await nextId();
+    document.getElementById("staffId").value = initialId;
+    console.log("Initial ID set to:", initialId);
+    
+    // Set current date
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ("0" + (today.getMonth() + 1)).slice(-2);
+    const day = ("0" + today.getDate()).slice(-2);
+    const todayStr = `${year}-${month}-${day}`;
+    
+    document.getElementById("doj").value = todayStr;
+    document.getElementById("dojFancy").textContent = fancy(todayStr);
+    
+    // Load existing data
+    const ids = await sortedIds();
+    console.log("Found", ids.length, "existing records");
+    
+    if(ids.length > 0) {
+      await loadIndex(0);
+    }
+    
+    // Load staff list
+    await loadStaffList();
+    
+    status("Ready");
+    console.log("Application initialized successfully");
+    
+  } catch(error) {
+    console.error("Initialization error:", error);
+    status("Error initializing");
+  }
+}
 
-  const t=new Date();
-  const y=t.getFullYear(), m=("0"+(t.getMonth()+1)).slice(-2), d=("0"+t.getDate()).slice(-2);
-  document.getElementById("doj").value=`${y}-${m}-${d}`;
-  document.getElementById("dojFancy").textContent=fancy(`${y}-${m}-${d}`);
+// ---------- Event Listeners ----------
+document.addEventListener("DOMContentLoaded", function() {
+  initialize();
+});
 
-  const ids=await sortedIds();
-  if(ids.length) loadIndex(0);
-
-  loadStaffList();
-  status("Ready");
-})();
-
-// ---------- Buttons ----------
-document.getElementById("addBtn").onclick = async()=>{
-  const s=getForm();
-  if(!s.staffName){alert("Name empty!"); return;}
-  await saveStaff(s);
-  alert("Saved: "+s.staffId);
-  await clearForm();
+// SAVE button
+document.getElementById("addBtn").onclick = async function() {
+  const staff = getForm();
+  if(!staff.staffName || staff.staffName.trim() === "") {
+    alert("Please enter Staff Name!");
+    document.getElementById("staffName").focus();
+    return;
+  }
+  
+  if(!staff.staffId || staff.staffId.trim() === "") {
+    alert("Staff ID is missing!");
+    return;
+  }
+  
+  try {
+    status("Saving...");
+    await saveStaff(staff);
+    alert("Staff saved successfully: " + staff.staffId);
+    await clearForm();
+    status("Ready");
+  } catch(error) {
+    console.error("Save error:", error);
+    alert("Error saving staff!");
+    status("Error");
+  }
 };
 
-document.getElementById("editBtn").onclick = async()=>{
-  const id=prompt("Enter Staff ID:");
-  const s=await getStaff(id);
-  if(!s){alert("Not found"); return;}
-  fillForm(s);
-  const ids=await sortedIds();
-  index=ids.indexOf(id);
+// EDIT button
+document.getElementById("editBtn").onclick = async function() {
+  const id = prompt("Enter Staff ID to edit:");
+  if(!id) return;
+  
+  try {
+    const staff = await getStaff(id);
+    if(!staff) {
+      alert("Staff not found: " + id);
+      return;
+    }
+    
+    fillForm(staff);
+    const ids = await sortedIds();
+    currentIndex = ids.indexOf(id);
+    if(currentIndex >= 0) {
+      status(`Editing record ${currentIndex + 1} of ${ids.length}`);
+    }
+  } catch(error) {
+    console.error("Edit error:", error);
+    alert("Error loading staff!");
+  }
 };
 
-document.getElementById("deleteBtn").onclick = async()=>{
-  const id=document.getElementById("staffId").value;
-  if(!confirm("Delete "+id+"?")) return;
-  await deleteStaff(id);
-  alert("Deleted");
-  const ids=await sortedIds();
-  if(ids.length) loadIndex(0); else clearForm();
+// DELETE button
+document.getElementById("deleteBtn").onclick = async function() {
+  const id = document.getElementById("staffId").value;
+  if(!id || id.trim() === "") {
+    alert("No staff selected!");
+    return;
+  }
+  
+  if(!confirm(`Are you sure you want to delete staff ${id}?`)) {
+    return;
+  }
+  
+  try {
+    status("Deleting...");
+    await deleteStaff(id);
+    alert("Staff deleted: " + id);
+    
+    const ids = await sortedIds();
+    if(ids.length > 0) {
+      await loadIndex(0);
+    } else {
+      await clearForm();
+    }
+    status("Ready");
+  } catch(error) {
+    console.error("Delete error:", error);
+    alert("Error deleting staff!");
+    status("Error");
+  }
 };
 
-document.getElementById("nextBtn").onclick = async()=>{
-  const ids=await sortedIds();
-  if(index<ids.length-1){ index++; loadIndex(index); }
-};
-document.getElementById("prevBtn").onclick = async()=>{
-  if(index>0){ index--; loadIndex(index); }
+// NEXT button
+document.getElementById("nextBtn").onclick = async function() {
+  const ids = await sortedIds();
+  if(ids.length === 0) {
+    alert("No records available");
+    return;
+  }
+  
+  if(currentIndex < ids.length - 1) {
+    currentIndex++;
+    await loadIndex(currentIndex);
+  } else {
+    alert("This is the last record");
+  }
 };
 
-document.getElementById("searchBtn").onclick = async()=>{
-  const id=document.getElementById("searchId").value;
-  const s=await getStaff(id);
-  if(!s){alert("Not found"); return;}
-  fillForm(s);
+// PREV button
+document.getElementById("prevBtn").onclick = async function() {
+  const ids = await sortedIds();
+  if(ids.length === 0) {
+    alert("No records available");
+    return;
+  }
+  
+  if(currentIndex > 0) {
+    currentIndex--;
+    await loadIndex(currentIndex);
+  } else {
+    alert("This is the first record");
+  }
 };
 
-document.getElementById("printBtn").onclick=()=>window.print();
-document.getElementById("homeBtn").onclick=()=>location.href="index.html";
+// SEARCH button
+document.getElementById("searchBtn").onclick = async function() {
+  const id = document.getElementById("searchId").value.trim();
+  if(!id) {
+    alert("Please enter Staff ID to search");
+    return;
+  }
+  
+  try {
+    const staff = await getStaff(id);
+    if(!staff) {
+      alert("Staff not found: " + id);
+      return;
+    }
+    
+    fillForm(staff);
+    const ids = await sortedIds();
+    currentIndex = ids.indexOf(id);
+    if(currentIndex >= 0) {
+      status(`Record ${currentIndex + 1} of ${ids.length}`);
+    }
+  } catch(error) {
+    console.error("Search error:", error);
+    alert("Error searching staff!");
+  }
+};
+
+// TEST button (for debugging)
+document.getElementById("testBtn").onclick = async function() {
+  try {
+    const testId = await nextId();
+    const testStaff = {
+      staffId: testId,
+      staffName: "Test Staff " + testId,
+      dob: "1990-01-15",
+      doj: new Date().toISOString().split('T')[0],
+      category: "TEACHER",
+      qualification: "M.A, B.Ed",
+      experience: 5,
+      salary: 30000,
+      father: "Test Father",
+      mother: "Test Mother",
+      contact: "9876543210",
+      email: "test" + testId + "@gmail.com",
+      address: "Test Address, Kolkata",
+      picture: ""
+    };
+    
+    await saveStaff(testStaff);
+    alert("Test staff added: " + testId);
+    await clearForm();
+    await loadStaffList();
+  } catch(error) {
+    console.error("Test error:", error);
+    alert("Error adding test data!");
+  }
+};
+
+// PRINT button
+document.getElementById("printBtn").onclick = function() {
+  window.print();
+};
+
+// HOME button
+document.getElementById("homeBtn").onclick = function() {
+  if(confirm("Go to home page?")) {
+    window.location.href = "index.html";
+  }
+};
 
 // CSV EXPORT
-document.getElementById("csvBtn").onclick=()=>{
-  const s=getForm();
-  const headers=["ID","NAME","DOB","DOJ","CATEGORY","QUALIFICATION","EXPERIENCE","SALARY","FATHER","MOTHER","CONTACT","EMAIL","ADDRESS"];
-  const vals=[s.staffId,s.staffName,s.dob,s.doj,s.category,s.qualification,s.experience,s.salary,s.father,s.mother,s.contact,s.email,s.address];
-  const csv=headers.join(",")+"\n"+vals.map(v=>`"${v||""}"`).join(",");
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download=s.staffId+"_staff.csv"; a.click();
+document.getElementById("csvBtn").onclick = function() {
+  const staff = getForm();
+  const headers = ["ID","NAME","DOB","DOJ","CATEGORY","QUALIFICATION","EXPERIENCE","SALARY","FATHER","MOTHER","CONTACT","EMAIL","ADDRESS"];
+  const values = [
+    staff.staffId,
+    staff.staffName,
+    staff.dob,
+    staff.doj,
+    staff.category,
+    staff.qualification,
+    staff.experience,
+    staff.salary,
+    staff.father,
+    staff.mother,
+    staff.contact,
+    staff.email,
+    staff.address
+  ];
+  
+  const csvContent = headers.join(",") + "\n" + values.map(v => `"${v || ""}"`).join(",");
+  const blob = new Blob([csvContent], {type: "text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = staff.staffId + "_staff.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
-// JSON Export
-document.getElementById("jsonExportBtn").onclick=async()=>{
-  const all=await allStaff();
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(all,null,2)],{type:"application/json"}));
-  a.download="staff_backup.json"; a.click();
-};
+// Add event listener for date fields to update fancy dates
+document.getElementById("dob").addEventListener("change", function() {
+  document.getElementById("dobFancy").textContent = fancy(this.value);
+});
 
-// JSON Import
-document.getElementById("jsonImportBtn").onclick=()=>{
-  document.getElementById("jsonFileInput").click();
-};
-document.getElementById("jsonFileInput").addEventListener("change",function(){
-  const f=this.files[0];
-  const r=new FileReader();
-  r.onload=async e=>{
-    const arr=JSON.parse(e.target.result);
-    for(const s of arr) await saveStaff(s);
-    alert("Import Done");
-    loadIndex(0);
-    loadStaffList();
-  };
-  r.readAsText(f);
+document.getElementById("doj").addEventListener("change", function() {
+  document.getElementById("dojFancy").textContent = fancy(this.value);
+});
+
+// Make search work with Enter key
+document.getElementById("searchId").addEventListener("keypress", function(e) {
+  if(e.key === "Enter") {
+    document.getElementById("searchBtn").click();
+  }
 });
 </script>
 
 </body>
 </html>
-
-
-<script>
-document.getElementById("staffPicture").addEventListener("change", e=>{
- const file=e.target.files[0];
- if(file){
-   let r=new FileReader();
-   r.onload=()=>{ document.getElementById("preview").src=r.result; };
-   r.readAsDataURL(file);
- }
-});
-</script>
