@@ -36,10 +36,8 @@ function numberToWords(num){
     return out.trim()+" Only";
 }
 
-/* ======================================================
-   STAFF DATABASE (from staff.html)
-====================================================== */
-const STAFF_DB = "staffDB_v1";
+/* STAFF DATABASE (Corrected) */
+const STAFF_DB = "staffDB_finalClean";
 let staffDB = null;
 
 function openStaffDB(){
@@ -56,15 +54,6 @@ function openStaffDB(){
             staffDB = e.target.result;
             res(staffDB);
         };
-    });
-}
-
-async function getStaffById(id){
-    const db = await openStaffDB();
-    return new Promise(res=>{
-        const tx = db.transaction("staff","readonly");
-        const req = tx.objectStore("staff").get(id);
-        req.onsuccess = () => res(req.result || null);
     });
 }
 
