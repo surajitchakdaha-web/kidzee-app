@@ -927,6 +927,12 @@ async function loadByIndex(i){
     setStatus("Error opening database");
   }
 })();
+
+window.addEventListener("load", async () => {
+  document.getElementById("billNo").value = await generateNextBillNo();
+  setTodayPaymentDate();
+});
+
 window.addEventListener("load", async () => {
   document.getElementById("billNo").value = await generateNextBillNo();
   setTodayPaymentDate();
