@@ -287,3 +287,8 @@ ${s.staffId},"${s.staffName}",${s.dob},${s.doj},"${s.category}","${s.qualificati
 
 // PRINT
 printBtn.onclick = () => window.print();
+
+homeBtn.onclick = () => {
+  location.href = "index.html";
+};
+

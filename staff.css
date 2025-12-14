@@ -110,6 +110,7 @@ textarea{
 .btn-csv{ background:#00897b; }
 .btn-print{ background:#ef6c00; }
 .btn-search{ background:#1e88e5; }
+.btn-home{  background:#6a1b9a; }
 
 .search-box{
   display:flex;
@@ -165,14 +166,33 @@ th{
   }
 }
 
-/* ================================
-   PRINT MODE
-================================= */
+/* ==========================================
+   PRINT FIX — Page Break Rules
+========================================== */
+@media print {
 
-@media print{
+  /* Toolbar, preview, status hide */
   .toolbar,
   .status-bar,
-  #preview{
-    display:none;
+  #preview {
+    display: none !important;
+  }
+
+  /* ONLY first card on first page */
+  .card {
+    page-break-after: always;
+  }
+
+  /* Table starts on NEW Page */
+  #listTable {
+    page-break-before: always;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  table, th, td {
+    border:1px solid #444 !important;
   }
 }
