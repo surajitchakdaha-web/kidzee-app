@@ -1,0 +1,174 @@
+/* ================================
+   GLOBAL DESIGN
+================================= */
+
+body{
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin:0 auto;
+  padding:20px;
+  background:linear-gradient(135deg,#e8f5e9,#e3f2fd);
+}
+
+h1{
+  text-align:center;
+  color:#004d40;
+  margin-top:0;
+}
+
+.status-bar{
+  padding:6px 12px;
+  background:#c8e6c9;
+  color:#1b5e20;
+  border-radius:6px;
+  font-size:12px;
+  margin-bottom:10px;
+}
+
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:8px;
+  position:relative;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ================================
+   GRID FORM
+================================= */
+
+form{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:10px 15px;
+  margin-top:10px;
+}
+
+label{
+  font-weight:bold;
+  color:#1b5e20;
+  margin-top:6px;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:6px 8px;
+  box-sizing:border-box;
+  border-radius:4px;
+  border:1px solid #b2dfdb;
+}
+
+textarea{
+  resize:vertical;
+  height:70px;
+}
+
+.full-row{
+  grid-column:1/3;
+}
+
+/* ================================
+   PICTURE PREVIEW
+================================= */
+
+#preview{
+  max-width:120px;
+  max-height:140px;
+  object-fit:cover;
+  position:absolute;
+  right:20px;
+  top:20px;
+  border-radius:6px;
+  border:1px solid #80cbc4;
+  background:#fff;
+}
+
+/* ================================
+   TOOLBAR BUTTONS
+================================= */
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}
+
+.btn{
+  padding:8px 14px;
+  border:none;
+  border-radius:4px;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-add{background:#2e7d32;}
+.btn-edit{background:#0277bd;}
+.btn-delete{background:#c62828;}
+.btn-prev{background:#5d4037;}
+.btn-next{background:#00796b;}
+.btn-csv{background:#00897b;}
+.btn-print{background:#ef6c00;}
+.btn-search{background:#1e88e5;}
+
+.search-box{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+
+/* ================================
+   TABLE
+================================= */
+
+table{
+  width:100%;
+  margin-top:25px;
+  border-collapse:collapse;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+th,td{
+  border:1px solid #b2dfdb;
+  padding:6px;
+  font-size:13px;
+}
+
+th{
+  background:#004d40;
+  color:white;
+}
+
+/* ================================
+   RESPONSIVE
+================================= */
+
+@media(max-width:600px){
+  form{
+    grid-template-columns:1fr;
+  }
+  .full-row{
+    grid-column:1/2;
+  }
+  #preview{
+    position:static;
+    margin-bottom:10px;
+  }
+  .toolbar{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+/* ================================
+   PRINT MODE
+================================= */
+
+@media print{
+  .toolbar,.status-bar,#preview{
+    display:none;
+  }
+}
