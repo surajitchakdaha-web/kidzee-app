@@ -1,3 +1,30 @@
+
+function numberToIndianWords(n){
+  n = Math.round(Number(n)||0);
+  if(n===0) return "zero rupees";
+  var ones=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+  var tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  function twoDigits(num){
+    if(num===0) return "";
+    if(num<20) return ones[num];
+    return tens[Math.floor(num/10)] + (num%10? " "+ones[num%10]:"");
+  }
+  function threeDigits(num){
+    var h=Math.floor(num/100), rest=num%100, out=[];
+    if(h>0) out.push(ones[h]+" hundred");
+    if(rest>0){ if(out.length) out.push("and"); out.push(twoDigits(rest)); }
+    return out.join(" ");
+  }
+  var out=[], crore=Math.floor(n/1e7); n%=1e7;
+  var lakh=Math.floor(n/1e5); n%=1e5;
+  var thousand=Math.floor(n/1000); n%=1000;
+  var hundred=n;
+  if(crore) out.push(threeDigits(crore)+" crore");
+  if(lakh) out.push(threeDigits(lakh)+" lakh");
+  if(thousand) out.push(threeDigits(thousand)+" thousand");
+  if(hundred) out.push(threeDigits(hundred));
+  return out.join(" ")+" rupees";
+}
 /* ================================
    STATUS MESSAGE
 ================================ */
@@ -184,18 +211,16 @@ async function getAllFees(){
 ================================ */
 async function generateNextBillNo(){
     let all = await getAllFees();
-    if(!all.length) return "BL0001";
-
-    let nums = all
-        .map(r=>r.billNo)
-        .filter(b=>/^BL\d{4}$/.test(b))
-        .map(b=>parseInt(b.substring(2),10));
-
-    if(!nums.length) return "BL0001";
-
-    let max = Math.max(...nums);
-    return "BL"+String(max+1).padStart(4,"0");
+    if(!all || all.length===0) return "BL0001";
+    let nums = all.map(r=>r.billNo)
+                  .filter(b=>/^BL\d+$/.test(b))
+                  .map(b=>parseInt(b.slice(2)))
+                  .filter(n=>!isNaN(n));
+    if(nums.length===0) return "BL0001";
+    let next = Math.max(...nums)+1;
+    return "BL"+String(next).padStart(4,"0");
 }
+
 
 /* ================================
    TOTAL CALCULATOR
