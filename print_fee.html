@@ -140,7 +140,7 @@ function numberToWords(num){
 // ---------------- DB OPEN ----------------
 function openFeeDb(){
   return new Promise(resolve=>{
-    const req=indexedDB.open("feeDB_v1",1);
+    const req=indexedDB.open("feeDB_v2",1);
     req.onsuccess=()=>resolve(req.result);
   });
 }
