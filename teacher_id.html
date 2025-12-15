@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher ID Card (6 per A4)</title>
+<link rel="stylesheet" href="css/idcard_teacher.css">
+</head>
+<body>
+<h2 style="text-align:center;color:#0a3d20;margin-top:0;">
+    TEACHER ID CARD – 6 Cards per A4
+</h2>
+<div id="listSection" class="tableBox">
+    <h3>Select Any 6 Teachers</h3>
+    <table class="teacher-table">
+        <thead>
+            <tr>
+                <th>Select</th><th>Photo</th><th>ID</th><th>Name</th>
+                <th>Category</th><th>Mobile</th>
+            </tr>
+        </thead>
+        <tbody id="teacherBody"></tbody>
+    </table>
+    <button id="generateBtn" disabled
+        style="margin-top:15px;padding:12px 20px;background:#0b8d47;
+               border:none;color:white;font-size:15px;font-weight:bold;
+               border-radius:6px;cursor:pointer;">
+        Generate 6 ID Cards
+    </button>
+</div>
+<div id="cardGrid"></div>
+<script src="js/idcard_teacher.js"></script>
+</body>
+</html>
