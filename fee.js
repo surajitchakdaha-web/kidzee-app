@@ -130,9 +130,16 @@ async function generateNextBillNo(){
     return "BL"+String(Math.max(...nums)+1).padStart(4,"0");
 }
 
-/* ========= TOTAL ========== */
-function calculateTotal(){
-    function n(id){ return Number(document.getElementById(id).value||0); }
+/* ============================
+   TOTAL CALCULATION (FINAL FIX)
+=============================*/
+function calculateTotal() {
+
+    function n(id){
+        let el = document.getElementById(id);
+        if(!el) return 0;               // field না থাকলে 0
+        return Number(el.value) || 0;   // empty হলে 0
+    }
 
     let total =
         n("admissionAmount") +
@@ -144,9 +151,24 @@ function calculateTotal(){
         n("fieldtrip") +
         n("sports");
 
-    totalAmount.value=total;
-    totalInWords.textContent = numberToIndianWords(total);
+    // TOTAL update
+    document.getElementById("totalAmount").value = total;
+
+    // WORDS update
+    document.getElementById("totalInWords").textContent =
+        numberToIndianWords(total);
 }
+
+/* AUTO UPDATE WHEN INPUT CHANGES */
+[
+    "admissionAmount","developmentAmount","uniformSets",
+    "tiffin","misc","picnic","fieldtrip","sports"
+].forEach(id=>{
+    let el = document.getElementById(id);
+    if(el){
+        el.addEventListener("input", calculateTotal);
+    }
+});
 
 /* ========= GET FORM DATA ========= */
 function getFormData(){
@@ -264,14 +286,15 @@ csvBtn.onclick=async()=>{
     a.click();
 };
 
-/* ========= LOAD TABLE (MAIN FIX) ========= */
-async function loadTable(){
+/* ========= LOAD TABLE (FINAL FIX) ========= */
+async function loadTable() {
     let all = await getAllFees();
     let tb = document.getElementById("feeTableBody");
-    tb.innerHTML="";
+    tb.innerHTML = "";
 
-    all.forEach(r=>{
-        let tr=document.createElement("tr");
+    all.forEach(r => {
+        let tr = document.createElement("tr");
+
         tr.innerHTML = `
             <td>${r.billNo}</td>
             <td>${r.studentId}</td>
@@ -281,12 +304,47 @@ async function loadTable(){
             <td>${r.payYear}</td>
             <td>${r.totalAmount}</td>
             <td>${r.paymentMode}</td>
-            <td><button onclick="window.location='print_fee.html?bill=${r.billNo}'">Print</button></td>
-            <td><button onclick="fillForm(${JSON.stringify(r)})">Edit</button></td>
-            <td><button onclick="deleteFee('${r.billNo}').then(loadTable)">Delete</button></td>
+
+            <td>
+                <button class="mini-btn"
+                    onclick="window.location.href='print_fee.html?bill=${r.billNo}'">
+                    Print
+                </button>
+            </td>
+
+            <td>
+                <button class="mini-btn"
+                    onclick='editRecord("${r.billNo}")'>
+                    Edit
+                </button>
+            </td>
+
+            <td>
+                <button class="mini-btn"
+                    onclick='deleteRecord("${r.billNo}")'>
+                    Delete
+                </button>
+            </td>
         `;
+
         tb.appendChild(tr);
     });
+}
+
+/* SAFE EDIT LOADER */
+async function editRecord(bill) {
+    let rec = await getFee(bill);
+    if (!rec) return alert("Record not found");
+    fillForm(rec);
+    setStatus("Loaded " + bill);
+}
+
+/* SAFE DELETE */
+async function deleteRecord(bill) {
+    if (!confirm("Delete " + bill + "?")) return;
+    await deleteFee(bill);
+    loadTable();
+    alert("Deleted " + bill);
 }
 
 /* ========= TODAY ========= */
