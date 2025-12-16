@@ -11,281 +11,141 @@ body{
   margin:20px;
   color:#000;
 }
-
-h1,h2,h3,h4{
-  text-align:center;
-  margin:5px 0;
-}
-
-.section{
-  border:1px solid #ccc;
-  padding:15px;
-  margin-bottom:20px;
-  border-radius:6px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-  font-size:14px;
-}
-table, th, td{
-  border:1px solid #ccc;
-  padding:6px;
-}
-th{
-  background:#f1f1f1;
-}
-
-.back-btn{
-  padding:8px 18px;
-  background:#1976d2;
-  color:#fff;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-header{
-  text-align:center;
-  margin-bottom:15px;
-}
-header img{
-  width:70px;
-  height:70px;
-}
-
+h1,h2,h3,h4{text-align:center;margin:5px 0;}
+.section{border:1px solid #ccc;padding:15px;margin-bottom:20px;border-radius:6px;}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+table,th,td{border:1px solid #ccc;padding:6px;}
+th{background:#f1f1f1;}
+.back-btn{padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:bold;}
+header{text-align:center;margin-bottom:15px;}
+header img{width:70px;height:70px;}
 @media print{
-  .no-print{ display:none !important; }
-  @page { margin:10mm; }
-  .page-break{ page-break-before: always; }
+  .no-print{display:none!important;}
+  @page{margin:10mm;}
+  .page-break{page-break-before:always;}
 }
 </style>
 </head>
 <body>
 
-<!-- TOP BUTTONS (screen only) -->
-<button class="no-print back-btn" onclick="window.location.href='fee.html'">← BACK</button>
-<button class="no-print back-btn" style="background:#2e7d32;margin-left:10px;" onclick="window.print()">
-PRINT NOW
-</button>
+<button class="no-print back-btn" onclick="location.href='fee.html'">← BACK</button>
+<button class="no-print back-btn" style="background:#2e7d32;margin-left:10px;" onclick="window.print()">PRINT NOW</button>
 
-<!-- COMMON HEADER WITH LOGO -->
 <header>
-  <img src="logo.png" alt="Logo">
+  <img src="logo.png">
   <h2>CHATUSHPATHI FOUNDATION</h2>
   <h4>True education uplifts the self</h4>
 </header>
 
-<!-- ========== PAGE 1 : BILL + STUDENT + KIT ========== -->
-
-<div id="billSection" class="section">
+<div class="section">
   <h3>Fee Receipt</h3>
   <div id="billContent">Loading...</div>
 </div>
 
-<div id="studentSection" class="section">
+<div class="section">
   <h3>Student Information</h3>
   <div id="studentContent">Loading...</div>
 </div>
 
-<div id="kitSection" class="section">
+<div class="section">
   <h3>SCHOOL KIT (DELIVERED)</h3>
   <div id="kitContent">Loading...</div>
 </div>
 
-<!-- ========== PAGE 2+ : PAYMENT HISTORY ONLY ========== -->
-
-<div id="historySection" class="section page-break">
+<div class="section page-break">
   <h3>Payment History</h3>
   <div id="historyHeader"></div>
   <table>
     <thead>
-      <tr>
-        <th>Bill No</th>
-        <th>Date</th>
-        <th>Total</th>
-        <th>Mode</th>
-      </tr>
+      <tr><th>Bill</th><th>Date</th><th>Total</th><th>Mode</th></tr>
     </thead>
-    <tbody id="historyBody">
-      <tr><td colspan="4">Loading...</td></tr>
-    </tbody>
+    <tbody id="historyBody"></tbody>
   </table>
 </div>
 
 <script>
-// ---------------- Number to Words (simple English) ----------------
-function numberToWords(num){
-  num = Math.round(Number(num) || 0);
-  if(num === 0) return "zero";
-
-  const a = ["","one","two","three","four","five","six","seven","eight","nine","ten",
-             "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
-  const b = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-
-  function inWords(n){
-    if(n < 20) return a[n];
-    if(n < 100) return b[Math.floor(n/10)] + (n%10 ? " " + a[n%10] : "");
-    if(n < 1000) return a[Math.floor(n/100)] + " hundred" + (n%100 ? " " + inWords(n%100) : "");
-    if(n < 1000000) return inWords(Math.floor(n/1000)) + " thousand" + (n%1000 ? " " + inWords(n%1000) : "");
-    if(n < 1000000000) return inWords(Math.floor(n/1000000)) + " million" + (n%1000000 ? " " + inWords(n%1000000) : "");
-    return n.toString();
-  }
-  return inWords(num);
+function indianWords(num){
+  num=Math.round(Number(num)||0);
+  if(num===0) return "zero rupees only";
+  const o=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+  const t=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  const two=n=>n<20?o[n]:t[Math.floor(n/10)]+(n%10?" "+o[n%10]:"");
+  const three=n=>(Math.floor(n/100)?o[Math.floor(n/100)]+" hundred ":"")+two(n%100);
+  let r=[],c=Math.floor(num/10000000);num%=10000000;
+  let l=Math.floor(num/100000);num%=100000;
+  let th=Math.floor(num/1000);num%=1000;
+  if(c)r.push(three(c)+" crore");
+  if(l)r.push(three(l)+" lakh");
+  if(th)r.push(three(th)+" thousand");
+  if(num)r.push(three(num));
+  return r.join(" ")+" rupees only";
 }
-
-// ---------------- DB OPEN ----------------
-function openFeeDb(){
-  return new Promise(resolve=>{
-    const req=indexedDB.open("feeDB_v2",1);
-    req.onsuccess=()=>resolve(req.result);
-  });
+function fancy(d){
+  if(!d) return "";
+  let x=new Date(d),m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return x.getDate()+" "+m[x.getMonth()]+", "+x.getFullYear();
 }
-function openStudDb(){
-  return new Promise(resolve=>{
-    const req=indexedDB.open("schoolDB_v1",1);
-    req.onsuccess=()=>resolve(req.result);
-  });
-}
+function openFee(){return new Promise(r=>{indexedDB.open("feeDB_git_safe_v1").onsuccess=e=>r(e.target.result);});}
+function openStud(){return new Promise(r=>{indexedDB.open("schoolDB_v1").onsuccess=e=>r(e.target.result);});}
 
-// Global info for reuse in history header
-let gStudentName = "";
-let gStudentClass = "";
-let gStudentId    = "";
+let gName="",gClass="",gId="";
 
-// ---------------- LOAD BILL + FIRST PAGE ----------------
-async function loadBill(){
-  const bill=new URLSearchParams(window.location.search).get("bill");
-  if(!bill){
-    document.getElementById("billContent").innerHTML="Bill not found";
-    return;
-  }
-
-  const db=await openFeeDb();
-  const tx=db.transaction("fees","readonly");
-  const req=tx.objectStore("fees").get(bill);
-
-  req.onsuccess=()=>{
-    const r=req.result;
-    if(!r){
-      document.getElementById("billContent").innerHTML="No data";
-      return;
-    }
-
-    gStudentName = r.studentName || "";
-    gStudentClass = r.className || "";
-    gStudentId = r.studentId || "";
-
-    const total = Number(r.totalAmount || 0);
-    const totalWords = numberToWords(total) + " only";
-
-    // BILL DETAILS + TOTAL IN WORDS
+async function load(){
+  const bill=new URLSearchParams(location.search).get("bill");
+  const db=await openFee();
+  const req=db.transaction("fees").objectStore("fees").get(bill);
+  req.onsuccess=async()=>{
+    const r=req.result;if(!r)return;
+    gName=r.studentName;gClass=r.className;gId=r.studentId;
     document.getElementById("billContent").innerHTML=`
-      <b>Bill No:</b> ${r.billNo}<br>
-      <b>Date:</b> ${r.payDate}<br>
-      <b>Student ID:</b> ${r.studentId}<br>
-      <b>Name:</b> ${r.studentName}<br>
-      <b>Class:</b> ${r.className}<br><br>
-
-      <table>
-        <tr><th>Particular</th><th>Amount</th></tr>
-        <tr><td>Admission</td><td>${r.admissionAmount}</td></tr>
-        <tr><td>Development</td><td>${r.developmentAmount}</td></tr>
-        <tr><td>Tiffin</td><td>${r.tiffin}</td></tr>
-        <tr><td>Misc</td><td>${r.misc}</td></tr>
-        <tr><td>Picnic</td><td>${r.picnic}</td></tr>
-        <tr><td>Field Trip</td><td>${r.fieldtrip}</td></tr>
-        <tr><td>Sports</td><td>${r.sports}</td></tr>
-        <tr><th>Total</th><th>${total.toFixed(2)}</th></tr>
-      </table>
-      <br>
-      <b>Total (in words):</b> ${totalWords}
+    <b>Bill:</b> ${r.billNo}<br>
+    <b>Date:</b> ${fancy(r.payDate)}<br>
+    <b>ID:</b> ${r.studentId}<br>
+    <b>Name:</b> ${r.studentName}<br>
+    <b>Class:</b> ${r.className}<br>
+    <table>
+      <tr><th>Particular</th><th>Amount</th></tr>
+      <tr><td>Admission</td><td>${r.admissionAmount}</td></tr>
+      <tr><td>Development</td><td>${r.developmentAmount}</td></tr>
+      <tr><td>Tiffin</td><td>${r.tiffin}</td></tr>
+      <tr><td>Misc</td><td>${r.misc}</td></tr>
+      <tr><td>Picnic</td><td>${r.picnic}</td></tr>
+      <tr><td>Field Trip</td><td>${r.fieldtrip}</td></tr>
+      <tr><td>Sports</td><td>${r.sports}</td></tr>
+      <tr><th>Total</th><th>${r.totalAmount}</th></tr>
+    </table>
+    <b>Total (in words):</b> ${indianWords(r.totalAmount)}
     `;
-
-    loadStudent(r.studentId);
-    loadKit(r);
+    const sdb=await openStud();
+    const sreq=sdb.transaction("students").objectStore("students").get(r.studentId);
+    sreq.onsuccess=()=>{
+      const s=sreq.result;
+      if(s)document.getElementById("studentContent").innerHTML=`
+      <b>Name:</b> ${s.studentName}<br>
+      <b>Section:</b> ${s.section}<br>
+      <b>Roll:</b> ${s.roll}<br>
+      <b>Father:</b> ${s.fatherName}<br>
+      <b>Mobile:</b> ${s.contact}<br>
+      <b>Address:</b> ${s.address}`;
+    };
     loadHistory(r.studentId);
   };
 }
-
-// ---------------- STUDENT INFO (stay on page–1) ----------------
-async function loadStudent(id){
-  const db=await openStudDb();
-  const tx=db.transaction("students","readonly");
-  const req=tx.objectStore("students").get(id);
-
+async function loadHistory(id){
+  const db=await openFee();
+  const req=db.transaction("fees").objectStore("fees").getAll();
   req.onsuccess=()=>{
-    const s=req.result;
-    if(!s){
-      document.getElementById("studentContent").innerHTML="Not found";
-      return;
-    }
-    document.getElementById("studentContent").innerHTML=`
-      <b>Name:</b> ${s.studentName}<br>
-      <b>Class:</b> ${s.className}<br>
-      <b>Section:</b> ${s.section}<br>
-      <b>Roll:</b> ${s.roll}<br>
-      <b>Mobile:</b> ${s.contact}<br>
-      <b>Father:</b> ${s.fatherName}<br>
-      <b>Mother:</b> ${s.motherName}<br>
-      <b>Address:</b> ${s.address}<br>
-    `;
-  };
-}
-
-// ---------------- KIT (stay on page–1) ----------------
-function loadKit(r){
-  const delivered = (r.kitSelected && r.kitSelected.length)
-    ? r.kitSelected.join(", ")
-    : "No items delivered";
-
-  document.getElementById("kitContent").innerHTML = delivered;
-}
-
-// ---------------- HISTORY (page–2 থেকে শুরু) ----------------
-async function loadHistory(studentId){
-  const db=await openFeeDb();
-  const tx=db.transaction("fees","readonly");
-  const req=tx.objectStore("fees").getAll();
-
-  req.onsuccess=()=>{
-    const list=req.result.filter(i=>i.studentId===studentId);
-    list.sort((a,b)=>a.payDate.localeCompare(b.payDate));
-
-    // History header: ছোট করে নাম/ক্লাস/আইডি আবার
-    document.getElementById("historyHeader").innerHTML = `
-      <b>Name:</b> ${gStudentName} &nbsp;&nbsp;
-      <b>Class:</b> ${gStudentClass} &nbsp;&nbsp;
-      <b>ID:</b> ${gStudentId}
-    `;
-
-    const body=document.getElementById("historyBody");
-    body.innerHTML="";
-
-    if(!list.length){
-      body.innerHTML = '<tr><td colspan="4">No previous payments</td></tr>';
-      return;
-    }
-
+    const b=document.getElementById("historyBody");
+    const list=req.result.filter(x=>x.studentId===id);
+    document.getElementById("historyHeader").innerHTML=`<b>${gName}</b> | ${gClass} | ${gId}`;
     list.forEach(r=>{
-      const row=document.createElement("tr");
-      row.innerHTML=`
-        <td>${r.billNo}</td>
-        <td>${r.payDate}</td>
-        <td>${r.totalAmount}</td>
-        <td>${r.paymentMode}</td>
-      `;
-      body.appendChild(row);
+      let tr=document.createElement("tr");
+      tr.innerHTML=`<td>${r.billNo}</td><td>${fancy(r.payDate)}</td><td>${r.totalAmount}</td><td>${r.paymentMode}</td>`;
+      b.appendChild(tr);
     });
   };
 }
-
-// START
-loadBill();
+load();
 </script>
-
 </body>
 </html>
