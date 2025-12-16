@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Fee Report - Chatushpathi Foundation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+font-family: Arial, sans-serif;
+margin:0 auto;
+max-width:1200px;
+padding:20px;
+background:linear-gradient(135deg,#f1f8e9,#e3f2fd);
+}
+.header{
+text-align:center;
+background:#ffffff;
+padding:20px;
+border-radius:8px;
+border:2px solid #c8e6c9;
+margin-bottom:20px;
+position:relative;
+}
+.header img{
+position:absolute;
+right:20px;
+top:20px;
+width:60px;
+height:60px;
+}
+.status-bar{
+padding:10px;
+background:#e8f5e9;
+border-radius:6px;
+margin-bottom:15px;
+color:#2e7d32;
+font-size:14px;
+text-align:center;
+}
+.card{
+background:#fff;
+border-radius:8px;
+padding:25px;
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+margin-bottom:25px;
+}
+.toolbar{
+display:flex;
+flex-wrap:wrap;
+gap:12px;
+margin-bottom:20px;
+padding:15px;
+background:#f8f9fa;
+border-radius:8px;
+border:1px solid #e0e0e0;
+}
+.btn{
+padding:10px 18px;
+border:none;
+color:#fff;
+cursor:pointer;
+border-radius:6px;
+font-weight:600;
+box-shadow:0 2px 6px rgba(0,0,0,0.2);
+font-size:14px;
+transition:all 0.3s;
+}
+.btn:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,0.3); }
+.btn-home{background:#6a1b9a;}
+.btn-fee{background:#2e7d32;}
+.btn-student{background:#00838f;}
+.btn-print{background:#ef6c00;}
+.btn-csv{background:#1976d2;}
+.btn-filter{background:#1e88e5;}
+.btn-reset{background:#c62828;}
+.filter-section{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+padding:20px;
+background:#f9fbe7;
+border-radius:8px;
+border-left:4px solid #cddc39;
+margin-bottom:20px;
+}
+.filter-field{
+display:flex;
+flex-direction:column;
+gap:5px;
+}
+.filter-field label{
+font-weight:600;
+color:#1b5e20;
+font-size:13px;
+}
+.filter-field input, .filter-field select{
+padding:8px;
+border:1px solid #a5d6a7;
+border-radius:4px;
+font-size:13px;
+}
+.student-stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+.stat-card{
+background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+padding:20px;
+border-radius:8px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+.stat-number{
+font-size:28px;
+font-weight:bold;
+color:#1b5e20;
+margin-bottom:5px;
+}
+.stat-label{
+color:#33691e;
+font-size:13px;
+}
+.student-list{
+max-height:600px;
+overflow:auto;
+}
+.student-card{
+background:#fff;
+margin-bottom:20px;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+border-left:5px solid #d81b60;
+}
+.student-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#fdf2f8;
+padding:15px 20px;
+border-radius:8px;
+margin-bottom:15px;
+}
+.student-info h3{
+margin:0;
+color:#d81b60;
+font-size:20px;
+}
+.student-meta{
+font-size:12px;
+color:#666;
+margin:5px 0 0 0;
+}
+.student-amount{
+font-size:24px;
+font-weight:bold;
+color:#2e7d32;
+}
+.payment-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:10px;
+margin-top:15px;
+}
+.payment-item{
+background:#f8f9fa;
+padding:12px;
+border-radius:6px;
+border-left:3px solid #1976d2;
+}
+.payment-header{
+font-weight:bold;
+color:#1b5e20;
+margin-bottom:5px;
+display:flex;
+justify-content:space-between;
+}
+.payment-details{
+font-size:12px;
+color:#666;
+line-height:1.4;
+}
+.no-data{
+text-align:center;
+padding:40px;
+color:#666;
+font-size:16px;
+background:#f9f9f9;
+border-radius:8px;
+border:2px dashed #ccc;
+}
+@media(max-width:768px){
+.toolbar{ flex-direction:column; align-items:stretch; }
+.filter-section{ grid-template-columns:1fr; }
+.student-header{ flex-direction:column; text-align:center; gap:10px; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+<strong style="font-size:22px;">CHATUSHPATHI FOUNDATION</strong><br>
+True education uplifts the self<br>
+Regd. Office: Chhatimtala, P.O.- Chakdaha, Dist.- Nadia, PIN-741222<br>
+Contact: 9064880703 | Email: chatushpathifoundation@gmail.com
+<img src="logo.png" alt="School Logo">
+</div>
+
+<div class="status-bar">
+Status: <span id="statusText">Loading student data...</span>
+</div>
+
+<div class="card">
+<div class="toolbar">
+<button class="btn btn-home" id="homeBtn">🏠 HOME</button>
+<button class="btn btn-fee" id="feePageBtn">💰 FEE PAGE</button>
+<button class="btn btn-student" id="studentPageBtn">👤 STUDENT PAGE</button>
+<button class="btn btn-print" id="printReportBtn">🖨️ PRINT REPORT</button>
+<button class="btn btn-csv" id="csvExportBtn">📊 EXPORT CSV</button>
+</div>
+
+<div class="filter-section">
+<div class="filter-field">
+<label>Class:</label>
+<input type="text" id="filterClass" placeholder="e.g., CLASS I">
+</div>
+<div class="filter-field">
+<label>Student ID:</label>
+<input type="text" id="filterId" placeholder="e.g., ST0001">
+</div>
+<div class="filter-field">
+<label>Student Name:</label>
+<input type="text" id="filterName" placeholder="Student name">
+</div>
+<div class="filter-field">
+<label>Min Amount:</label>
+<input type="number" id="filterMinAmount" placeholder="0">
+</div>
+<div class="filter-field">
+<button class="btn btn-filter" id="filterApply">🔍 APPLY FILTER</button>
+<button class="btn btn-reset" id="filterReset">🔄 RESET</button>
+</div>
+</div>
+
+<div class="student-stats" id="statsContainer">
+<!-- Dynamic stats will appear here -->
+</div>
+
+<div class="student-list" id="studentList">
+<div class="no-data">
+📊 No student data found. Please add fee records first.
+</div>
+</div>
+</div>
+
+<script>
+var FEE_DB_NAME="feeDB_v1";
+var FEE_DB_VERSION=1;
+var feeDb=null;
+
+function setStatus(msg){ 
+document.getElementById("statusText").textContent = msg; 
+}
+
+function openFeeDb(){
+return new Promise(function(resolve,reject){
+if(feeDb) return resolve(feeDb);
+var req=indexedDB.open(FEE_DB_NAME,FEE_DB_VERSION);
+req.onerror=function(){reject(req.error);};
+req.onupgradeneeded=function(e){
+var db=e.target.result;
+if(!db.objectStoreNames.contains("fees")){
+db.createObjectStore("fees",{keyPath:"billNo"});
+}
+};
+req.onsuccess=function(e){
+feeDb=e.target.result;
+resolve(feeDb);
+};
+});
+}
+
+async function getAllFees(){
+var db=await openFeeDb();
+return new Promise(function(resolve,reject){
+var tx=db.transaction("fees","readonly");
+var req=tx.objectStore("fees").getAll();
+req.onsuccess=function(){resolve(req.result||[]);};
+req.onerror=function(){reject(req.error);};
+});
+}
+
+function formatFancy(iso){
+if(!iso) return "";
+var parts = iso.split("-");
+if(parts.length!==3) return "";
+var y=parseInt(parts[0],10), m=parseInt(parts[1],10), d=parseInt(parts[2],10);
+var dt=new Date(y,m-1,d);
+var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function ordinal(n){
+var s=["th","st","nd","rd"], v=n%100;
+return n+(s[(v-20)%10]||s[v]||s[0]);
+}
+return ordinal(dt.getDate())+" "+months[dt.getMonth()]+", "+dt.getFullYear();
+}
+
+async function generateStudentReport(){
+try{
+setStatus("Generating report...");
+var all = await getAllFees();
+if(!all.length){
+document.getElementById("studentList").innerHTML = '<div class="no-data">📊 No fee records found. Please add fee records in Fee Collection page first.</div>';
+document.getElementById("statsContainer").innerHTML = '';
+setStatus("No data available");
+return;
+}
+
+// Group by student
+var studentSummary = {};
+all.forEach(function(r){
+var sid = r.studentId;
+if(!studentSummary[sid]){
+studentSummary[sid] = {
+studentId: sid,
+name: r.studentName,
+className: r.className,
+section: r.section || "",
+roll: r.roll || "",
+totalPaid: 0,
+billCount: 0,
+payments: []
+};
+}
+studentSummary[sid].totalPaid += (r.totalAmount || 0);
+studentSummary[sid].billCount++;
+studentSummary[sid].payments.push({
+billNo: r.billNo,
+payDate: formatFancy(r.payDate),
+amount: r.totalAmount,
+mode: r.paymentMode
+});
+});
+
+// Convert to array and sort by total paid
+var students = Object.values(studentSummary).sort(function(a,b){
+return b.totalPaid - a.totalPaid;
+});
+
+// Generate stats
+var totalStudents = students.length;
+var grandTotal = students.reduce((sum,s)=>sum+(s.totalPaid||0),0);
+var avgPayment = totalStudents ? (grandTotal/totalStudents).toFixed(0) : 0;
+
+document.getElementById("statsContainer").innerHTML = `
+<div class="stat-card">
+<div class="stat-number">${totalStudents}</div>
+<div class="stat-label">Total Students</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">₹${grandTotal.toLocaleString('en-IN')}</div>
+<div class="stat-label">Grand Total</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">₹${avgPayment.toLocaleString('en-IN')}</div>
+<div class="stat-label">Avg per Student</div>
+</div>
+`;
+
+// Generate student cards
+var html = '';
+students.forEach(function(student){
+html += `
+<div class="student-card">
+<div class="student-header">
+<div>
+<h3>${student.name || 'N/A'}</h3>
+<p class="student-meta">
+<strong>ID:</strong> ${student.studentId} | 
+<strong>Class:</strong> ${student.className || 'N/A'} | 
+<strong>Sec:</strong> ${student.section} | 
+<strong>Roll:</strong> ${student.roll}
+</p>
+</div>
+<div>
+<div class="student-amount">₹${student.totalPaid.toLocaleString('en-IN')}</div>
+<div style="font-size:12px;color:#666;">${student.billCount} bill(s)</div>
+</div>
+</div>
+<div class="payment-grid">
+${student.payments.map(p => `
+<div class="payment-item">
+<div class="payment-header">
+<span>${p.billNo}</span>
+<span>₹${p.amount.toLocaleString('en-IN')}</span>
+</div>
+<div class="payment-details">
+${p.payDate} • ${p.mode}
+</div>
+</div>
+`).join('')}
+</div>
+</div>
+`;
+});
+
+document.getElementById("studentList").innerHTML = html;
+setStatus(`Report generated: ${totalStudents} students, ₹${grandTotal.toLocaleString('en-IN')} total`);
+} catch(e){
+console.error(e);
+setStatus("Error generating report");
+}
+}
+
+// Filter function
+function applyFilters(){
+var classFilter = document.getElementById("filterClass").value.toLowerCase();
+var idFilter = document.getElementById("filterId").value.toLowerCase();
+var nameFilter = document.getElementById("filterName").value.toLowerCase();
+var minAmount = parseFloat(document.getElementById("filterMinAmount").value) || 0;
+
+var allStudents = JSON.parse(localStorage.getItem('lastStudentReport') || '[]');
+var filtered = allStudents.filter(function(student){
+return (!classFilter || student.className.toLowerCase().includes(classFilter)) &&
+(!idFilter || student.studentId.toLowerCase().includes(idFilter)) &&
+(!nameFilter || student.name.toLowerCase().includes(nameFilter)) &&
+(student.totalPaid >= minAmount);
+});
+
+localStorage.setItem('filteredStudents', JSON.stringify(filtered));
+generateFilteredReport(filtered);
+setStatus(`${filtered.length} students matching filter`);
+}
+
+function generateFilteredReport(students){
+if(!students.length){
+document.getElementById("studentList").innerHTML = '<div class="no-data">❌ No students match the selected filters</div>';
+return;
+}
+
+var grandTotal = students.reduce((sum,s)=>sum+(s.totalPaid||0),0);
+document.getElementById("statsContainer").innerHTML = `
+<div class="stat-card">
+<div class="stat-number">${students.length}</div>
+<div class="stat-label">Filtered Students</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">₹${grandTotal.toLocaleString('en-IN')}</div>
+<div class="stat-label">Filtered Total</div>
+</div>
+`;
+
+var html = '';
+students.forEach(function(student){
+html += `
+<div class="student-card">
+<div class="student-header">
+<div>
+<h3>${student.name || 'N/A'}</h3>
+<p class="student-meta">
+<strong>ID:</strong> ${student.studentId} | 
+<strong>Class:</strong> ${student.className || 'N/A'} | 
+<strong>Sec:</strong> ${student.section} | 
+<strong>Roll:</strong> ${student.roll}
+</p>
+</div>
+<div>
+<div class="student-amount">₹${student.totalPaid.toLocaleString('en-IN')}</div>
+<div style="font-size:12px;color:#666;">${student.billCount} bill(s)</div>
+</div>
+</div>
+<div class="payment-grid">
+${student.payments.map(p => `
+<div class="payment-item">
+<div class="payment-header">
+<span>${p.billNo}</span>
+<span>₹${p.amount.toLocaleString('en-IN')}</span>
+</div>
+<div class="payment-details">
+${p.payDate} • ${p.mode}
+</div>
+</div>
+`).join('')}
+</div>
+</div>
+`;
+});
+document.getElementById("studentList").innerHTML = html;
+}
+
+// Event Listeners
+document.getElementById("homeBtn").onclick = function(){ window.location.href="index.html"; };
+document.getElementById("feePageBtn").onclick = function(){ window.location.href="fee.html"; };
+document.getElementById("studentPageBtn").onclick = function(){ window.location.href="student.html"; };
+
+document.getElementById("printReportBtn").onclick = function(){
+window.print();
+};
+
+document.getElementById("csvExportBtn").onclick = async function(){
+var students = JSON.parse(localStorage.getItem('lastStudentReport') || '[]');
+if(!students.length){
+alert("No data to export");
+return;
+}
+var csv = "Student ID,Name,Class,Section,Roll,Total Paid,Bill Count\n";
+students.forEach(function(s){
+csv += `"${s.studentId}","${s.name}","${s.className}","${s.section}","${s.roll}",${s.totalPaid},${s.billCount}\n`;
+});
+var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+var url = URL.createObjectURL(blob);
+var a = document.createElement("a");
+a.href = url;
+a.download = "student_report_" + new Date().toISOString().slice(0,10) + ".csv";
+a.click();
+URL.revokeObjectURL(url);
+};
+
+document.getElementById("filterApply").onclick = applyFilters;
+document.getElementById("filterReset").onclick = function(){
+document.getElementById("filterClass").value = "";
+document.getElementById("filterId").value = "";
+document.getElementById("filterName").value = "";
+document.getElementById("filterMinAmount").value = "";
+generateStudentReport();
+};
+
+// Initialize
+(async function init(){
+try{
+await openFeeDb();
+await generateStudentReport();
+localStorage.removeItem('filteredStudents');
+} catch(e){
+console.error(e);
+setStatus("Error loading data");
+}
+})();
+</script>
+</body>
+</html>
