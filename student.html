@@ -2,496 +2,1370 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Student Detail (PWA – Final Version)</title>
+  <title>Student Management - Chatushpathi Foundation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#283593">
-  <link rel="manifest" href="manifest.json">
 
   <style>
     body{
       font-family: Arial, sans-serif;
       max-width: 900px;
-      margin:0 auto;
-      padding:20px;
-      background:linear-gradient(135deg,#e0f7fa,#e8eaf6);
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #e0f7fa, #e8eaf6);
     }
-    h1{ text-align:center; color:#283593; }
+    h1{ 
+      text-align: center; 
+      color: #283593; 
+      margin-bottom: 5px;
+    }
+    .subtitle{
+      text-align: center;
+      color: #5c6bc0;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
     .status-bar{
-      font-size:12px; background:#e3f2fd; padding:6px 12px;
-      border-radius:6px; margin-bottom:10px; color:#1a237e;
+      font-size: 12px; 
+      background: #e3f2fd; 
+      padding: 8px 12px;
+      border-radius: 6px; 
+      margin-bottom: 15px; 
+      color: #1a237e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .card{
-      background:#fff; border-radius:8px; padding:20px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.2); position:relative;
+      background: #fff; 
+      border-radius: 8px; 
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+      position: relative;
+      margin-bottom: 20px;
     }
     form{
-      display:grid; grid-template-columns:1fr 2fr; gap:10px 15px;
+      display: grid; 
+      grid-template-columns: 1fr 2fr; 
+      gap: 12px 15px;
     }
-    label{ font-weight:bold; color:#1a237e;}
-    input,select,textarea{
-      width:100%; padding:6px 8px; box-sizing:border-box;
-      border:1px solid #c5cae9; border-radius:4px; font-size:13px;
+    label{ 
+      font-weight: bold; 
+      color: #1a237e;
+      font-size: 13px;
     }
-    textarea{resize:vertical;}
+    input, select, textarea{
+      width: 100%; 
+      padding: 8px 10px; 
+      box-sizing: border-box;
+      border: 1px solid #c5cae9; 
+      border-radius: 4px; 
+      font-size: 14px;
+    }
+    textarea{ resize: vertical; min-height: 60px; }
     #preview{
-      max-width:100px; max-height:120px; object-fit:cover;
-      position:absolute; top:20px; right:20px;
-      border-radius:4px; border:1px solid #c5cae9;
+      max-width: 100px; 
+      max-height: 120px; 
+      object-fit: cover;
+      position: absolute; 
+      top: 20px; 
+      right: 20px;
+      border-radius: 4px; 
+      border: 2px solid #5c6bc0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .full-row{ grid-column:1/3; }
+    .full-row{ grid-column: 1/3; }
+    .date-display {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .date-display input {
+      flex: 1;
+    }
+    .date-display span {
+      min-width: 150px;
+      color: #5c6bc0;
+      font-weight: bold;
+      font-size: 13px;
+      background: #f5f5f5;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
     .toolbar{
-      margin-top:20px; display:flex; flex-wrap:wrap;
-      gap:10px; align-items:center; justify-content:space-between;
+      margin-top: 20px; 
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 8px; 
+      align-items: center;
     }
     .btn{
-      border:none; border-radius:4px; padding:8px 14px;
-      color:#fff; cursor:pointer; font-weight:600;
-      font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.2);
+      border: none; 
+      border-radius: 4px; 
+      padding: 8px 14px;
+      color: #fff; 
+      cursor: pointer; 
+      font-weight: 600;
+      font-size: 13px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.3s;
     }
-    .btn-add{background:#2e7d32;} .btn-edit{background:#0288d1;}
-    .btn-delete{background:#c62828;} .btn-home{background:#6a1b9a;}
-    .btn-csv{background:#00897b;} .btn-print{background:#ef6c00;}
-    .btn-prev{background:#5d4037;} .btn-next{background:#00796b;}
-    .btn-search{background:#3949ab;}
-    .btn-json-export{background:#004d40;}
-    .btn-json-import{background:#ad1457;}
-
-    .search-box{display:flex; gap:6px; align-items:center;}
-    .search-box input{width:120px;}
-
-    @media(max-width:600px){
-      form{ grid-template-columns:1fr; }
-      .full-row{ grid-column:1/2; }
-      #preview{ position:static; margin-bottom:10px; }
-      .toolbar{flex-direction:column; align-items:flex-start;}
-      .search-box{width:100%;} .search-box input{flex:1;}
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    @media print{ .toolbar,.status-bar{display:none;} }
+    .btn-add{background: #2e7d32;} 
+    .btn-edit{background: #0288d1;}
+    .btn-delete{background: #c62828;} 
+    .btn-home{background: #6a1b9a;}
+    .btn-csv{background: #00897b;} 
+    .btn-print{background: #ef6c00;}
+    .btn-prev{background: #5d4037;} 
+    .btn-next{background: #00796b;}
+    .btn-search{background: #3949ab;}
+    .btn-json-export{background: #004d40;}
+    .btn-json-import{background: #ad1457;}
+    .btn-fee{background: #ff5722;}
+    .btn-sync{background: #7b1fa2;}
+    .btn-report{background: #d81b60;}
+
+    .search-box{
+      display: flex; 
+      gap: 6px; 
+      align-items: center;
+    }
+    .search-box input{
+      width: 120px; 
+      padding: 6px 8px;
+    }
+
+    /* Student Table Styles */
+    .student-table{
+      width: 100%; 
+      border-collapse: collapse; 
+      font-size: 12px;
+      margin-top: 15px;
+    }
+    .student-table th{
+      background: #5c6bc0; 
+      color: white; 
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .student-table td{
+      padding: 6px 8px;
+      border-bottom: 1px solid #e8eaf6;
+    }
+    .student-table tr:hover{
+      background: #f3e5f5;
+      cursor: pointer;
+    }
+    .student-table tr:nth-child(even){
+      background: #f8fdff;
+    }
+    
+    .action-btn{
+      padding: 3px 8px;
+      margin: 0 2px;
+      border: none;
+      border-radius: 3px;
+      font-size: 11px;
+      cursor: pointer;
+      color: white;
+    }
+    .edit-btn{ background: #0288d1; }
+    .delete-btn{ background: #c62828; }
+    .fee-btn{ background: #2e7d32; }
+
+    @media(max-width: 600px){
+      form{ grid-template-columns: 1fr; }
+      .full-row{ grid-column: 1/2; }
+      #preview{ 
+        position: static; 
+        display: block;
+        margin: 10px auto; 
+      }
+      .toolbar{
+        flex-direction: column; 
+        align-items: stretch;
+      }
+      .search-box{ width: 100%; } 
+      .search-box input{ flex: 1; }
+      .date-display {
+        flex-direction: column;
+        gap: 5px;
+      }
+      .date-display span {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+    
+    @media print{ 
+      .toolbar, .status-bar{ display: none; } 
+      .btn, .search-box{ display: none; }
+    }
+    
+    .stats-box{
+      background: #fff3e0;
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .stat-item{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-value{
+      font-size: 20px;
+      font-weight: bold;
+      color: #283593;
+    }
+    .stat-label{
+      font-size: 11px;
+      color: #666;
+    }
+    
+    .required::after{
+      content: " *";
+      color: #c62828;
+    }
+    
+    .form-section {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      border-left: 4px solid #5c6bc0;
+    }
+    .form-section h4 {
+      margin: 0 0 10px 0;
+      color: #1a237e;
+    }
   </style>
 </head>
 <body>
 
-<h1>Student Detail (FINAL)</h1>
+<h1>Student Management</h1>
+<div class="subtitle">Chatushpathi Foundation | True education uplifts the self</div>
 
-<div class="status-bar">Status: <span id="statusText">Loading...</span></div>
+<div class="status-bar">
+  <div>Status: <span id="statusText">Loading...</span></div>
+  <div>Storage: <span id="storageType">LocalStorage</span></div>
+  <div>Total Students: <span id="totalStudents">0</span></div>
+</div>
 
 <div class="card">
-
-  <img id="preview">
+  <img id="preview" alt="Student Photo Preview">
 
   <form id="studentForm">
+    
+    <div class="form-section">
+      <h4>Basic Information</h4>
+      <label class="required">STUDENT NAME:</label>
+      <input type="text" id="studentName" required placeholder="Enter full name">
 
-    <label>STUDENT NAME:</label>
-    <input type="text" id="studentName">
+      <label>STUDENT PICTURE:</label>
+      <input type="file" id="studentPicture" accept="image/*">
 
-    <label>STUDENT PICTURE:</label>
-    <input type="file" id="studentPicture" accept="image/*">
+      <label>STUDENT ID (AUTO):</label>
+      <input type="text" id="studentId" readonly style="background:#f5f5f5;font-weight:bold;">
+    </div>
 
-    <label>STUDENT ID (AUTO):</label>
-    <input type="text" id="studentId" readonly>
+    <div class="form-section">
+      <h4>Date Information</h4>
+      <label>DATE OF BIRTH:</label>
+      <div class="date-display">
+        <input type="date" id="dob">
+        <span id="dobFancy"></span>
+      </div>
 
-    <label>DOB:</label>
-    <input type="date" id="dob">
+      <label>ADMISSION DATE:</label>
+      <div class="date-display">
+        <input type="date" id="doa">
+        <span id="doaFancy"></span>
+      </div>
+    </div>
 
-    <label>DOB (Formatted):</label>
-    <span class="full-row" id="dobFancy"></span>
+    <div class="form-section">
+      <h4>Academic Information</h4>
+      <label class="required">CLASS:</label>
+      <select id="className" required>
+        <option value="">Select Class</option>
+        <option>PLAY GROUP</option>
+        <option>NURSERY</option>
+        <option>JUNIOR K.G.</option>
+        <option>SENIOR K.G.</option>
+        <option>CLASS – I</option>
+        <option>CLASS – II</option>
+        <option>CLASS – III</option>
+        <option>CLASS – IV</option>
+        <option>CLASS – V</option>
+        <option>CLASS – VI</option>
+        <option>CLASS – VII</option>
+        <option>CLASS – VIII</option>
+        <option>CLASS – IX</option>
+        <option>CLASS – X</option>
+      </select>
 
-    <label>ADMISSION DATE:</label>
-    <input type="date" id="doa">
+      <label>SECTION:</label>
+      <input type="text" id="section" placeholder="A" value="A">
 
-    <label>ADMISSION (Formatted):</label>
-    <span class="full-row" id="doaFancy"></span>
+      <label>ROLL NO:</label>
+      <input type="number" id="roll" min="1" placeholder="1">
 
-    <label>CLASS:</label>
-    <select id="className">
-      <option value="">Select</option>
-      <option>PLAY GROUP</option>
-      <option>NURSURY</option>
-      <option>JUNIOUR K.G.</option>
-      <option>SENIOUR K.G.</option>
-      <option>CLASS – I</option>
-      <option>CLASS – II</option>
-      <option>CLASS – III</option>
-      <option>CLASS – IV</option>
-      <option>CLASS – V</option>
-    </select>
+      <label>CATEGORY:</label>
+      <select id="category">
+        <option value="">Select Category</option>
+        <option>NEW ADMISSION</option>
+        <option>RE-ADMISSION</option>
+        <option>PROMOTED</option>
+        <option>TRANSFERRED</option>
+        <option>OTHER</option>
+      </select>
+    </div>
 
-    <label>SECTION:</label>
-    <input type="text" id="section" placeholder="A / B / C">
+    <div class="form-section">
+      <h4>Family Information</h4>
+      <label>FATHER'S NAME:</label>
+      <input type="text" id="fatherName" placeholder="Father's full name">
 
-    <label>ROLL NO:</label>
-    <input type="number" id="roll">
+      <label>MOTHER'S NAME:</label>
+      <input type="text" id="motherName" placeholder="Mother's full name">
 
-    <label>CATEGORY:</label>
-    <select id="category">
-      <option value="">Select</option>
-      <option>NEW ADMISSION</option>
-      <option>PROMOTE</option>
-      <option>OTHER</option>
-    </select>
+      <label>MOBILE NUMBER:</label>
+      <input type="tel" id="contact" placeholder="9876543210">
 
-    <label>FATHER NAME:</label>
-    <input type="text" id="fatherName">
+      <label>EMAIL:</label>
+      <input type="email" id="email" placeholder="example@gmail.com" value="@gmail.com">
+    </div>
 
-    <label>MOTHER NAME:</label>
-    <input type="text" id="motherName">
-
-    <label>MOBILE:</label>
-    <input type="tel" id="contact">
-
-    <label>EMAIL:</label>
-    <input type="email" id="email" value="@gmail.com">
-
-    <label class="full-row">ADDRESS:</label>
-    <textarea class="full-row" id="address"></textarea>
+    <div class="form-section full-row">
+      <h4>Address</h4>
+      <textarea class="full-row" id="address" placeholder="Full address with PIN code">P.O.-Chakdaha, Dist.-Nadia, PIN-741222</textarea>
+    </div>
 
   </form>
 
   <div class="toolbar">
-
-    <button class="btn btn-add" id="addBtn">ADD / SAVE</button>
-    <button class="btn btn-edit" id="editBtn">EDIT</button>
-    <button class="btn btn-delete" id="deleteBtn">DELETE</button>
-    <button class="btn btn-home" id="homeBtn">HOME</button>
-    <button class="btn btn-csv" id="csvBtn">CSV</button>
-    <button class="btn btn-print" id="printBtn">PRINT</button>
-
-    <button class="btn btn-prev" id="prevBtn">PREV</button>
-    <button class="btn btn-next" id="nextBtn">NEXT</button>
-
+    <button class="btn btn-add" id="addBtn">➕ ADD / SAVE</button>
+    <button class="btn btn-edit" id="editBtn">✏️ EDIT</button>
+    <button class="btn btn-delete" id="deleteBtn">🗑️ DELETE</button>
+    <button class="btn btn-fee" id="feeBtn">💰 FEE PAGE</button>
+    <button class="btn btn-home" id="homeBtn">🏠 HOME</button>
+    <button class="btn btn-report" id="reportBtn">📋 REPORT</button>
+    
     <div class="search-box">
-      <input type="text" id="searchId" placeholder="Search ID">
-      <button class="btn btn-search" id="searchBtn">SEARCH</button>
+      <input type="text" id="searchId" placeholder="Search by ID/Name">
+      <button class="btn btn-search" id="searchBtn">🔍 SEARCH</button>
     </div>
 
-    <button class="btn btn-json-export" id="jsonExportBtn">EXPORT JSON</button>
-    <button class="btn btn-json-import" id="jsonImportBtn">IMPORT JSON</button>
-    <input type="file" id="jsonFileInput" accept="application/json" style="display:none">
+    <button class="btn btn-prev" id="prevBtn">⬅️ PREV</button>
+    <button class="btn btn-next" id="nextBtn">➡️ NEXT</button>
 
+    <button class="btn btn-csv" id="csvBtn">📊 CSV EXPORT</button>
+    <button class="btn btn-json-export" id="jsonExportBtn">📤 JSON EXPORT</button>
+    <button class="btn btn-sync" id="syncBtn">🔄 SYNC TO FEE</button>
   </div>
 </div>
-<!-- ================== SAVED STUDENT LIST ================== -->
-<br><br>
-<div class="card">
-  <h2 style="color:#1a237e; margin-top:0;">Saved Student Records</h2>
 
-  <table id="studentTable" 
-         style="width:100%; border-collapse:collapse; font-size:13px;">
-    <thead>
-      <tr style="background:#e8eaf6; color:#1a237e;">
-        <th style="border:1px solid #c5cae9; padding:6px;">ID</th>
-        <th style="border:1px solid #c5cae9; padding:6px;">Name</th>
-        <th style="border:1px solid #c5cae9; padding:6px;">Class</th>
-        <th style="border:1px solid #c5cae9; padding:6px;">Roll</th>
-        <th style="border:1px solid #c5cae9; padding:6px;">Father</th>
-        <th style="border:1px solid #c5cae9; padding:6px;">Contact</th>
-      </tr>
-    </thead>
-    <tbody id="studentTableBody"></tbody>
-  </table>
+<!-- Statistics Section -->
+<div class="card">
+  <h3 style="color:#1a237e; margin-top:0;">📊 Student Statistics</h3>
+  <div class="stats-box">
+    <div class="stat-item">
+      <div class="stat-value" id="totalCount">0</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="newAdmissionCount">0</div>
+      <div class="stat-label">New Admissions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="reAdmissionCount">0</div>
+      <div class="stat-label">Re-Admissions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="class1Count">0</div>
+      <div class="stat-label">Class I Students</div>
+    </div>
+  </div>
 </div>
 
+<!-- Student Records Table -->
+<div class="card">
+  <h3 style="color:#1a237e; margin-top:0;">📋 Student Records</h3>
+  <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+    <input type="text" id="tableSearch" placeholder="Search in table..." style="flex:1; padding: 6px 10px;">
+    <button class="btn" id="clearSearch" style="background:#757575;">Clear</button>
+  </div>
+  
+  <div style="overflow-x: auto; max-height: 400px;">
+    <table class="student-table" id="studentTable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Section</th>
+          <th>Roll</th>
+          <th>Father</th>
+          <th>Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody">
+        <!-- Data will be loaded here -->
+      </tbody>
+    </table>
+  </div>
+  
+  <div style="margin-top: 10px; text-align: center; color: #666; font-size: 12px;">
+    Click on any row to load student details for editing
+  </div>
+</div>
 
 <script>
-// ========== Fancy Date Helpers ==========
-function ordinal(n){
-  let s=["th","st","nd","rd"], v=n%100;
-  return n+(s[(v-20)%10]||s[v]||s[0]);
-}
-function formatFancy(d){
-  if(!d) return "";
-  const [y,m,day] = d.split("-");
-  const dt=new Date(y,m-1,day);
-  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return `${ordinal(dt.getDate())} ${months[dt.getMonth()]}, ${dt.getFullYear()}`;
+// ==================== CONFIGURATION ====================
+const APP_NAME = "chatushpathi_students";
+const STUDENT_STORAGE_KEY = APP_NAME + "_students";
+
+// ==================== HELPER FUNCTIONS ====================
+function setStatus(msg) { 
+  document.getElementById("statusText").textContent = msg; 
+  console.log("Status:", msg);
 }
 
-// ========== Status ==========
-function setStatus(t){ document.getElementById("statusText").textContent=t; }
+function setStorageType(type) {
+  document.getElementById("storageType").textContent = type;
+}
 
-// ========== IndexedDB ==========
-const DB="schoolDB_v1";
-const VER=1;
-let idb=null;
+function updateTotalStudents(count) {
+  document.getElementById("totalStudents").textContent = count;
+}
 
-function openDb(){
-  return new Promise((resolve)=>{
-    if(idb) return resolve(idb);
-    const req=indexedDB.open(DB,VER);
-    req.onupgradeneeded=e=>{
-      const db=e.target.result;
-      if(!db.objectStoreNames.contains("students")){
-        db.createObjectStore("students",{keyPath:"studentId"});
+function ordinal(n) {
+  n = parseInt(n);
+  if (isNaN(n)) return n;
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function formatFancy(dateStr) {
+  if (!dateStr) return "Not set";
+  try {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return "Invalid date";
+    const date = new Date(year, month - 1, day);
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${ordinal(date.getDate())} ${months[date.getMonth()]}, ${date.getFullYear()}`;
+  } catch (e) {
+    return "Invalid date";
+  }
+}
+
+function setTodayDate(elementId, fancyElementId) {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+  
+  document.getElementById(elementId).value = dateStr;
+  if (fancyElementId) {
+    document.getElementById(fancyElementId).textContent = formatFancy(dateStr);
+  }
+}
+
+// ==================== STORAGE FUNCTIONS ====================
+class StudentStorage {
+  constructor() {
+    this.init();
+  }
+  
+  init() {
+    if (!localStorage.getItem(STUDENT_STORAGE_KEY)) {
+      localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify([]));
+    }
+    setStorageType("LocalStorage");
+    return this.getAllStudents();
+  }
+  
+  saveStudent(studentData) {
+    try {
+      console.log("Saving student data:", studentData);
+      
+      // Validate required fields
+      if (!studentData.studentId || !studentData.studentName || !studentData.className) {
+        throw new Error("Missing required fields");
       }
-    };
-    req.onsuccess=()=>{idb=req.result; resolve(idb);};
-  });
+      
+      const students = this.getAllStudents();
+      console.log("Current students before save:", students);
+      
+      const existingIndex = students.findIndex(s => s.studentId === studentData.studentId);
+      
+      if (existingIndex >= 0) {
+        students[existingIndex] = studentData;
+      } else {
+        students.push(studentData);
+      }
+      
+      // Save to localStorage
+      localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(students));
+      
+      // Verify save
+      const savedStudents = this.getAllStudents();
+      console.log("Students after save:", savedStudents);
+      
+      this.updateStatistics();
+      console.log("Student saved successfully:", studentData.studentId);
+      return true;
+    } catch (error) {
+      console.error("Error saving student:", error);
+      console.error("Error details:", error.message);
+      return false;
+    }
+  }
+  
+  getStudent(studentId) {
+    try {
+      const students = this.getAllStudents();
+      const student = students.find(s => s.studentId === studentId);
+      console.log("Getting student:", studentId, "Found:", student);
+      return student || null;
+    } catch (error) {
+      console.error("Error getting student:", error);
+      return null;
+    }
+  }
+  
+  getAllStudents() {
+    try {
+      const data = localStorage.getItem(STUDENT_STORAGE_KEY);
+      if (!data) return [];
+      const students = JSON.parse(data);
+      console.log("All students from storage:", students);
+      return Array.isArray(students) ? students : [];
+    } catch (error) {
+      console.error("Error getting students:", error);
+      return [];
+    }
+  }
+  
+  deleteStudent(studentId) {
+    try {
+      const students = this.getAllStudents();
+      const filtered = students.filter(s => s.studentId !== studentId);
+      localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(filtered));
+      this.updateStatistics();
+      return true;
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      return false;
+    }
+  }
+  
+  searchStudents(query) {
+    try {
+      const students = this.getAllStudents();
+      const lowerQuery = query.toLowerCase();
+      
+      return students.filter(student => 
+        (student.studentId && student.studentId.toLowerCase().includes(lowerQuery)) ||
+        (student.studentName && student.studentName.toLowerCase().includes(lowerQuery)) ||
+        (student.className && student.className.toLowerCase().includes(lowerQuery)) ||
+        (student.fatherName && student.fatherName.toLowerCase().includes(lowerQuery)) ||
+        (student.contact && student.contact.includes(query))
+      );
+    } catch (error) {
+      console.error("Error searching students:", error);
+      return [];
+    }
+  }
+  
+  updateStatistics() {
+    try {
+      const students = this.getAllStudents();
+      const total = students.length;
+      const newAdmissions = students.filter(s => s.category === "NEW ADMISSION").length;
+      const reAdmissions = students.filter(s => s.category === "RE-ADMISSION").length;
+      const class1 = students.filter(s => s.className === "CLASS – I").length;
+      
+      document.getElementById("totalCount").textContent = total;
+      document.getElementById("newAdmissionCount").textContent = newAdmissions;
+      document.getElementById("reAdmissionCount").textContent = reAdmissions;
+      document.getElementById("class1Count").textContent = class1;
+      updateTotalStudents(total);
+    } catch (error) {
+      console.error("Error updating statistics:", error);
+    }
+  }
+  
+  clearAll() {
+    localStorage.removeItem(STUDENT_STORAGE_KEY);
+    this.init();
+    this.updateStatistics();
+  }
 }
 
-async function saveStudent(s){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("students","readwrite");
-    tx.objectStore("students").put(s);
-    tx.oncomplete=res;
-  });
-}
-async function getStudent(id){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("students","readonly");
-    const req=tx.objectStore("students").get(id);
-    req.onsuccess=()=>res(req.result||null);
-  });
-}
-async function deleteStudent(id){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("students","readwrite");
-    tx.objectStore("students").delete(id);
-    tx.oncomplete=res;
-  });
-}
-async function getAllStudents(){
-  const db=await openDb();
-  return new Promise(res=>{
-    const tx=db.transaction("students","readonly");
-    const req=tx.objectStore("students").getAll();
-    req.onsuccess=()=>res(req.result||[]);
-  });
-}
-async function getSortedIds(){
-  const all=await getAllStudents();
-  const ids=all.map(s=>s.studentId);
-  ids.sort();
-  return ids;
-}
-async function generateNextId(){
-  const ids=await getSortedIds();
-  if(ids.length===0) return "ST0001";
-  const last=ids[ids.length-1];
-  const n=parseInt(last.substring(2))+1;
-  return "ST"+n.toString().padStart(4,"0");
+// Create storage instance
+const storage = new StudentStorage();
+
+// ==================== STUDENT ID GENERATION ====================
+function generateNextStudentId() {
+  try {
+    const students = storage.getAllStudents();
+    console.log("Generating ID from students:", students);
+    
+    if (students.length === 0) return "ST0001";
+    
+    // Extract numeric parts from existing IDs
+    const studentIds = students
+      .map(s => s.studentId)
+      .filter(id => id && typeof id === 'string' && /^ST\d+$/i.test(id))
+      .map(id => {
+        const numPart = id.substring(2);
+        const num = parseInt(numPart, 10);
+        return isNaN(num) ? 0 : num;
+      });
+    
+    console.log("Extracted IDs:", studentIds);
+    
+    if (studentIds.length === 0) return "ST0001";
+    
+    const maxId = Math.max(...studentIds);
+    console.log("Max ID:", maxId);
+    
+    const nextId = "ST" + String(maxId + 1).padStart(4, "0");
+    console.log("Next ID:", nextId);
+    
+    return nextId;
+  } catch (error) {
+    console.error("Error generating student ID:", error);
+    const fallback = "ST" + String(new Date().getTime()).slice(-4);
+    console.log("Fallback ID:", fallback);
+    return fallback;
+  }
 }
 
-// ========== Picture Preview ==========
-let pictureData="";
-document.getElementById("studentPicture").addEventListener("change",function(){
-  const f=this.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=e=>{
-    pictureData=e.target.result;
-    document.getElementById("preview").src=pictureData;
+// ==================== PICTURE HANDLING ====================
+let currentPictureData = "";
+
+document.getElementById("studentPicture").addEventListener("change", function() {
+  const file = this.files[0];
+  if (!file) return;
+  
+  // Check file size (max 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    alert("Image size should be less than 2MB");
+    this.value = "";
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentPictureData = e.target.result;
+    document.getElementById("preview").src = currentPictureData;
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(file);
 });
 
-// ========== Form Helpers ==========
-function getForm(){
-  return {
-    studentId: document.getElementById("studentId").value,
-    studentName: document.getElementById("studentName").value,
+// ==================== FORM FUNCTIONS ====================
+function getFormData() {
+  // Get email value and add @gmail.com if not present
+  let emailValue = document.getElementById("email").value.trim();
+  if (emailValue && !emailValue.includes("@")) {
+    emailValue += "@gmail.com";
+  }
+  
+  // Get section value, default to "A"
+  let sectionValue = document.getElementById("section").value.trim().toUpperCase();
+  if (!sectionValue) sectionValue = "A";
+  
+  // Get roll number
+  let rollValue = document.getElementById("roll").value.trim();
+  
+  const formData = {
+    studentId: document.getElementById("studentId").value.trim(),
+    studentName: document.getElementById("studentName").value.trim(),
     dob: document.getElementById("dob").value,
     doa: document.getElementById("doa").value,
-    className: document.getElementById("className").value,
-    section: document.getElementById("section").value,
-    roll: document.getElementById("roll").value,
-    category: document.getElementById("category").value,
-    fatherName: document.getElementById("fatherName").value,
-    motherName: document.getElementById("motherName").value,
-    contact: document.getElementById("contact").value,
-    email: document.getElementById("email").value,
-    address: document.getElementById("address").value,
-    picture: pictureData
+    className: document.getElementById("className").value.trim(),
+    section: sectionValue,
+    roll: rollValue,
+    category: document.getElementById("category").value.trim(),
+    fatherName: document.getElementById("fatherName").value.trim(),
+    motherName: document.getElementById("motherName").value.trim(),
+    contact: document.getElementById("contact").value.trim(),
+    email: emailValue || "@gmail.com",
+    address: document.getElementById("address").value.trim() || "P.O.-Chakdaha, Dist.-Nadia, PIN-741222",
+    picture: currentPictureData,
+    lastUpdated: new Date().toISOString()
   };
+  
+  console.log("Form data collected:", formData);
+  return formData;
 }
-function fillForm(d){
-  document.getElementById("studentId").value=d.studentId;
-  document.getElementById("studentName").value=d.studentName;
-  document.getElementById("dob").value=d.dob;
-  document.getElementById("dobFancy").textContent=formatFancy(d.dob);
-  document.getElementById("doa").value=d.doa;
-  document.getElementById("doaFancy").textContent=formatFancy(d.doa);
-  document.getElementById("className").value=d.className;
-  document.getElementById("section").value=d.section;
-  document.getElementById("roll").value=d.roll;
-  document.getElementById("category").value=d.category;
-  document.getElementById("fatherName").value=d.fatherName;
-  document.getElementById("motherName").value=d.motherName;
-  document.getElementById("contact").value=d.contact;
-  document.getElementById("email").value=d.email;
-  document.getElementById("address").value=d.address;
-  pictureData = d.picture;
-  document.getElementById("preview").src = pictureData;
+
+function fillForm(studentData) {
+  if (!studentData) {
+    console.log("No student data provided to fillForm");
+    return;
+  }
+  
+  console.log("Filling form with:", studentData);
+  
+  document.getElementById("studentId").value = studentData.studentId || "";
+  document.getElementById("studentName").value = studentData.studentName || "";
+  document.getElementById("dob").value = studentData.dob || "";
+  document.getElementById("dobFancy").textContent = formatFancy(studentData.dob || "");
+  document.getElementById("doa").value = studentData.doa || "";
+  document.getElementById("doaFancy").textContent = formatFancy(studentData.doa || "");
+  document.getElementById("className").value = studentData.className || "";
+  document.getElementById("section").value = studentData.section || "A";
+  document.getElementById("roll").value = studentData.roll || "";
+  document.getElementById("category").value = studentData.category || "";
+  document.getElementById("fatherName").value = studentData.fatherName || "";
+  document.getElementById("motherName").value = studentData.motherName || "";
+  document.getElementById("contact").value = studentData.contact || "";
+  document.getElementById("email").value = studentData.email || "@gmail.com";
+  document.getElementById("address").value = studentData.address || "P.O.-Chakdaha, Dist.-Nadia, PIN-741222";
+  
+  currentPictureData = studentData.picture || "";
+  if (currentPictureData && currentPictureData.startsWith("data:image")) {
+    document.getElementById("preview").src = currentPictureData;
+  } else {
+    document.getElementById("preview").src = "";
+    currentPictureData = "";
+  }
+  
+  console.log("Form filled successfully");
 }
-async function clearForm(){
+
+function clearForm() {
+  console.log("Clearing form...");
+  
+  // Reset form but keep defaults
   document.getElementById("studentForm").reset();
-  pictureData="";
-  document.getElementById("preview").src="";
-  const id=await generateNextId();
-  document.getElementById("studentId").value=id;
-
-  // Set default Admission Date = today
-  const t=new Date();
-  const y=t.getFullYear();
-  const m=("0"+(t.getMonth()+1)).slice(-2);
-  const d=("0"+t.getDate()).slice(-2);
-  document.getElementById("doa").value=`${y}-${m}-${d}`;
-  document.getElementById("doaFancy").textContent=formatFancy(`${y}-${m}-${d}`);
+  currentPictureData = "";
+  document.getElementById("preview").src = "";
+  
+  // Generate new student ID
+  const nextId = generateNextStudentId();
+  console.log("Generated next ID:", nextId);
+  document.getElementById("studentId").value = nextId;
+  
+  // Set default values
+  document.getElementById("section").value = "A";
+  document.getElementById("email").value = "@gmail.com";
+  document.getElementById("address").value = "P.O.-Chakdaha, Dist.-Nadia, PIN-741222";
+  
+  // Set default admission date to today
+  setTodayDate("doa", "doaFancy");
+  
+  setStatus("Form cleared. Ready to add new student.");
+  console.log("Form cleared");
 }
 
-// ========== Load First ==========
-let currentIndex=-1;
-
-async function loadIndex(i){
-  const ids=await getSortedIds();
-  if(!ids.length){setStatus("No records"); return;}
-  if(i<0) i=0;
-  if(i>=ids.length) i=ids.length-1;
-  currentIndex=i;
-  const rec=await getStudent(ids[i]);
-  if(rec) fillForm(rec);
+// ==================== TABLE FUNCTIONS ====================
+function loadStudentTable(filterQuery = "") {
+  try {
+    console.log("Loading student table...");
+    const tbody = document.getElementById("studentTableBody");
+    tbody.innerHTML = "";
+    
+    let students = storage.getAllStudents();
+    console.log("Students to display:", students);
+    
+    // Apply filter if provided
+    if (filterQuery.trim()) {
+      students = storage.searchStudents(filterQuery.trim());
+    }
+    
+    // Sort by student ID
+    students.sort((a, b) => a.studentId.localeCompare(b.studentId));
+    
+    if (students.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align:center; padding:20px; color:#666;">
+            No students found. ${filterQuery ? 'Try a different search.' : 'Add your first student!'}
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    students.forEach((student) => {
+      const row = document.createElement("tr");
+      row.dataset.studentId = student.studentId;
+      
+      // Create photo thumbnail - fix for image display
+      let photoSrc = "";
+      if (student.picture && student.picture.startsWith("data:image")) {
+        photoSrc = student.picture;
+      }
+      
+      const photoCell = photoSrc 
+        ? `<img src="${photoSrc}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;" alt="Photo" onerror="this.style.display='none'">`
+        : `<div style="width:30px;height:30px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#666;">No Photo</div>`;
+      
+      row.innerHTML = `
+        <td><strong>${student.studentId || "N/A"}</strong></td>
+        <td>${photoCell}</td>
+        <td>${student.studentName || "N/A"}</td>
+        <td>${student.className || "N/A"}</td>
+        <td>${student.section || "A"}</td>
+        <td>${student.roll || "N/A"}</td>
+        <td>${student.fatherName || "N/A"}</td>
+        <td>${student.contact || "N/A"}</td>
+        <td>
+          <button class="action-btn edit-btn" data-id="${student.studentId}">Edit</button>
+          <button class="action-btn delete-btn" data-id="${student.studentId}">Del</button>
+          <button class="action-btn fee-btn" data-id="${student.studentId}">Fee</button>
+        </td>
+      `;
+      
+      // Click on row to load student
+      row.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("action-btn")) {
+          console.log("Loading student from row click:", student.studentId);
+          fillForm(student);
+          setStatus(`Loaded: ${student.studentName} (${student.studentId})`);
+        }
+      });
+      
+      tbody.appendChild(row);
+    });
+    
+    // Add event listeners to action buttons
+    tbody.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const studentId = btn.dataset.id;
+        console.log("Edit button clicked for:", studentId);
+        const student = storage.getStudent(studentId);
+        if (student) {
+          fillForm(student);
+          setStatus(`Editing: ${student.studentName}`);
+        }
+      });
+    });
+    
+    tbody.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const studentId = btn.dataset.id;
+        if (confirm(`Delete student ${studentId}?`)) {
+          if (storage.deleteStudent(studentId)) {
+            loadStudentTable(document.getElementById("tableSearch").value);
+            setStatus(`Deleted student: ${studentId}`);
+          }
+        }
+      });
+    });
+    
+    tbody.querySelectorAll(".fee-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const studentId = btn.dataset.id;
+        const student = storage.getStudent(studentId);
+        if (student) {
+          // Store student data in localStorage for fee page
+          localStorage.setItem("current_fee_student", JSON.stringify(student));
+          // Redirect to fee page
+          window.location.href = "fee.html";
+        }
+      });
+    });
+    
+    console.log("Student table loaded with", students.length, "students");
+    
+  } catch (error) {
+    console.error("Error loading student table:", error);
+    setStatus("Error loading student table");
+  }
 }
 
-// ========== INIT ==========
-(async ()=>{
-  setStatus("Opening database...");
-  await openDb();
-
-  document.getElementById("studentId").value = await generateNextId();
-
-  // Default Admission Date = Today
-  const t=new Date();
-  const y=t.getFullYear(), m=("0"+(t.getMonth()+1)).slice(-2), d=("0"+t.getDate()).slice(-2);
-  document.getElementById("doa").value=`${y}-${m}-${d}`;
-  document.getElementById("doaFancy").textContent=formatFancy(`${y}-${m}-${d}`);
-
-  const ids=await getSortedIds();
-  if(ids.length>0) loadIndex(0);
-
-  setStatus("Ready");
-})();
-
-// ========== Buttons ==========
-
-document.getElementById("addBtn").onclick = async ()=>{
-  const d=getForm();
-  if(!d.studentName){alert("Name empty"); return;}
-  await saveStudent(d);
-  alert("Saved: "+d.studentId);
-  await clearForm();
-};
-
-document.getElementById("editBtn").onclick = async ()=>{
-  const id=prompt("Enter ID:");
-  if(!id) return;
-  const r=await getStudent(id);
-  if(!r){alert("Not found"); return;}
-  fillForm(r);
-  const ids=await getSortedIds();
-  currentIndex=ids.indexOf(id);
-};
-
-document.getElementById("deleteBtn").onclick = async ()=>{
-  const id=document.getElementById("studentId").value;
-  if(!confirm("Delete "+id+"?")) return;
-  await deleteStudent(id);
-  alert("Deleted");
-  const ids=await getSortedIds();
-  if(ids.length>0) loadIndex(0); else clearForm();
-};
-
-document.getElementById("searchBtn").onclick = async ()=>{
-  const id=document.getElementById("searchId").value;
-  const r=await getStudent(id);
-  if(!r){alert("Not found"); return;}
-  fillForm(r);
-};
-
-document.getElementById("nextBtn").onclick = async ()=>{
-  const ids=await getSortedIds();
-  if(currentIndex<ids.length-1){
-    currentIndex++; loadIndex(currentIndex);
+// ==================== INITIALIZATION ====================
+document.addEventListener("DOMContentLoaded", function() {
+  try {
+    console.log("Initializing application...");
+    
+    // Initialize storage
+    const students = storage.init();
+    console.log("Initial students:", students);
+    
+    // Set up form
+    clearForm();
+    
+    // Set up date change listeners
+    document.getElementById("dob").addEventListener("change", function() {
+      document.getElementById("dobFancy").textContent = formatFancy(this.value);
+    });
+    
+    document.getElementById("doa").addEventListener("change", function() {
+      document.getElementById("doaFancy").textContent = formatFancy(this.value);
+    });
+    
+    // Email auto-complete
+    document.getElementById("email").addEventListener("blur", function() {
+      let emailValue = this.value.trim();
+      if (emailValue && !emailValue.includes("@")) {
+        this.value = emailValue + "@gmail.com";
+      }
+    });
+    
+    // Load initial data
+    loadStudentTable();
+    storage.updateStatistics();
+    
+    setStatus("Ready! Total students: " + storage.getAllStudents().length);
+    console.log("Application initialized successfully");
+    
+  } catch (error) {
+    console.error("Initialization error:", error);
+    setStatus("Error initializing application");
   }
-};
-document.getElementById("prevBtn").onclick = async ()=>{
-  if(currentIndex>0){
-    currentIndex--; loadIndex(currentIndex);
-  }
-};
-
-document.getElementById("printBtn").onclick=()=>window.print();
-document.getElementById("homeBtn").onclick=()=>location.href="index.html";
-
-document.getElementById("csvBtn").onclick = ()=>{
-  const d=getForm();
-  const headers=["ID","NAME","DOB","DOA","CLASS","SECTION","ROLL","CATEGORY","FATHER","MOTHER","CONTACT","EMAIL","ADDRESS"];
-  const vals=[d.studentId,d.studentName,d.dob,d.doa,d.className,d.section,d.roll,d.category,d.fatherName,d.motherName,d.contact,d.email,d.address];
-  const csv=headers.join(",")+"\n"+vals.map(v=>`"${v||""}"`).join(",");
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=d.studentId+"_student.csv"; a.click();
-  URL.revokeObjectURL(url);
-};
-
-// JSON Backup
-document.getElementById("jsonExportBtn").onclick=async()=>{
-  const all=await getAllStudents();
-  const blob=new Blob([JSON.stringify(all,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="students_backup.json"; a.click();
-};
-
-// JSON Import
-document.getElementById("jsonImportBtn").onclick=()=>{
-  document.getElementById("jsonFileInput").click();
-};
-document.getElementById("jsonFileInput").addEventListener("change",function(){
-  const f=this.files[0];
-  const r=new FileReader();
-  r.onload=async e=>{
-    const arr=JSON.parse(e.target.result);
-    for(const s of arr) await saveStudent(s);
-    alert("Import Done");
-    loadIndex(0);
-  };
-  r.readAsText(f);
 });
 
-async function loadStudentTable(){
-  const all = await getAllStudents();
-  const tbody = document.getElementById("studentTableBody");
-  tbody.innerHTML = "";
+// ==================== EVENT HANDLERS ====================
+// Add/Save button
+document.getElementById("addBtn").addEventListener("click", function() {
+  try {
+    console.log("Save button clicked");
+    
+    const formData = getFormData();
+    
+    // Validation
+    if (!formData.studentName.trim()) {
+      alert("❌ Student name is required");
+      document.getElementById("studentName").focus();
+      return;
+    }
+    
+    if (!formData.className.trim()) {
+      alert("❌ Class is required");
+      document.getElementById("className").focus();
+      return;
+    }
+    
+    if (!formData.studentId.trim()) {
+      formData.studentId = generateNextStudentId();
+      document.getElementById("studentId").value = formData.studentId;
+    }
+    
+    // Ensure email has @gmail.com
+    if (formData.email && !formData.email.includes("@")) {
+      formData.email = formData.email + "@gmail.com";
+    }
+    
+    // Ensure section is not empty
+    if (!formData.section) {
+      formData.section = "A";
+    }
+    
+    console.log("Final student data to save:", formData);
+    
+    const saveResult = storage.saveStudent(formData);
+    console.log("Save result:", saveResult);
+    
+    if (saveResult) {
+      alert(`✅ Student saved successfully!\n\nID: ${formData.studentId}\nName: ${formData.studentName}\nClass: ${formData.className}`);
+      
+      // Reload table
+      loadStudentTable(document.getElementById("tableSearch").value);
+      
+      // Clear form for next entry
+      clearForm();
+      
+      setStatus(`Saved: ${formData.studentName} (${formData.studentId})`);
+    } else {
+      alert("❌ Error saving student. Please check console for details.");
+    }
+  } catch (error) {
+    console.error("Error in save button:", error);
+    alert("❌ Error saving student: " + error.message);
+  }
+});
 
-  all.sort((a,b) => a.studentId.localeCompare(b.studentId));
+// Edit button
+document.getElementById("editBtn").addEventListener("click", function() {
+  const studentId = prompt("Enter Student ID to edit:", document.getElementById("studentId").value);
+  if (!studentId) return;
+  
+  const student = storage.getStudent(studentId.trim());
+  if (!student) {
+    alert("Student not found");
+    return;
+  }
+  
+  fillForm(student);
+  setStatus(`Editing: ${student.studentName} (${studentId})`);
+});
 
-  all.forEach(st => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.studentId}</td>
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.studentName}</td>
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.className}</td>
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.roll}</td>
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.fatherName}</td>
-      <td style="border:1px solid #c5cae9; padding:5px;">${st.contact}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+// Delete button
+document.getElementById("deleteBtn").addEventListener("click", function() {
+  const studentId = document.getElementById("studentId").value.trim();
+  if (!studentId || studentId.startsWith("ST000")) {
+    alert("No student selected to delete");
+    return;
+  }
+  
+  if (!confirm(`Delete student ${studentId}?`)) {
+    return;
+  }
+  
+  if (storage.deleteStudent(studentId)) {
+    alert(`Deleted student: ${studentId}`);
+    
+    // Reload table
+    loadStudentTable(document.getElementById("tableSearch").value);
+    
+    // Clear form
+    clearForm();
+    
+    setStatus(`Deleted: ${studentId}`);
+  } else {
+    alert("Error deleting student");
+  }
+});
 
-// Load table on page start
-window.onload = ()=> { 
-  setTimeout(loadStudentTable, 800); 
-};
+// Search button
+document.getElementById("searchBtn").addEventListener("click", function() {
+  const query = document.getElementById("searchId").value.trim();
+  if (!query) {
+    alert("Enter search query");
+    return;
+  }
+  
+  const results = storage.searchStudents(query);
+  if (results.length === 0) {
+    alert("No students found matching your search");
+    return;
+  }
+  
+  // Load first result in form
+  fillForm(results[0]);
+  
+  // Filter table
+  loadStudentTable(query);
+  
+  setStatus(`Found ${results.length} student(s)`);
+});
 
-// Load table every time new record is saved
-document.getElementById("addBtn").addEventListener("click", ()=>{
-  setTimeout(loadStudentTable, 800);
+// Table search
+document.getElementById("tableSearch").addEventListener("input", function() {
+  loadStudentTable(this.value);
+});
+
+document.getElementById("clearSearch").addEventListener("click", function() {
+  document.getElementById("tableSearch").value = "";
+  loadStudentTable();
+});
+
+// Navigation buttons
+document.getElementById("nextBtn").addEventListener("click", function() {
+  const students = storage.getAllStudents();
+  if (students.length === 0) {
+    alert("No students available");
+    return;
+  }
+  
+  const currentId = document.getElementById("studentId").value;
+  const currentIndex = students.findIndex(s => s.studentId === currentId);
+  
+  if (currentIndex < students.length - 1) {
+    fillForm(students[currentIndex + 1]);
+    setStatus(`Student ${currentIndex + 2} of ${students.length}`);
+  } else {
+    alert("Last student");
+  }
+});
+
+document.getElementById("prevBtn").addEventListener("click", function() {
+  const students = storage.getAllStudents();
+  if (students.length === 0) {
+    alert("No students available");
+    return;
+  }
+  
+  const currentId = document.getElementById("studentId").value;
+  const currentIndex = students.findIndex(s => s.studentId === currentId);
+  
+  if (currentIndex > 0) {
+    fillForm(students[currentIndex - 1]);
+    setStatus(`Student ${currentIndex} of ${students.length}`);
+  } else {
+    alert("First student");
+  }
+});
+
+// CSV Export
+document.getElementById("csvBtn").addEventListener("click", function() {
+  try {
+    const students = storage.getAllStudents();
+    if (students.length === 0) {
+      alert("No students to export");
+      return;
+    }
+    
+    const headers = ["Student ID", "Student Name", "Date of Birth", "Admission Date", 
+                    "Class", "Section", "Roll No", "Category", "Father's Name", 
+                    "Mother's Name", "Contact", "Email", "Address"];
+    
+    let csvContent = headers.join(",") + "\n";
+    
+    students.forEach(student => {
+      const row = [
+        `"${student.studentId || ""}"`,
+        `"${student.studentName || ""}"`,
+        `"${student.dob || ""}"`,
+        `"${student.doa || ""}"`,
+        `"${student.className || ""}"`,
+        `"${student.section || "A"}"`,
+        `"${student.roll || ""}"`,
+        `"${student.category || ""}"`,
+        `"${student.fatherName || ""}"`,
+        `"${student.motherName || ""}"`,
+        `"${student.contact || ""}"`,
+        `"${student.email || ""}"`,
+        `"${student.address || ""}"`
+      ];
+      
+      csvContent += row.join(",") + "\n";
+    });
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `students_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    setStatus(`Exported ${students.length} students to CSV`);
+    
+  } catch (error) {
+    console.error("CSV export error:", error);
+    alert("Error exporting CSV");
+  }
+});
+
+// JSON Export
+document.getElementById("jsonExportBtn").addEventListener("click", function() {
+  try {
+    const students = storage.getAllStudents();
+    const exportData = {
+      app: "Chatushpathi Student Management",
+      version: "2.0",
+      timestamp: new Date().toISOString(),
+      count: students.length,
+      students: students
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `students_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    setStatus(`Exported ${students.length} students to JSON`);
+    
+  } catch (error) {
+    console.error("JSON export error:", error);
+    alert("Error exporting JSON");
+  }
+});
+
+// Sync to Fee button
+document.getElementById("syncBtn").addEventListener("click", function() {
+  const students = storage.getAllStudents();
+  if (students.length === 0) {
+    alert("No students to sync");
+    return;
+  }
+  
+  // Store all students in localStorage for fee page
+  localStorage.setItem("all_students_fee", JSON.stringify(students));
+  alert(`✅ ${students.length} students synced to Fee Page!\n\nGo to Fee Page and refresh to see the students.`);
+  setStatus(`Synced ${students.length} students to Fee Page`);
+});
+
+// Report Button
+document.getElementById("reportBtn").addEventListener("click", function() {
+  try {
+    const students = storage.getAllStudents();
+    if (students.length === 0) {
+      alert("No students to generate report");
+      return;
+    }
+    
+    // Group by class
+    const classGroups = {};
+    students.forEach(student => {
+      const className = student.className || "Unknown";
+      if (!classGroups[className]) {
+        classGroups[className] = [];
+      }
+      classGroups[className].push(student);
+    });
+    
+    // Generate report HTML
+    let reportHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Report - Chatushpathi Foundation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+    .header { background: #2e7d32; color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; }
+    .class-section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .class-header { background: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #5c6bc0; color: white; padding: 10px; text-align: left; }
+    td { padding: 8px 10px; border-bottom: 1px solid #e0e0e0; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .summary { background: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .print-btn { background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 20px 0; }
+    @media print {
+      .print-btn { display: none; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📋 STUDENT REPORT</h1>
+    <h3>Chatushpathi Foundation</h3>
+    <p>Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}</p>
+  </div>
+  
+  <div class="summary">
+    <h2>📊 Summary</h2>
+    <p><strong>Total Students:</strong> ${students.length}</p>
+    <p><strong>Total Classes:</strong> ${Object.keys(classGroups).length}</p>
+    <p><strong>New Admissions:</strong> ${students.filter(s => s.category === "NEW ADMISSION").length}</p>
+    <p><strong>Re-Admissions:</strong> ${students.filter(s => s.category === "RE-ADMISSION").length}</p>
+  </div>
+  
+  <button class="print-btn" onclick="window.print()">🖨️ Print Report</button>
+`;
+    
+    // Add each class section
+    Object.keys(classGroups).sort().forEach(className => {
+      const classStudents = classGroups[className];
+      reportHTML += `
+  <div class="class-section">
+    <div class="class-header">
+      <h2>${className} - ${classStudents.length} Students</h2>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Section</th>
+          <th>Roll</th>
+          <th>Father's Name</th>
+          <th>Contact</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>`;
+      
+      classStudents.sort((a, b) => (a.roll || 0) - (b.roll || 0)).forEach(student => {
+        reportHTML += `
+        <tr>
+          <td><strong>${student.studentId}</strong></td>
+          <td>${student.studentName}</td>
+          <td>${student.section || "A"}</td>
+          <td>${student.roll || ""}</td>
+          <td>${student.fatherName || ""}</td>
+          <td>${student.contact || ""}</td>
+          <td>${student.category || ""}</td>
+        </tr>`;
+      });
+      
+      reportHTML += `
+      </tbody>
+    </table>
+  </div>`;
+    });
+    
+    reportHTML += `
+  <div style="text-align:center; margin-top:30px; padding:20px; background:#f5f5f5; border-radius:8px;">
+    <p>Report generated by Chatushpathi Foundation Student Management System</p>
+    <p><strong>True education uplifts the self</strong></p>
+  </div>
+</body>
+</html>`;
+    
+    // Open report in new window
+    const reportWindow = window.open('', '_blank');
+    reportWindow.document.write(reportHTML);
+    reportWindow.document.close();
+    
+    setStatus(`Generated report for ${students.length} students`);
+    
+  } catch (error) {
+    console.error("Error generating report:", error);
+    alert("Error generating report");
+  }
+});
+
+// Fee Page button
+document.getElementById("feeBtn").addEventListener("click", function() {
+  const studentId = document.getElementById("studentId").value.trim();
+  if (studentId && !studentId.startsWith("ST000")) {
+    const student = storage.getStudent(studentId);
+    if (student) {
+      // Store in localStorage for fee page
+      localStorage.setItem("current_fee_student", JSON.stringify(student));
+    }
+  }
+  window.location.href = "fee.html";
+});
+
+// Home button
+document.getElementById("homeBtn").addEventListener("click", function() {
+  if (confirm("Go to Home page?")) {
+    window.location.href = "index.html";
+  }
+});
+
+// Initialize statistics on load
+window.addEventListener("load", function() {
+  storage.updateStatistics();
+});
+
+// Auto-refresh form when dates change
+document.getElementById("dob").addEventListener("change", function() {
+  document.getElementById("dobFancy").textContent = formatFancy(this.value);
+});
+
+document.getElementById("doa").addEventListener("change", function() {
+  document.getElementById("doaFancy").textContent = formatFancy(this.value);
 });
 </script>
-
 
 </body>
 </html>
