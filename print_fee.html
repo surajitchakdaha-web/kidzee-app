@@ -4,148 +4,428 @@
 <meta charset="UTF-8">
 <title>Fee Receipt – Print</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{
-  font-family: Arial, sans-serif;
-  margin:20px;
-  color:#000;
+font-family: Arial, sans-serif;
+margin:20px;
+color:#000;
+background: white;
 }
-h1,h2,h3,h4{text-align:center;margin:5px 0;}
-.section{border:1px solid #ccc;padding:15px;margin-bottom:20px;border-radius:6px;}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
-table,th,td{border:1px solid #ccc;padding:6px;}
-th{background:#f1f1f1;}
-.back-btn{padding:8px 18px;background:#1976d2;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:bold;}
-header{text-align:center;margin-bottom:15px;}
-header img{width:70px;height:70px;}
+h1,h2,h3,h4{
+text-align:center;
+margin:5px 0;
+color:#1b5e20;
+}
+.section{
+border:2px solid #c8e6c9;
+padding:20px;
+margin-bottom:25px;
+border-radius:8px;
+background:#f9fbe7;
+}
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+font-size:14px;
+}
+table, th, td{
+border:1px solid #a5d6a7;
+padding:8px;
+text-align:left;
+}
+th{
+background:#a5d6a7 !important;
+color:#1b5e20;
+font-weight:bold;
+}
+.back-btn{
+padding:10px 20px;
+background:#1976d2;
+color:#fff;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+margin:10px 5px;
+font-size:14px;
+}
+header{
+text-align:center;
+margin-bottom:25px;
+padding:20px;
+background:#ffffff;
+border-radius:12px;
+border:2px solid #c8e6c9;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+header img{
+width:80px;
+height:80px;
+margin-bottom:10px;
+}
+.total-row{
+background:#e8f5e9 !important;
+font-weight:bold;
+font-size:16px;
+}
+.words-amount{
+font-size:16px;
+font-weight:bold;
+color:#2e7d32;
+background:#e8f5e9;
+padding:12px;
+border-radius:6px;
+margin-top:15px;
+}
+.kit-items{
+background:#fff3e0;
+padding:12px;
+border-radius:6px;
+margin-top:10px;
+font-weight:bold;
+}
+.no-data{
+text-align:center;
+color:#666;
+font-style:italic;
+padding:20px;
+}
 @media print{
-  .no-print{display:none!important;}
-  @page{margin:10mm;}
-  .page-break{page-break-before:always;}
+.no-print{ display:none !important; }
+body{ margin:10mm; }
+@page { margin:10mm; }
+.page-break{ page-break-before: always; }
+}
+@media(max-width:600px){
+table{font-size:12px;}
+table, th, td{padding:4px;}
 }
 </style>
 </head>
 <body>
+<!-- TOP BUTTONS (screen only) -->
+<div style="text-align:center; margin-bottom:20px;" class="no-print">
+<button class="back-btn" onclick="window.location.href='fee.html'">← BACK TO FEE</button>
+<button class="back-btn" style="background:#2e7d32;" onclick="window.print()">🖨️ PRINT NOW</button>
+</div>
 
-<button class="no-print back-btn" onclick="location.href='fee.html'">← BACK</button>
-<button class="no-print back-btn" style="background:#2e7d32;margin-left:10px;" onclick="window.print()">PRINT NOW</button>
-
+<!-- COMMON HEADER WITH LOGO -->
 <header>
-  <img src="logo.png">
-  <h2>CHATUSHPATHI FOUNDATION</h2>
-  <h4>True education uplifts the self</h4>
+<img src="logo.png" alt="School Logo">
+<h1>CHATUSHPATHI FOUNDATION</h1>
+<h3>True education uplifts the self</h3>
+<p style="font-size:14px; margin:5px 0;">Regd. Office: Chhatimtala, P.O.-Chakdaha, Dist.-Nadia, PIN-741222</p>
+<p style="font-size:14px;">Contact: 9064880703 | chatushpathifoundation@gmail.com</p>
 </header>
 
-<div class="section">
-  <h3>Fee Receipt</h3>
-  <div id="billContent">Loading...</div>
+<!-- ========== MAIN BILL SECTION ========== -->
+<div id="billSection" class="section">
+<h2 style="color:#d81b60;">FEE RECEIPT</h2>
+<div id="billContent" class="no-data">Loading receipt...</div>
 </div>
 
-<div class="section">
-  <h3>Student Information</h3>
-  <div id="studentContent">Loading...</div>
+<!-- ========== STUDENT INFORMATION ========== -->
+<div id="studentSection" class="section">
+<h3>👤 STUDENT DETAILS</h3>
+<div id="studentContent" class="no-data">Loading student info...</div>
 </div>
 
-<div class="section">
-  <h3>SCHOOL KIT (DELIVERED)</h3>
-  <div id="kitContent">Loading...</div>
+<!-- ========== SCHOOL KIT STATUS ========== -->
+<div id="kitSection" class="section">
+<h3>📦 SCHOOL KIT STATUS</h3>
+<div id="kitContent" class="no-data">Loading kit information...</div>
 </div>
 
-<div class="section page-break">
-  <h3>Payment History</h3>
-  <div id="historyHeader"></div>
-  <table>
-    <thead>
-      <tr><th>Bill</th><th>Date</th><th>Total</th><th>Mode</th></tr>
-    </thead>
-    <tbody id="historyBody"></tbody>
-  </table>
+<!-- ========== PAYMENT HISTORY ========== -->
+<div id="historySection" class="section page-break">
+<h3>📋 PAYMENT HISTORY</h3>
+<div id="historyHeader" style="margin-bottom:15px; font-size:16px;"></div>
+<table id="historyTable">
+<thead>
+<tr>
+<th>Bill No</th>
+<th>Date</th>
+<th>Total (₹)</th>
+<th>Mode</th>
+</tr>
+</thead>
+<tbody id="historyBody">
+<tr><td colspan="4" class="no-data">Loading history...</td></tr>
+</tbody>
+</table>
 </div>
 
 <script>
-function indianWords(num){
-  num=Math.round(Number(num)||0);
-  if(num===0) return "zero rupees only";
-  const o=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
-  const t=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-  const two=n=>n<20?o[n]:t[Math.floor(n/10)]+(n%10?" "+o[n%10]:"");
-  const three=n=>(Math.floor(n/100)?o[Math.floor(n/100)]+" hundred ":"")+two(n%100);
-  let r=[],c=Math.floor(num/10000000);num%=10000000;
-  let l=Math.floor(num/100000);num%=100000;
-  let th=Math.floor(num/1000);num%=1000;
-  if(c)r.push(three(c)+" crore");
-  if(l)r.push(three(l)+" lakh");
-  if(th)r.push(three(th)+" thousand");
-  if(num)r.push(three(num));
-  return r.join(" ")+" rupees only";
+// ✅ FIXED: Indian Rupees Number to Words
+function numberToIndianWords(n){
+n = Math.round(Number(n)||0);
+if(n===0) return "zero rupees";
+var ones=["","one","two","three","four","five","six","seven","eight","nine",
+"ten","eleven","twelve","thirteen","fourteen","fifteen",
+"sixteen","seventeen","eighteen","nineteen"];
+var tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function twoDigits(num){
+if(num===0) return "";
+if(num<20) return ones[num];
+return tens[Math.floor(num/10)] + (num%10? " "+ones[num%10] : "");
 }
-function fancy(d){
-  if(!d) return "";
-  let x=new Date(d),m=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return x.getDate()+" "+m[x.getMonth()]+", "+x.getFullYear();
+function threeDigits(num){
+var h=Math.floor(num/100);
+var rest=num%100;
+var parts=[];
+if(h>0) parts.push(ones[h]+" hundred");
+if(rest>0){
+if(parts.length) parts.push("and");
+parts.push(twoDigits(rest));
 }
-function openFee(){return new Promise(r=>{indexedDB.open("feeDB_git_safe_v1").onsuccess=e=>r(e.target.result);});}
-function openStud(){return new Promise(r=>{indexedDB.open("schoolDB_v1").onsuccess=e=>r(e.target.result);});}
+return parts.join(" ");
+}
+var parts=[];
+var crore=Math.floor(n/10000000); n%=10000000;
+var lakh=Math.floor(n/100000); n%=100000;
+var thousand=Math.floor(n/1000); n%=1000;
+var hundred=n;
+if(crore) parts.push(threeDigits(crore)+" crore");
+if(lakh) parts.push(threeDigits(lakh)+" lakh");
+if(thousand) parts.push(threeDigits(thousand)+" thousand");
+if(hundred) parts.push(threeDigits(hundred));
+return parts.join(" ")+" rupees";
+}
 
-let gName="",gClass="",gId="";
+// ✅ FIXED: Correct Database Names & Proper Async/Await
+var FEE_DB_NAME="feeDB_v1";
+var STUD_DB_NAME="schoolDB_v1";
 
-async function load(){
-  const bill=new URLSearchParams(location.search).get("bill");
-  const db=await openFee();
-  const req=db.transaction("fees").objectStore("fees").get(bill);
-  req.onsuccess=async()=>{
-    const r=req.result;if(!r)return;
-    gName=r.studentName;gClass=r.className;gId=r.studentId;
-    document.getElementById("billContent").innerHTML=`
-    <b>Bill:</b> ${r.billNo}<br>
-    <b>Date:</b> ${fancy(r.payDate)}<br>
-    <b>ID:</b> ${r.studentId}<br>
-    <b>Name:</b> ${r.studentName}<br>
-    <b>Class:</b> ${r.className}<br>
-    <table>
-      <tr><th>Particular</th><th>Amount</th></tr>
-      <tr><td>Admission</td><td>${r.admissionAmount}</td></tr>
-      <tr><td>Development</td><td>${r.developmentAmount}</td></tr>
-      <tr><td>Tiffin</td><td>${r.tiffin}</td></tr>
-      <tr><td>Misc</td><td>${r.misc}</td></tr>
-      <tr><td>Picnic</td><td>${r.picnic}</td></tr>
-      <tr><td>Field Trip</td><td>${r.fieldtrip}</td></tr>
-      <tr><td>Sports</td><td>${r.sports}</td></tr>
-      <tr><th>Total</th><th>${r.totalAmount}</th></tr>
-    </table>
-    <b>Total (in words):</b> ${indianWords(r.totalAmount)}
-    `;
-    const sdb=await openStud();
-    const sreq=sdb.transaction("students").objectStore("students").get(r.studentId);
-    sreq.onsuccess=()=>{
-      const s=sreq.result;
-      if(s)document.getElementById("studentContent").innerHTML=`
-      <b>Name:</b> ${s.studentName}<br>
-      <b>Section:</b> ${s.section}<br>
-      <b>Roll:</b> ${s.roll}<br>
-      <b>Father:</b> ${s.fatherName}<br>
-      <b>Mobile:</b> ${s.contact}<br>
-      <b>Address:</b> ${s.address}`;
-    };
-    loadHistory(r.studentId);
-  };
+async function openFeeDb(){
+return new Promise((resolve,reject)=>{
+if(window.feeDb) return resolve(window.feeDb);
+const req=indexedDB.open(FEE_DB_NAME,1);
+req.onerror=()=>reject(req.error);
+req.onsuccess=(e)=>{
+window.feeDb = e.target.result;
+resolve(window.feeDb);
+};
+req.onupgradeneeded=(e)=>{
+const db=e.target.result;
+if(!db.objectStoreNames.contains("fees")){
+db.createObjectStore("fees",{keyPath:"billNo"});
 }
-async function loadHistory(id){
-  const db=await openFee();
-  const req=db.transaction("fees").objectStore("fees").getAll();
-  req.onsuccess=()=>{
-    const b=document.getElementById("historyBody");
-    const list=req.result.filter(x=>x.studentId===id);
-    document.getElementById("historyHeader").innerHTML=`<b>${gName}</b> | ${gClass} | ${gId}`;
-    list.forEach(r=>{
-      let tr=document.createElement("tr");
-      tr.innerHTML=`<td>${r.billNo}</td><td>${fancy(r.payDate)}</td><td>${r.totalAmount}</td><td>${r.paymentMode}</td>`;
-      b.appendChild(tr);
-    });
-  };
+};
+});
 }
-load();
+
+async function openStudentDb(){
+return new Promise((resolve,reject)=>{
+if(window.studDb) return resolve(window.studDb);
+const req=indexedDB.open(STUD_DB_NAME,1);
+req.onerror=()=>reject(req.error);
+req.onsuccess=(e)=>{
+window.studDb = e.target.result;
+resolve(window.studDb);
+};
+req.onupgradeneeded=(e)=>{
+const db=e.target.result;
+if(!db.objectStoreNames.contains("students")){
+db.createObjectStore("students",{keyPath:"studentId"});
+}
+};
+});
+}
+
+// Global variables
+let gStudentName = "", gStudentClass = "", gStudentId = "";
+
+// ✅ FIXED: Main Bill Loading
+async function loadBill(){
+try{
+const billNo = new URLSearchParams(window.location.search).get("bill");
+if(!billNo){
+document.getElementById("billContent").innerHTML='<div class="no-data">❌ Bill number not provided</div>';
+return;
+}
+
+const db = await openFeeDb();
+const tx = db.transaction("fees","readonly");
+const req = tx.objectStore("fees").get(billNo);
+
+req.onsuccess = ()=>{
+const record = req.result;
+if(!record){
+document.getElementById("billContent").innerHTML='<div class="no-data">❌ Bill not found: '+billNo+'</div>';
+return;
+}
+
+// Set global student info
+gStudentName = record.studentName || "N/A";
+gStudentClass = record.className || "N/A";
+gStudentId = record.studentId || "N/A";
+
+const total = Number(record.totalAmount || 0);
+const totalWords = numberToIndianWords(total) + " only";
+
+// Build detailed bill table
+const billHtml = `
+<div style="margin-bottom:15px;">
+<b>Bill No:</b> <span style="color:#d81b60;font-size:18px;">${record.billNo}</span><br>
+<b>Payment Date:</b> ${record.payDate || "N/A"}<br>
+<b>Student ID:</b> ${record.studentId || "N/A"}<br>
+<b>Student Name:</b> ${record.studentName || "N/A"}<br>
+<b>Class:</b> ${record.className || "N/A"} | <b>Section:</b> ${record.section || ""} | <b>Roll:</b> ${record.roll || ""}
+</div>
+
+<table>
+<thead>
+<tr><th>Particulars</th><th>Amount (₹)</th></tr>
+</thead>
+<tbody>
+<tr><td>Admission Fee (${record.admissionType || ""})</td><td>${record.admissionAmount || 0}</td></tr>
+<tr><td>Development Fee (${record.developmentType || ""})</td><td>${record.developmentAmount || 0}</td></tr>
+<tr><td>Uniform (${record.uniformType || ""})</td><td>${record.uniformSets || 0}</td></tr>
+<tr><td>Tiffin/Food Charge</td><td>${record.tiffin || 0}</td></tr>
+<tr><td>Miscellaneous Fee</td><td>${record.misc || 0}</td></tr>
+<tr><td>Picnic Fee</td><td>${record.picnic || 0}</td></tr>
+<tr><td>Field Trip</td><td>${record.fieldtrip || 0}</td></tr>
+<tr><td>Sports Fee</td><td>${record.sports || 0}</td></tr>
+<tr class="total-row"><td><strong>TOTAL AMOUNT</strong></td><td><strong>${total.toLocaleString('en-IN')}</strong></td></tr>
+</tbody>
+</table>
+
+<div class="words-amount">
+<b>Total Amount (in words):</b> ${totalWords}
+</div>
+
+<div style="margin-top:15px; font-size:12px; color:#666;">
+<b>Payment Mode:</b> ${record.paymentMode || "CASH"}<br>
+<b>Month/Year:</b> ${record.payMonth ? record.payMonth + "/" + record.payYear : "N/A"}
+</div>
+`;
+
+document.getElementById("billContent").innerHTML = billHtml;
+
+// Load other sections
+loadStudentDetails(record.studentId);
+loadKitStatus(record);
+loadPaymentHistory(record.studentId);
+};
+} catch(e){
+console.error("Load bill error:", e);
+document.getElementById("billContent").innerHTML='<div class="no-data">❌ Error loading bill data</div>';
+}
+}
+
+// ✅ FIXED: Student Details
+async function loadStudentDetails(studentId){
+try{
+const db = await openStudentDb();
+const tx = db.transaction("students","readonly");
+const req = tx.objectStore("students").get(studentId);
+
+req.onsuccess = ()=>{
+const student = req.result;
+if(!student){
+document.getElementById("studentContent").innerHTML='<div class="no-data">Student details not found</div>';
+return;
+}
+document.getElementById("studentContent").innerHTML=`
+<table style="font-size:13px;">
+<tr><td><b>Name:</b></td><td>${student.studentName || "N/A"}</td></tr>
+<tr><td><b>Class:</b></td><td>${student.className || "N/A"}</td></tr>
+<tr><td><b>Section:</b></td><td>${student.section || "N/A"}</td></tr>
+<tr><td><b>Roll No:</b></td><td>${student.roll || "N/A"}</td></tr>
+${student.contact ? `<tr><td><b>Contact:</b></td><td>${student.contact}</td></tr>` : ''}
+${student.fatherName ? `<tr><td><b>Father:</b></td><td>${student.fatherName}</td></tr>` : ''}
+${student.motherName ? `<tr><td><b>Mother:</b></td><td>${student.motherName}</td></tr>` : ''}
+${student.address ? `<tr><td><b>Address:</b></td><td>${student.address}</td></tr>` : ''}
+</table>
+`;
+};
+} catch(e){
+document.getElementById("studentContent").innerHTML='<div class="no-data">Error loading student details</div>';
+}
+}
+
+// ✅ FIXED: Kit Status
+function loadKitStatus(record){
+const delivered = record.kitSelected && record.kitSelected.length ? 
+record.kitSelected.join(", ") : "No items delivered this bill";
+const dueItems = record.kitDue && record.kitDue.length ? 
+record.kitDue.join(", ") : "None";
+
+const kitHtml = `
+<div class="kit-items">✅ <strong>DELIVERED:</strong> ${delivered}</div>
+${dueItems !== "None" ? `<div style="margin-top:10px; color:#d32f2f;">⏳ <strong>PENDING:</strong> ${dueItems}</div>` : ""}
+<div style="margin-top:10px; font-size:12px; color:#666;">
+Year: ${record.payYear || "N/A"}
+</div>
+`;
+document.getElementById("kitContent").innerHTML = kitHtml;
+}
+
+// ✅ FIXED: Payment History
+async function loadPaymentHistory(studentId){
+try{
+const db = await openFeeDb();
+const tx = db.transaction("fees","readonly");
+const req = tx.objectStore("fees").getAll();
+
+req.onsuccess = ()=>{
+const allRecords = req.result;
+const studentPayments = allRecords.filter(r => r.studentId === studentId);
+studentPayments.sort((a,b) => (a.payDate || "").localeCompare(b.payDate || ""));
+
+// Header
+document.getElementById("historyHeader").innerHTML = `
+<div style="background:#e8f5e9; padding:12px; border-radius:6px; margin-bottom:15px;">
+<b>Student:</b> ${gStudentName} | 
+<b>Class:</b> ${gStudentClass} | 
+<b>ID:</b> ${gStudentId} | 
+<b>Total Payments:</b> ${studentPayments.length}
+</div>
+`;
+
+const tbody = document.getElementById("historyBody");
+tbody.innerHTML = "";
+
+if(!studentPayments.length){
+tbody.innerHTML = '<tr><td colspan="4" class="no-data">No payment history found</td></tr>';
+return;
+}
+
+let grandTotal = 0;
+studentPayments.forEach(record => {
+grandTotal += Number(record.totalAmount || 0);
+const row = document.createElement("tr");
+row.innerHTML = `
+<td style="font-weight:bold;">${record.billNo}</td>
+<td>${record.payDate || "N/A"}</td>
+<td>${Number(record.totalAmount || 0).toLocaleString('en-IN')}</td>
+<td>${record.paymentMode || "CASH"}</td>
+`;
+tbody.appendChild(row);
+});
+
+// Grand Total Row
+const totalRow = document.createElement("tr");
+totalRow.className = "total-row";
+totalRow.innerHTML = `
+<td colspan="2"><strong>GRAND TOTAL</strong></td>
+<td><strong>₹${grandTotal.toLocaleString('en-IN')}</strong></td>
+<td></td>
+`;
+tbody.appendChild(totalRow);
+};
+} catch(e){
+document.getElementById("historyBody").innerHTML = '<tr><td colspan="4" class="no-data">Error loading history</td></tr>';
+}
+}
+
+// ✅ START APPLICATION
+(async function init(){
+console.log("Print page loading...");
+document.title = "Fee Receipt - " + new URLSearchParams(window.location.search).get("bill") || "Print";
+await loadBill();
+})();
 </script>
 </body>
 </html>
