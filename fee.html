@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Fee Collection (PWA) – FINAL</title>
+<title>Fee Collection (PWA) – Complete Working Version</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{
@@ -142,6 +142,7 @@ font-size:13px;
 .btn-student{background:#00838f;}
 .btn-report{background:#d81b60;}
 .btn-csv{background:#1976d2;}
+.btn-manual{background:#7b1fa2;}
 .search-box{
 display:flex;
 gap:5px;
@@ -209,6 +210,7 @@ cursor:pointer;
 .sb-print{background:#ef6c00;}
 .sb-edit{background:#0277bd;}
 .sb-del{background:#c62828;}
+.sb-view{background:#5d4037;}
 @media(max-width:600px){
 form{ grid-template-columns:1fr; }
 .full-row{ grid-column:1/2; }
@@ -227,37 +229,50 @@ Contact- 9064880703 | Email : <a href="mailto:chatushpathifoundation@gmail.com">
 <img src="logo.png" alt="School Logo">
 </div>
 <div class="status-bar">
-Status: <span id="statusText">Loading...</span>
+Status: <span id="statusText">Loading...</span> | 
+Storage: <span id="storageType">LocalStorage</span> |
+Records: <span id="recordCount">0</span>
 </div>
 <div class="card">
 <form id="feeForm">
 <!-- BILL NUMBER -->
 <label>BILL NUMBER:</label>
-<input type="text" id="billNo" readonly>
+<input type="text" id="billNo" readonly style="background:#e8f5e9;font-weight:bold;color:#1b5e20;">
+<!-- STUDENT INFO SECTION -->
+<div class="full-row" style="background:#e3f2fd;padding:10px;border-radius:5px;margin-bottom:10px;">
+<strong style="color:#1565c0;">STUDENT INFORMATION</strong>
+</div>
 <!-- STUDENT NAME -->
 <label>STUDENT NAME:</label>
-<input type="text" id="studentName" readonly>
+<div class="inline-row">
+<input type="text" id="studentName" style="flex:1;">
+<button type="button" id="manualStudentBtn" class="btn btn-manual" style="padding:5px 10px;font-size:12px;">Manual Entry</button>
+</div>
 <!-- UNIQUE ID -->
 <label>UNIQUE ID (Student ID):</label>
-<input type="text" id="studentId">
+<input type="text" id="studentId" placeholder="ST0001" style="background:#fff3e0;">
 <!-- CLASS -->
 <label>CLASS:</label>
-<input type="text" id="className" readonly>
+<input type="text" id="className" placeholder="e.g., CLASS - I">
 <!-- SECTION -->
 <label>SECTION:</label>
-<input type="text" id="section" readonly>
+<input type="text" id="section" placeholder="e.g., A">
 <!-- ROLL -->
 <label>ROLL:</label>
-<input type="text" id="roll" readonly>
+<input type="text" id="roll" placeholder="e.g., 1">
+<!-- PAYMENT INFO SECTION -->
+<div class="full-row" style="background:#f3e5f5;padding:10px;border-radius:5px;margin:10px 0;">
+<strong style="color:#7b1fa2;">PAYMENT INFORMATION</strong>
+</div>
 <!-- PAYMENT DATE -->
 <label>DATE OF PAYMENT:</label>
 <input type="date" id="payDate">
 <label>Formatted Date:</label>
-<span id="payDateFancy" class="full-row" style="font-size:13px;color:#33691e;"></span>
+<span id="payDateFancy" class="full-row" style="font-size:13px;color:#33691e;font-weight:bold;"></span>
 <!-- NEW FEE MONTH -->
 <label>MONTH:</label>
 <select id="feeMonth">
-<option value="">Select</option>
+<option value="">Select Month</option>
 <option value="01">January</option>
 <option value="02">February</option>
 <option value="03">March</option>
@@ -273,13 +288,13 @@ Status: <span id="statusText">Loading...</span>
 </select>
 <!-- NEW FEE YEAR -->
 <label>YEAR:</label>
-<input type="number" id="feeYear" placeholder="2025">
+<input type="number" id="feeYear" placeholder="2025" value="2025">
 <!-- ADMISSION FEES -->
 <div class="fee-section full-row">
 <label class="full-row">ADMISSION FEES:</label>
 <div class="admission-row">
 <select id="admissionType">
-<option value="">Select</option>
+<option value="">Select Type</option>
 <option value="FULL PAYMENT">FULL PAYMENT</option>
 <option value="INSTALLMENT">INSTALLMENT</option>
 </select>
@@ -292,7 +307,7 @@ Status: <span id="statusText">Loading...</span>
 <label>DEVELOPMENT FEES:</label>
 <div class="inline-row">
 <select id="developmentType">
-<option value="">Select</option>
+<option value="">Select Type</option>
 <option value="EARLY SESSION">EARLY SESSION</option>
 <option value="REGULAR SESSION">REGULAR SESSION</option>
 </select>
@@ -302,7 +317,7 @@ Status: <span id="statusText">Loading...</span>
 <label>SCHOOL UNIFORM:</label>
 <div class="inline-row">
 <select id="uniformType">
-<option value="">Select</option>
+<option value="">Select Type</option>
 <option value="WINTER">WINTER</option>
 <option value="REGULAR">REGULAR</option>
 </select>
@@ -348,25 +363,27 @@ Status: <span id="statusText">Loading...</span>
 </select>
 <!-- TOTAL AMOUNT -->
 <label>TOTAL AMOUNT:</label>
-<input type="number" id="totalAmount" readonly>
+<input type="number" id="totalAmount" readonly style="background:#e8f5e9;font-weight:bold;font-size:16px;color:#c62828;">
 <label>Total (in words):</label>
-<span id="totalInWords" class="full-row" style="font-size:13px;color:#33691e;"></span>
+<span id="totalInWords" class="full-row" style="font-size:13px;color:#33691e;font-style:italic;font-weight:bold;"></span>
 </form>
 <div class="toolbar">
-<button class="btn btn-save" id="saveBtn">SAVE</button>
-<button class="btn btn-edit" id="editBtn">EDIT</button>
-<button class="btn btn-delete" id="deleteBtn">DELETE</button>
-<button class="btn btn-print" id="printBtn">PRINT</button>
-<button class="btn btn-home" id="homeBtn">HOME</button>
-<button class="btn btn-student" id="studentBtn">STUDENT PAGE</button>
-<button class="btn btn-prev" id="prevBtn">PREV</button>
-<button class="btn btn-next" id="nextBtn">NEXT</button>
+<button class="btn btn-save" id="saveBtn">💾 SAVE</button>
+<button class="btn btn-edit" id="editBtn">✏️ EDIT</button>
+<button class="btn btn-delete" id="deleteBtn">🗑️ DELETE</button>
+<button class="btn btn-print" id="printBtn">🖨️ PRINT</button>
+<button class="btn btn-home" id="homeBtn">🏠 HOME</button>
+<button class="btn btn-student" id="studentBtn">👨‍🎓 STUDENT PAGE</button>
+<button class="btn btn-prev" id="prevBtn">⬅️ PREV</button>
+<button class="btn btn-next" id="nextBtn">➡️ NEXT</button>
 <div class="search-box">
-<input type="text" id="searchBill" placeholder="Bill No">
-<button class="btn btn-search" id="searchBtn">SEARCH</button>
+<input type="text" id="searchBill" placeholder="Bill No (BL0001)">
+<button class="btn btn-search" id="searchBtn">🔍 SEARCH</button>
 </div>
 <button class="btn btn-csv" id="csvExportBtn">📊 CSV EXPORT</button>
 <button class="btn btn-report" id="studentReportBtn">📋 STUDENT REPORT</button>
+<button class="btn" id="backupBtn" style="background:#ff9800;">📤 BACKUP DATA</button>
+<button class="btn" id="addSampleBtn" style="background:#43a047;">➕ ADD SAMPLE DATA</button>
 </div>
 </div> <!-- /card main -->
 <!-- SAVED FEE RECORDS -->
@@ -380,6 +397,7 @@ Status: <span id="statusText">Loading...</span>
 <th>Date</th>
 <th>Total</th>
 <th>Mode</th>
+<th>View</th>
 </tr>
 </thead>
 <tbody id="studentHistoryBody">
@@ -457,1025 +475,1418 @@ Status: <span id="statusText">Loading...</span>
 <tbody id="feeTableBody"></tbody>
 </table>
 </div>
+<div style="margin-top:15px;padding:10px;background:#fff3e0;border-radius:6px;font-size:12px;">
+<strong>📊 Statistics:</strong> 
+Total Records: <span id="totalRecords">0</span> | 
+Total Amount: ₹<span id="totalAmountSum">0</span> | 
+Last Updated: <span id="lastUpdated">Never</span>
+</div>
+</div>
+
+<!-- Manual Student Entry Modal -->
+<div id="studentModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
+<div style="background:white;padding:20px;border-radius:10px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+<h3 style="color:#1b5e20;margin-top:0;">Manual Student Entry</h3>
+<div style="display:grid;gap:10px;margin-bottom:15px;">
+<label>Student ID:</label>
+<input type="text" id="modalStudentId" placeholder="ST001">
+<label>Full Name:</label>
+<input type="text" id="modalStudentName" placeholder="Enter full name">
+<label>Class:</label>
+<input type="text" id="modalClassName" placeholder="CLASS - I">
+<label>Section:</label>
+<input type="text" id="modalSection" placeholder="A">
+<label>Roll Number:</label>
+<input type="text" id="modalRoll" placeholder="1">
+<label>Parent Name:</label>
+<input type="text" id="modalParentName" placeholder="Parent's name">
+<label>Contact Number:</label>
+<input type="text" id="modalContact" placeholder="Phone number">
+</div>
+<div style="display:flex;gap:10px;justify-content:flex-end;">
+<button class="btn" id="modalCancelBtn" style="background:#757575;">Cancel</button>
+<button class="btn btn-save" id="modalSaveBtn">Save Student</button>
+</div>
+</div>
 </div>
 
 <script>
-// Status function
-function setStatus(msg){ 
+// ==================== CONFIGURATION ====================
+const APP_NAME = "chatushpathi_fee_system";
+const FEE_STORAGE_KEY = APP_NAME + "_fees";
+const STUDENT_STORAGE_KEY = APP_NAME + "_students";
+const LAST_BILL_KEY = APP_NAME + "_last_bill";
+
+// ==================== HELPER FUNCTIONS ====================
+function setStatus(msg) { 
     document.getElementById("statusText").textContent = msg; 
+    console.log("Status:", msg);
 }
 
-// Ordinal function for dates
-function ordinal(n){
-    var s=["th","st","nd","rd"], v=n%100;
-    return n+(s[(v-20)%10]||s[v]||s[0]);
+function updateRecordCount(count) {
+    document.getElementById("recordCount").textContent = count;
 }
 
-// Format date function
-function formatFancy(iso){
-    if(!iso) return "";
+function ordinal(n) {
+    var s = ["th", "st", "nd", "rd"], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function formatFancy(iso) {
+    if (!iso) return "";
     var parts = iso.split("-");
-    if(parts.length!==3) return "";
-    var y=parseInt(parts[0],10), m=parseInt(parts[1],10), d=parseInt(parts[2],10);
-    var dt=new Date(y,m-1,d);
-    var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return ordinal(dt.getDate())+" "+months[dt.getMonth()]+", "+dt.getFullYear();
+    if (parts.length !== 3) return "";
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10), d = parseInt(parts[2], 10);
+    var dt = new Date(y, m - 1, d);
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return ordinal(dt.getDate()) + " " + months[dt.getMonth()] + ", " + dt.getFullYear();
 }
 
-// Database names
-var STUD_DB_NAME="schoolDB_v1";
-var STUD_DB_VERSION=1;
-var studDb=null;
+function setTodayPaymentDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    document.getElementById("payDate").value = dateStr;
+    document.getElementById("payDateFancy").textContent = formatFancy(dateStr);
+}
 
-var FEE_DB_NAME="feeDB_v1";
-var FEE_DB_VERSION=1;
-var feeDb=null;
-
-// Open Student Database
-function openStudentDb(){
-    return new Promise(function(resolve,reject){
-        if(studDb) return resolve(studDb);
-        var req=indexedDB.open(STUD_DB_NAME,STUD_DB_VERSION);
-        req.onerror=function(){reject(req.error);};
-        req.onupgradeneeded=function(e){
-            var db=e.target.result;
-            if(!db.objectStoreNames.contains("students")){
-                db.createObjectStore("students",{keyPath:"studentId"});
+// ==================== STORAGE FUNCTIONS ====================
+// Simple LocalStorage-based storage system
+class DataStorage {
+    constructor() {
+        this.init();
+    }
+    
+    init() {
+        // Initialize if empty
+        if (!localStorage.getItem(FEE_STORAGE_KEY)) {
+            localStorage.setItem(FEE_STORAGE_KEY, JSON.stringify([]));
+        }
+        if (!localStorage.getItem(STUDENT_STORAGE_KEY)) {
+            localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify([]));
+        }
+        if (!localStorage.getItem(LAST_BILL_KEY)) {
+            localStorage.setItem(LAST_BILL_KEY, "BL0000");
+        }
+    }
+    
+    // ========== FEE OPERATIONS ==========
+    saveFee(feeData) {
+        try {
+            const fees = this.getAllFees();
+            const existingIndex = fees.findIndex(f => f.billNo === feeData.billNo);
+            
+            if (existingIndex >= 0) {
+                fees[existingIndex] = feeData;
+            } else {
+                fees.push(feeData);
             }
-        };
-        req.onsuccess=function(e){
-            studDb=e.target.result;
-            resolve(studDb);
-        };
+            
+            localStorage.setItem(FEE_STORAGE_KEY, JSON.stringify(fees));
+            localStorage.setItem(LAST_BILL_KEY, feeData.billNo);
+            this.updateLastUpdated();
+            
+            return true;
+        } catch (error) {
+            console.error("Error saving fee:", error);
+            return false;
+        }
+    }
+    
+    getFee(billNo) {
+        const fees = this.getAllFees();
+        return fees.find(f => f.billNo === billNo) || null;
+    }
+    
+    getAllFees() {
+        try {
+            const data = localStorage.getItem(FEE_STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (error) {
+            console.error("Error getting fees:", error);
+            return [];
+        }
+    }
+    
+    deleteFee(billNo) {
+        try {
+            const fees = this.getAllFees();
+            const filtered = fees.filter(f => f.billNo !== billNo);
+            localStorage.setItem(FEE_STORAGE_KEY, JSON.stringify(filtered));
+            this.updateLastUpdated();
+            return true;
+        } catch (error) {
+            console.error("Error deleting fee:", error);
+            return false;
+        }
+    }
+    
+    // ========== STUDENT OPERATIONS ==========
+    saveStudent(studentData) {
+        try {
+            const students = this.getAllStudents();
+            const existingIndex = students.findIndex(s => s.studentId === studentData.studentId);
+            
+            if (existingIndex >= 0) {
+                students[existingIndex] = studentData;
+            } else {
+                students.push(studentData);
+            }
+            
+            localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(students));
+            return true;
+        } catch (error) {
+            console.error("Error saving student:", error);
+            return false;
+        }
+    }
+    
+    getStudent(studentId) {
+        const students = this.getAllStudents();
+        return students.find(s => s.studentId === studentId) || null;
+    }
+    
+    getAllStudents() {
+        try {
+            const data = localStorage.getItem(STUDENT_STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (error) {
+            console.error("Error getting students:", error);
+            return [];
+        }
+    }
+    
+    deleteStudent(studentId) {
+        try {
+            const students = this.getAllStudents();
+            const filtered = students.filter(s => s.studentId !== studentId);
+            localStorage.setItem(STUDENT_STORAGE_KEY, JSON.stringify(filtered));
+            return true;
+        } catch (error) {
+            console.error("Error deleting student:", error);
+            return false;
+        }
+    }
+    
+    // ========== UTILITY FUNCTIONS ==========
+    updateLastUpdated() {
+        const now = new Date().toISOString();
+        localStorage.setItem(APP_NAME + "_last_updated", now);
+    }
+    
+    getLastUpdated() {
+        const dateStr = localStorage.getItem(APP_NAME + "_last_updated");
+        return dateStr ? new Date(dateStr).toLocaleString() : "Never";
+    }
+    
+    clearAllData() {
+        localStorage.removeItem(FEE_STORAGE_KEY);
+        localStorage.removeItem(STUDENT_STORAGE_KEY);
+        localStorage.removeItem(LAST_BILL_KEY);
+        this.init();
+    }
+}
+
+// Create storage instance
+const storage = new DataStorage();
+
+// ==================== BILL NUMBER GENERATION ====================
+function generateNextBillNo() {
+    try {
+        const lastBill = localStorage.getItem(LAST_BILL_KEY) || "BL0000";
+        
+        if (/^BL\d{4}$/.test(lastBill)) {
+            const lastNum = parseInt(lastBill.substring(2), 10);
+            const nextNum = lastNum + 1;
+            return "BL" + String(nextNum).padStart(4, "0");
+        }
+        
+        // Fallback: check existing bills
+        const allFees = storage.getAllFees();
+        if (allFees.length === 0) {
+            return "BL0001";
+        }
+        
+        const billNumbers = allFees
+            .map(f => f.billNo)
+            .filter(b => /^BL\d{4}$/i.test(b))
+            .map(b => parseInt(b.substring(2), 10))
+            .filter(n => !isNaN(n));
+        
+        if (billNumbers.length === 0) {
+            return "BL0001";
+        }
+        
+        const maxNum = Math.max(...billNumbers);
+        return "BL" + String(maxNum + 1).padStart(4, "0");
+        
+    } catch (error) {
+        console.error("Error generating bill number:", error);
+        // Date-based fallback
+        const date = new Date();
+        const dateStr = date.getFullYear().toString().slice(-2) + 
+                       (date.getMonth() + 1).toString().padStart(2, '0');
+        return "BL" + dateStr + "01";
+    }
+}
+
+// ==================== STUDENT AUTO-COMPLETE ====================
+function setupStudentAutocomplete() {
+    const studentIdInput = document.getElementById('studentId');
+    const studentNameInput = document.getElementById('studentName');
+    const classInput = document.getElementById('className');
+    const sectionInput = document.getElementById('section');
+    const rollInput = document.getElementById('roll');
+    
+    // When student ID is entered
+    studentIdInput.addEventListener('blur', async function() {
+        const studentId = this.value.trim();
+        if (!studentId) return;
+        
+        const student = storage.getStudent(studentId);
+        if (student) {
+            studentNameInput.value = student.studentName || '';
+            classInput.value = student.className || '';
+            sectionInput.value = student.section || '';
+            rollInput.value = student.roll || '';
+            setStatus(`Student loaded: ${student.studentName}`);
+        } else {
+            setStatus("Student not found. You can enter details manually.");
+            // Don't clear manual entries if user already typed something
+            if (!studentNameInput.value && !classInput.value) {
+                // Ask if user wants to create new student
+                if (confirm(`Student ID "${studentId}" not found. Create new student?`)) {
+                    showStudentModal(studentId);
+                }
+            }
+        }
+        
+        // Load payment history for this student
+        await refreshStudentHistory(studentId);
+        applyKitLocks();
+    });
+    
+    // Manual entry button
+    document.getElementById('manualStudentBtn').addEventListener('click', function() {
+        const studentId = studentIdInput.value.trim();
+        showStudentModal(studentId);
     });
 }
 
-// Open Fee Database
-function openFeeDb(){
-    return new Promise(function(resolve,reject){
-        if(feeDb) return resolve(feeDb);
-        var req=indexedDB.open(FEE_DB_NAME,FEE_DB_VERSION);
-        req.onerror=function(){reject(req.error);};
-        req.onupgradeneeded=function(e){
-            var db=e.target.result;
-            if(!db.objectStoreNames.contains("fees")){
-                db.createObjectStore("fees",{keyPath:"billNo"});
-            }
-        };
-        req.onsuccess=function(e){
-            feeDb=e.target.result;
-            resolve(feeDb);
-        };
-    });
+// ==================== MODAL FUNCTIONS ====================
+function showStudentModal(prefillId = '') {
+    const modal = document.getElementById('studentModal');
+    const modalStudentId = document.getElementById('modalStudentId');
+    const modalStudentName = document.getElementById('modalStudentName');
+    const modalClassName = document.getElementById('modalClassName');
+    const modalSection = document.getElementById('modalSection');
+    const modalRoll = document.getElementById('modalRoll');
+    
+    // Prefill with existing data if available
+    modalStudentId.value = prefillId || document.getElementById('studentId').value || '';
+    modalStudentName.value = document.getElementById('studentName').value || '';
+    modalClassName.value = document.getElementById('className').value || '';
+    modalSection.value = document.getElementById('section').value || '';
+    modalRoll.value = document.getElementById('roll').value || '';
+    
+    modal.style.display = 'flex';
 }
 
-// Get student by ID
-async function getStudentById(id){
-    if(!id) return null;
+function hideStudentModal() {
+    document.getElementById('studentModal').style.display = 'none';
+}
+
+// ==================== FORM FUNCTIONS ====================
+function updateAdmissionControls() {
+    const type = document.getElementById("admissionType").value;
+    const amountField = document.getElementById("admissionAmount");
+    const monthField = document.getElementById("installMonth");
+    
+    if (type === "FULL PAYMENT") {
+        amountField.disabled = false;
+        monthField.disabled = true;
+        monthField.value = "";
+    } else if (type === "INSTALLMENT") {
+        amountField.disabled = false;
+        monthField.disabled = false;
+    } else {
+        amountField.disabled = true;
+        monthField.disabled = true;
+        amountField.value = "0";
+        monthField.value = "";
+    }
+}
+
+// Kit management
+function kitKey(studentId, year) {
+    return `${APP_NAME}_kit_${studentId}_${year}`;
+}
+
+function getKitYearRecord(studentId, year) {
+    if (!studentId || !year) return { items: [] };
     try {
-        var db=await openStudentDb();
-        return new Promise(function(resolve,reject){
-            var tx=db.transaction("students","readonly");
-            var req=tx.objectStore("students").get(id);
-            req.onsuccess=function(){ 
-                resolve(req.result||null); 
-            };
-            req.onerror=function(){ 
-                reject(req.error); 
-            };
-        });
-    } catch(e) {
-        console.error("Error getting student:", e);
-        return null;
+        const data = localStorage.getItem(kitKey(studentId, year));
+        return data ? JSON.parse(data) : { items: [] };
+    } catch (e) {
+        return { items: [] };
     }
 }
 
-// Generate Bill Number - FIXED VERSION
-async function generateNextBillNo(){
-    try {
-        var db = await openFeeDb();
-        return new Promise(function(resolve, reject){
-            var tx = db.transaction("fees", "readonly");
-            var store = tx.objectStore("fees");
-            var req = store.getAll();
-            
-            req.onsuccess = function(){
-                var all = req.result || [];
-                if(!all.length) {
-                    resolve("BL0001");
-                    return;
-                }
-                
-                // Extract numeric part from existing bill numbers
-                var nums = all
-                    .map(function(r){ return r.billNo; })
-                    .filter(function(b){ 
-                        // Match patterns like BL0001, BL0010, etc.
-                        return /^BL\d{4}$/i.test(b); 
-                    })
-                    .map(function(b){ 
-                        return parseInt(b.substring(2), 10); 
-                    })
-                    .filter(function(n){ return !isNaN(n); });
-                
-                if(!nums.length) {
-                    resolve("BL0001");
-                    return;
-                }
-                
-                var max = Math.max.apply(null, nums);
-                var next = max + 1;
-                // Ensure 4-digit padding
-                var nextBill = "BL" + String(next).padStart(4, "0");
-                resolve(nextBill);
-            };
-            
-            req.onerror = function(){
-                // If error, fallback to a default bill number
-                var today = new Date();
-                var fallback = "BL" + 
-                    today.getFullYear().toString().substr(-2) + 
-                    (today.getMonth()+1).toString().padStart(2,'0') + 
-                    "001";
-                resolve(fallback);
-            };
-        });
-    } catch(e) {
-        console.error("Error generating bill number:", e);
-        // Emergency fallback
-        var today = new Date();
-        return "BL" + 
-            today.getFullYear().toString().substr(-2) + 
-            (today.getMonth()+1).toString().padStart(2,'0') + 
-            "001";
-    }
+function saveKitYearRecord(studentId, year, record) {
+    if (!studentId || !year) return;
+    localStorage.setItem(kitKey(studentId, year), JSON.stringify(record));
 }
 
-// Set today's date
-function setTodayPaymentDate(){
-    var t=new Date();
-    var y=t.getFullYear();
-    var m=("0"+(t.getMonth()+1)).slice(-2);
-    var d=("0"+t.getDate()).slice(-2);
-    var iso=y+"-"+m+"-"+d;
-    document.getElementById("payDate").value=iso;
-    document.getElementById("payDateFancy").textContent=formatFancy(iso);
-}
-
-// Admission controls
-function updateAdmissionControls(){
-    var type = document.getElementById("admissionType").value;
-    var amt = document.getElementById("admissionAmount");
-    var mon = document.getElementById("installMonth");
-    if(type==="FULL PAYMENT"){
-        amt.disabled=false;
-        mon.disabled=true;
-        mon.value="";
-    }else if(type==="INSTALLMENT"){
-        amt.disabled=false;
-        mon.disabled=false;
-    }else{
-        amt.disabled=true;
-        mon.disabled=true;
-        amt.value="0";
-        mon.value="";
-    }
-}
-
-// Kit storage functions
-function kitKey(studentId,year){
-    return "kitGiven_"+studentId+"_"+year;
-}
-
-function getKitYearRecord(studentId,year){
-    if(!studentId || !year) return {items:[]};
-    var raw=localStorage.getItem(kitKey(studentId,year));
-    if(!raw) return {items:[]};
-    try{return JSON.parse(raw);}catch(e){return {items:[]};}
-}
-
-function saveKitYearRecord(studentId,year,rec){
-    if(!studentId || !year) return;
-    localStorage.setItem(kitKey(studentId,year),JSON.stringify(rec));
-}
-
-function applyKitLocks(){
-    var sid=document.getElementById("studentId").value.trim();
-    var pd=document.getElementById("payDate").value;
-    var year = pd ? pd.split("-")[0] : "";
-    var rec=getKitYearRecord(sid,year);
-    var givenBoxes=document.querySelectorAll(".kit-given");
-    givenBoxes.forEach(function(chk){
-        if(rec.items.indexOf(chk.value)!==-1){
-            chk.checked=true;
-            chk.disabled=true;
-        }else{
-            chk.disabled=false;
+function applyKitLocks() {
+    const studentId = document.getElementById("studentId").value.trim();
+    const payDate = document.getElementById("payDate").value;
+    const year = payDate ? payDate.split("-")[0] : "";
+    
+    if (!studentId || !year) return;
+    
+    const kitRecord = getKitYearRecord(studentId, year);
+    const checkboxes = document.querySelectorAll(".kit-given");
+    
+    checkboxes.forEach(checkbox => {
+        if (kitRecord.items.includes(checkbox.value)) {
+            checkbox.checked = true;
+            checkbox.disabled = true;
+        } else {
+            checkbox.disabled = false;
         }
     });
 }
 
-// Database operations for fees
-async function saveFee(rec){
-    var db=await openFeeDb();
-    return new Promise(function(resolve,reject){
-        var tx=db.transaction("fees","readwrite");
-        tx.objectStore("fees").put(rec);
-        tx.oncomplete=function(){resolve();};
-        tx.onerror=function(){reject(tx.error);};
-    });
-}
-
-async function getFee(billNo){
-    var db=await openFeeDb();
-    return new Promise(function(resolve,reject){
-        var tx=db.transaction("fees","readonly");
-        var req=tx.objectStore("fees").get(billNo);
-        req.onsuccess=function(){resolve(req.result||null);};
-        req.onerror=function(){reject(req.error);};
-    });
-}
-
-async function deleteFee(billNo){
-    var db=await openFeeDb();
-    return new Promise(function(resolve,reject){
-        var tx=db.transaction("fees","readwrite");
-        tx.objectStore("fees").delete(billNo);
-        tx.oncomplete=function(){resolve();};
-        tx.onerror=function(){reject(tx.error);};
-    });
-}
-
-async function getAllFees(){
-    try {
-        var db=await openFeeDb();
-        return new Promise(function(resolve,reject){
-            var tx=db.transaction("fees","readonly");
-            var req=tx.objectStore("fees").getAll();
-            req.onsuccess=function(){
-                resolve(req.result||[]);
-            };
-            req.onerror=function(){
-                reject(req.error);
-            };
-        });
-    } catch(e) {
-        console.error("Error getting all fees:", e);
-        return [];
+// Number to words
+function numberToIndianWords(n) {
+    n = Math.round(Number(n) || 0);
+    if (n === 0) return "zero rupees";
+    
+    const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+                  "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+                  "sixteen", "seventeen", "eighteen", "nineteen"];
+    const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+    
+    function twoDigits(num) {
+        if (num === 0) return "";
+        if (num < 20) return ones[num];
+        return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
     }
-}
-
-// Kit data functions
-function getKitData(){
-    var given=document.querySelectorAll(".kit-given");
-    var due =document.querySelectorAll(".kit-due");
-    var kitSelected=[], kitDue=[];
-    given.forEach(function(chk){ 
-        if(chk.checked && !chk.disabled) kitSelected.push(chk.value); 
-    });
-    due.forEach(function(chk){ 
-        if(chk.checked) kitDue.push(chk.value); 
-    });
-    return {kitSelected:kitSelected, kitDue:kitDue};
-}
-
-function setKitData(sel,due){
-    sel=sel||[]; due=due||[];
-    var given=document.querySelectorAll(".kit-given");
-    var dueEls=document.querySelectorAll(".kit-due");
-    given.forEach(function(chk){ 
-        chk.checked = sel.indexOf(chk.value)!==-1; 
-    });
-    dueEls.forEach(function(chk){ 
-        chk.checked = due.indexOf(chk.value)!==-1; 
-    });
-    applyKitLocks();
-}
-
-// Number to words function
-function numberToIndianWords(n){
-    n = Math.round(Number(n)||0);
-    if(n===0) return "zero rupees";
-    var ones=["","one","two","three","four","five","six","seven","eight","nine",
-              "ten","eleven","twelve","thirteen","fourteen","fifteen",
-              "sixteen","seventeen","eighteen","nineteen"];
-    var tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-    function twoDigits(num){
-        if(num===0) return "";
-        if(num<20) return ones[num];
-        return tens[Math.floor(num/10)] + (num%10? " "+ones[num%10] : "");
-    }
-    function threeDigits(num){
-        var h=Math.floor(num/100);
-        var rest=num%100;
-        var parts=[];
-        if(h>0) parts.push(ones[h]+" hundred");
-        if(rest>0){
-            if(parts.length) parts.push("and");
+    
+    function threeDigits(num) {
+        const hundred = Math.floor(num / 100);
+        const rest = num % 100;
+        const parts = [];
+        if (hundred > 0) parts.push(ones[hundred] + " hundred");
+        if (rest > 0) {
+            if (parts.length) parts.push("and");
             parts.push(twoDigits(rest));
         }
         return parts.join(" ");
     }
-    var parts=[];
-    var crore=Math.floor(n/10000000); n%=10000000;
-    var lakh=Math.floor(n/100000); n%=100000;
-    var thousand=Math.floor(n/1000); n%=1000;
-    var hundred=n;
-    if(crore) parts.push(threeDigits(crore)+" crore");
-    if(lakh) parts.push(threeDigits(lakh)+" lakh");
-    if(thousand) parts.push(threeDigits(thousand)+" thousand");
-    if(hundred) parts.push(threeDigits(hundred));
-    return parts.join(" ")+" rupees";
+    
+    const parts = [];
+    let crore = Math.floor(n / 10000000); n %= 10000000;
+    let lakh = Math.floor(n / 100000); n %= 100000;
+    let thousand = Math.floor(n / 1000); n %= 1000;
+    let hundred = n;
+    
+    if (crore) parts.push(threeDigits(crore) + " crore");
+    if (lakh) parts.push(threeDigits(lakh) + " lakh");
+    if (thousand) parts.push(threeDigits(thousand) + " thousand");
+    if (hundred) parts.push(threeDigits(hundred));
+    
+    return parts.join(" ") + " rupees";
 }
 
-// Update total in words
-function updateTotalInWords(total){
-    var span=document.getElementById("totalInWords");
-    if(!span) return;
-    var n=Math.round(Number(total)||0);
-    if(!n){
-        span.textContent="";
-        return;
-    }
-    span.textContent = numberToIndianWords(n) + " only";
+function updateTotalInWords(total) {
+    const span = document.getElementById("totalInWords");
+    if (!span) return;
+    
+    const num = Math.round(Number(total) || 0);
+    span.textContent = num ? numberToIndianWords(num) + " only" : "";
 }
 
-// Calculate total
-function calculateTotal(){
-    var total=0;
-    function num(id){ 
-        var val = document.getElementById(id).value;
-        return isNaN(val) ? 0 : Number(val); 
-    }
-    total+=num("admissionAmount");
-    total+=num("developmentAmount");
-    total+=num("uniformSets");
-    total+=num("tiffin");
-    total+=num("misc");
-    total+=num("picnic");
-    total+=num("fieldtrip");
-    total+=num("sports");
+function calculateTotal() {
+    let total = 0;
+    
+    const getValue = (id) => {
+        const val = document.getElementById(id).value;
+        return isNaN(val) ? 0 : Number(val);
+    };
+    
+    total += getValue("admissionAmount");
+    total += getValue("developmentAmount");
+    total += getValue("uniformSets");
+    total += getValue("tiffin");
+    total += getValue("misc");
+    total += getValue("picnic");
+    total += getValue("fieldtrip");
+    total += getValue("sports");
+    
     document.getElementById("totalAmount").value = total.toFixed(2);
     updateTotalInWords(total);
 }
 
-// Get form data
-function getFormData(){
-    var kit=getKitData();
-    var payDate=document.getElementById("payDate").value;
-    var payMonth="", payYear="";
-    var fm=document.getElementById("feeMonth").value;
-    var fy=document.getElementById("feeYear").value.trim();
-    if(fm && fy){
-        payMonth=fm;
-        payYear=fy;
-    }else if(payDate){
-        var p=payDate.split("-");
-        if(p.length===3){ payYear=p[0]; payMonth=p[1]; }
+function getKitData() {
+    const givenBoxes = document.querySelectorAll(".kit-given:not(:disabled)");
+    const dueBoxes = document.querySelectorAll(".kit-due");
+    
+    const selected = Array.from(givenBoxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+    
+    const due = Array.from(dueBoxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+    
+    return { selected, due };
+}
+
+function setKitData(selected = [], due = []) {
+    const givenBoxes = document.querySelectorAll(".kit-given");
+    const dueBoxes = document.querySelectorAll(".kit-due");
+    
+    givenBoxes.forEach(cb => {
+        cb.checked = selected.includes(cb.value);
+    });
+    
+    dueBoxes.forEach(cb => {
+        cb.checked = due.includes(cb.value);
+    });
+    
+    applyKitLocks();
+}
+
+function getFormData() {
+    const kit = getKitData();
+    const payDate = document.getElementById("payDate").value;
+    
+    let payMonth = "", payYear = "";
+    const feeMonth = document.getElementById("feeMonth").value;
+    const feeYear = document.getElementById("feeYear").value.trim();
+    
+    if (feeMonth && feeYear) {
+        payMonth = feeMonth;
+        payYear = feeYear;
+    } else if (payDate) {
+        const parts = payDate.split("-");
+        if (parts.length === 3) {
+            payYear = parts[0];
+            payMonth = parts[1];
+        }
+    }
+    
+    // Get current form values
+    const studentId = document.getElementById("studentId").value.trim();
+    const studentName = document.getElementById("studentName").value.trim();
+    const className = document.getElementById("className").value.trim();
+    const section = document.getElementById("section").value.trim();
+    const roll = document.getElementById("roll").value.trim();
+    
+    // Auto-save student information if not already saved
+    if (studentId && studentName && className) {
+        const studentData = {
+            studentId: studentId,
+            studentName: studentName,
+            className: className,
+            section: section,
+            roll: roll,
+            lastUpdated: new Date().toISOString()
+        };
+        storage.saveStudent(studentData);
     }
     
     return {
-        billNo:document.getElementById("billNo").value.trim(),
-        studentName:document.getElementById("studentName").value.trim(),
-        studentId:document.getElementById("studentId").value.trim(),
-        className:document.getElementById("className").value.trim(),
-        section:document.getElementById("section").value.trim(),
-        roll:document.getElementById("roll").value.trim(),
-        payDate:payDate,
-        payMonth:payMonth,
-        payYear:payYear,
-        admissionType:document.getElementById("admissionType").value,
-        admissionAmount:Number(document.getElementById("admissionAmount").value||0),
-        installMonth:document.getElementById("installMonth").value,
-        developmentType:document.getElementById("developmentType").value,
-        developmentAmount:Number(document.getElementById("developmentAmount").value||0),
-        uniformType:document.getElementById("uniformType").value,
-        uniformSets:Number(document.getElementById("uniformSets").value||0),
-        kitSelected:kit.kitSelected,
-        kitDue:kit.kitDue,
-        tiffin:Number(document.getElementById("tiffin").value||0),
-        misc:Number(document.getElementById("misc").value||0),
-        picnic:Number(document.getElementById("picnic").value||0),
-        fieldtrip:Number(document.getElementById("fieldtrip").value||0),
-        sports:Number(document.getElementById("sports").value||0),
-        paymentMode:document.getElementById("paymentMode").value,
-        totalAmount:Number(document.getElementById("totalAmount").value||0)
+        billNo: document.getElementById("billNo").value.trim(),
+        studentName: studentName,
+        studentId: studentId,
+        className: className,
+        section: section,
+        roll: roll,
+        payDate: payDate,
+        payMonth: payMonth,
+        payYear: payYear,
+        admissionType: document.getElementById("admissionType").value,
+        admissionAmount: Number(document.getElementById("admissionAmount").value || 0),
+        installMonth: document.getElementById("installMonth").value,
+        developmentType: document.getElementById("developmentType").value,
+        developmentAmount: Number(document.getElementById("developmentAmount").value || 0),
+        uniformType: document.getElementById("uniformType").value,
+        uniformSets: Number(document.getElementById("uniformSets").value || 0),
+        kitSelected: kit.selected,
+        kitDue: kit.due,
+        tiffin: Number(document.getElementById("tiffin").value || 0),
+        misc: Number(document.getElementById("misc").value || 0),
+        picnic: Number(document.getElementById("picnic").value || 0),
+        fieldtrip: Number(document.getElementById("fieldtrip").value || 0),
+        sports: Number(document.getElementById("sports").value || 0),
+        paymentMode: document.getElementById("paymentMode").value,
+        totalAmount: Number(document.getElementById("totalAmount").value || 0),
+        timestamp: new Date().toISOString()
     };
 }
 
-// Fill form with data
-function fillForm(d){
-    document.getElementById("billNo").value = d.billNo||"";
-    document.getElementById("studentName").value = d.studentName||"";
-    document.getElementById("studentId").value = d.studentId||"";
-    document.getElementById("className").value = d.className||"";
-    document.getElementById("section").value = d.section||"";
-    document.getElementById("roll").value = d.roll||"";
-    document.getElementById("payDate").value = d.payDate||"";
-    document.getElementById("payDateFancy").textContent = formatFancy(d.payDate||"");
-    document.getElementById("feeMonth").value = d.payMonth||"";
-    document.getElementById("feeYear").value = d.payYear||"";
-    document.getElementById("admissionType").value = d.admissionType||"";
-    document.getElementById("admissionAmount").value = d.admissionAmount!=null?d.admissionAmount:0;
-    document.getElementById("installMonth").value = d.installMonth||"";
-    document.getElementById("developmentType").value = d.developmentType||"";
-    document.getElementById("developmentAmount").value = d.developmentAmount!=null?d.developmentAmount:0;
-    document.getElementById("uniformType").value = d.uniformType||"";
-    document.getElementById("uniformSets").value = d.uniformSets!=null?d.uniformSets:0;
-    setKitData(d.kitSelected||[], d.kitDue||[]);
-    document.getElementById("tiffin").value = d.tiffin!=null?d.tiffin:0;
-    document.getElementById("misc").value = d.misc!=null?d.misc:0;
-    document.getElementById("picnic").value = d.picnic!=null?d.picnic:0;
-    document.getElementById("fieldtrip").value = d.fieldtrip!=null?d.fieldtrip:0;
-    document.getElementById("sports").value = d.sports!=null?d.sports:0;
-    document.getElementById("paymentMode").value = d.paymentMode||"CASH";
-    document.getElementById("totalAmount").value = d.totalAmount!=null?d.totalAmount:0;
-    updateTotalInWords(d.totalAmount||0);
+function fillForm(data) {
+    document.getElementById("billNo").value = data.billNo || "";
+    document.getElementById("studentName").value = data.studentName || "";
+    document.getElementById("studentId").value = data.studentId || "";
+    document.getElementById("className").value = data.className || "";
+    document.getElementById("section").value = data.section || "";
+    document.getElementById("roll").value = data.roll || "";
+    document.getElementById("payDate").value = data.payDate || "";
+    document.getElementById("payDateFancy").textContent = formatFancy(data.payDate || "");
+    document.getElementById("feeMonth").value = data.payMonth || "";
+    document.getElementById("feeYear").value = data.payYear || "";
+    document.getElementById("admissionType").value = data.admissionType || "";
+    document.getElementById("admissionAmount").value = data.admissionAmount || 0;
+    document.getElementById("installMonth").value = data.installMonth || "";
+    document.getElementById("developmentType").value = data.developmentType || "";
+    document.getElementById("developmentAmount").value = data.developmentAmount || 0;
+    document.getElementById("uniformType").value = data.uniformType || "";
+    document.getElementById("uniformSets").value = data.uniformSets || 0;
+    
+    setKitData(data.kitSelected || [], data.kitDue || []);
+    
+    document.getElementById("tiffin").value = data.tiffin || 0;
+    document.getElementById("misc").value = data.misc || 0;
+    document.getElementById("picnic").value = data.picnic || 0;
+    document.getElementById("fieldtrip").value = data.fieldtrip || 0;
+    document.getElementById("sports").value = data.sports || 0;
+    document.getElementById("paymentMode").value = data.paymentMode || "CASH";
+    document.getElementById("totalAmount").value = data.totalAmount || 0;
+    
+    updateTotalInWords(data.totalAmount || 0);
     updateAdmissionControls();
     calculateTotal();
     applyKitLocks();
 }
 
-// Clear form
-async function clearForm(){
-    // Generate new bill number FIRST
-    var nextBillNo = await generateNextBillNo();
+async function clearForm() {
+    // Generate new bill number
+    const nextBillNo = generateNextBillNo();
     document.getElementById("billNo").value = nextBillNo;
     
-    setTodayPaymentDate();
-    document.getElementById("feeForm").reset();
-    document.getElementById("studentName").value = "";
-    document.getElementById("className").value = "";
-    document.getElementById("section").value = "";
-    document.getElementById("roll").value = "";
-    document.getElementById("admissionAmount").value="0";
-    document.getElementById("developmentAmount").value="0";
-    document.getElementById("uniformSets").value="0";
-    document.getElementById("tiffin").value="0";
-    document.getElementById("misc").value="0";
-    document.getElementById("picnic").value="0";
-    document.getElementById("fieldtrip").value="0";
-    document.getElementById("sports").value="0";
-    document.getElementById("totalAmount").value="0";
-    updateTotalInWords(0);
-    document.getElementById("paymentMode").value="CASH";
-    document.getElementById("feeMonth").value="";
-    document.getElementById("feeYear").value="";
+    // Clear only student ID, keep other student info for manual editing
     document.getElementById("studentId").value = "";
     
+    // Reset fee fields only
+    document.getElementById("feeMonth").value = "";
+    document.getElementById("feeYear").value = new Date().getFullYear();
+    document.getElementById("admissionType").value = "";
+    document.getElementById("admissionAmount").value = "0";
+    document.getElementById("installMonth").value = "";
+    document.getElementById("developmentType").value = "";
+    document.getElementById("developmentAmount").value = "0";
+    document.getElementById("uniformType").value = "";
+    document.getElementById("uniformSets").value = "0";
+    document.getElementById("tiffin").value = "0";
+    document.getElementById("misc").value = "0";
+    document.getElementById("picnic").value = "0";
+    document.getElementById("fieldtrip").value = "0";
+    document.getElementById("sports").value = "0";
+    document.getElementById("totalAmount").value = "0";
+    document.getElementById("paymentMode").value = "CASH";
+    
+    // Set today's date
+    setTodayPaymentDate();
+    
+    // Reset kit checkboxes
+    setKitData([], []);
+    
+    updateTotalInWords(0);
     updateAdmissionControls();
     calculateTotal();
-    applyKitLocks();
+    
+    setStatus(`New bill created: ${nextBillNo}`);
 }
 
-// Current index for navigation
-var currentIndex=-1;
+// ==================== DATA MANAGEMENT ====================
+let currentIndex = -1;
+let allFeesCache = [];
 
-// Load by index
-async function loadByIndex(i){
-    var all=await getAllFees();
-    all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
-    if(!all.length){ 
-        setStatus("No records"); 
-        return; 
-    }
-    if(i<0)i=0;
-    if(i>=all.length)i=all.length-1;
-    currentIndex=i;
-    var rec=all[i];
-    if(rec) fillForm(rec);
-    setStatus("Loaded bill: "+rec.billNo);
-    await refreshStudentHistory(document.getElementById("studentId").value.trim());
-}
-
-// Initialize app
-async function initializeApp() {
+async function refreshTable() {
     try {
-        // Initialize databases
-        await openFeeDb();
-        await openStudentDb();
+        allFeesCache = storage.getAllFees();
         
-        // Generate and set bill number
-        const nextBillNo = await generateNextBillNo();
-        document.getElementById("billNo").value = nextBillNo;
+        // Update statistics
+        document.getElementById("totalRecords").textContent = allFeesCache.length;
+        updateRecordCount(allFeesCache.length);
+        
+        const totalAmount = allFeesCache.reduce((sum, fee) => sum + (fee.totalAmount || 0), 0);
+        document.getElementById("totalAmountSum").textContent = totalAmount.toLocaleString('en-IN');
+        
+        document.getElementById("lastUpdated").textContent = storage.getLastUpdated();
+        
+        // Apply filters
+        const nameFilter = document.getElementById("filterName").value.toLowerCase();
+        const idFilter = document.getElementById("filterId").value.toLowerCase();
+        const classFilter = document.getElementById("filterClass").value.toLowerCase();
+        const monthFilter = document.getElementById("filterMonth").value;
+        const yearFilter = document.getElementById("filterYear").value.trim();
+        
+        const filtered = allFeesCache.filter(fee => {
+            if (nameFilter && !fee.studentName?.toLowerCase().includes(nameFilter)) return false;
+            if (idFilter && !fee.studentId?.toLowerCase().includes(idFilter)) return false;
+            if (classFilter && !fee.className?.toLowerCase().includes(classFilter)) return false;
+            if (monthFilter && fee.payMonth !== monthFilter) return false;
+            if (yearFilter && String(fee.payYear) !== yearFilter) return false;
+            return true;
+        });
+        
+        // Sort by bill number
+        filtered.sort((a, b) => a.billNo.localeCompare(b.billNo));
+        
+        // Update table
+        const tbody = document.getElementById("feeTableBody");
+        tbody.innerHTML = "";
+        
+        const months = ["January", "February", "March", "April", "May", "June", 
+                       "July", "August", "September", "October", "November", "December"];
+        
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="19" style="text-align:center;padding:20px;color:#666;">No fee records found. Save your first fee entry!</td></tr>`;
+        } else {
+            filtered.forEach(fee => {
+                const monthName = fee.payMonth ? 
+                    months[parseInt(fee.payMonth, 10) - 1] || fee.payMonth : "";
+                
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><strong>${fee.billNo || ""}</strong></td>
+                    <td>${fee.studentId || ""}</td>
+                    <td>${fee.studentName || ""}</td>
+                    <td>${fee.className || ""}</td>
+                    <td>${monthName}</td>
+                    <td>${fee.payYear || ""}</td>
+                    <td>${fee.admissionAmount || 0}</td>
+                    <td>${fee.developmentAmount || 0}</td>
+                    <td>${fee.uniformSets || 0}</td>
+                    <td>${fee.tiffin || 0}</td>
+                    <td>${fee.misc || 0}</td>
+                    <td>${fee.picnic || 0}</td>
+                    <td>${fee.fieldtrip || 0}</td>
+                    <td>${fee.sports || 0}</td>
+                    <td><strong>₹${(fee.totalAmount || 0).toLocaleString('en-IN')}</strong></td>
+                    <td>${fee.paymentMode || ""}</td>
+                    <td><button class="small-btn sb-print" data-bill="${fee.billNo}" title="Print">🖨️</button></td>
+                    <td><button class="small-btn sb-edit" data-bill="${fee.billNo}" title="Edit">✏️</button></td>
+                    <td><button class="small-btn sb-del" data-bill="${fee.billNo}" title="Delete">🗑️</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        setStatus(`Loaded ${filtered.length} fee records`);
+        
+    } catch (error) {
+        console.error("Error refreshing table:", error);
+        setStatus("Error loading records");
+    }
+}
+
+async function refreshStudentHistory(studentId) {
+    const tbody = document.getElementById("studentHistoryBody");
+    tbody.innerHTML = "";
+    
+    if (!studentId) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#666;">Enter Student ID to view history</td></tr>`;
+        return;
+    }
+    
+    try {
+        const allFees = storage.getAllFees();
+        const studentFees = allFees
+            .filter(fee => fee.studentId === studentId)
+            .sort((a, b) => (a.payDate || "").localeCompare(b.payDate || ""));
+        
+        if (studentFees.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#666;">No payment history for this student</td></tr>`;
+            return;
+        }
+        
+        studentFees.forEach(fee => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><strong>${fee.billNo || ""}</strong></td>
+                <td>${formatFancy(fee.payDate || "")}</td>
+                <td><strong>₹${(fee.totalAmount || 0).toLocaleString('en-IN')}</strong></td>
+                <td>${fee.paymentMode || ""}</td>
+                <td><button class="small-btn sb-view" data-bill="${fee.billNo}" title="View Details">👁️</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Error refreshing student history:", error);
+    }
+}
+
+function addSampleData() {
+    // Sample students
+    const sampleStudents = [
+        {
+            studentId: "ST001",
+            studentName: "RAHUL SHARMA",
+            className: "CLASS - I",
+            section: "A",
+            roll: "1",
+            parentName: "MR. SHARMA",
+            contact: "9876543210"
+        },
+        {
+            studentId: "ST002",
+            studentName: "PRIYA PATEL",
+            className: "CLASS - II",
+            section: "B",
+            roll: "5",
+            parentName: "MRS. PATEL",
+            contact: "9876543211"
+        },
+        {
+            studentId: "ST003",
+            studentName: "AMIT KUMAR",
+            className: "CLASS - III",
+            section: "A",
+            roll: "3",
+            parentName: "MR. KUMAR",
+            contact: "9876543212"
+        }
+    ];
+    
+    // Save sample students
+    sampleStudents.forEach(student => {
+        storage.saveStudent(student);
+    });
+    
+    // Sample fee records
+    const sampleFees = [
+        {
+            billNo: "BL0001",
+            studentId: "ST001",
+            studentName: "RAHUL SHARMA",
+            className: "CLASS - I",
+            section: "A",
+            roll: "1",
+            payDate: "2025-01-15",
+            payMonth: "01",
+            payYear: "2025",
+            admissionType: "FULL PAYMENT",
+            admissionAmount: 1500,
+            developmentAmount: 500,
+            uniformSets: 2,
+            tiffin: 300,
+            misc: 100,
+            totalAmount: 2400,
+            paymentMode: "CASH",
+            timestamp: new Date().toISOString()
+        },
+        {
+            billNo: "BL0002",
+            studentId: "ST002",
+            studentName: "PRIYA PATEL",
+            className: "CLASS - II",
+            section: "B",
+            roll: "5",
+            payDate: "2025-01-20",
+            payMonth: "01",
+            payYear: "2025",
+            admissionType: "INSTALLMENT",
+            admissionAmount: 750,
+            developmentAmount: 600,
+            uniformSets: 1,
+            tiffin: 300,
+            totalAmount: 1650,
+            paymentMode: "ONLINE",
+            timestamp: new Date().toISOString()
+        }
+    ];
+    
+    // Save sample fees
+    sampleFees.forEach(fee => {
+        storage.saveFee(fee);
+    });
+    
+    localStorage.setItem(LAST_BILL_KEY, "BL0002");
+    
+    alert("✅ Sample data added successfully!\n\nAdded:\n- 3 Sample Students\n- 2 Sample Fee Records");
+    
+    refreshTable();
+    setStatus("Sample data loaded");
+}
+
+// ==================== EVENT HANDLERS ====================
+document.addEventListener("DOMContentLoaded", function() {
+    try {
+        // Initialize storage
+        storage.init();
         
         // Set today's date
         setTodayPaymentDate();
         
-        // Set up controls
-        updateAdmissionControls();
-        calculateTotal();
+        // Generate initial bill number
+        const nextBillNo = generateNextBillNo();
+        document.getElementById("billNo").value = nextBillNo;
         
-        // Load existing records if any
-        const all = await getAllFees();
-        if(all.length > 0) {
-            await loadByIndex(0);
+        // Set current year
+        const currentYear = new Date().getFullYear();
+        document.getElementById("feeYear").value = currentYear;
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Setup student autocomplete
+        setupStudentAutocomplete();
+        
+        // Load initial data
+        refreshTable();
+        
+        setStatus(`Ready! Start by entering Student ID or using Manual Entry.`);
+        
+    } catch (error) {
+        console.error("Initialization error:", error);
+        setStatus("Error initializing application");
+    }
+});
+
+function setupEventListeners() {
+    // Modal buttons
+    document.getElementById('modalCancelBtn').addEventListener('click', hideStudentModal);
+    document.getElementById('modalSaveBtn').addEventListener('click', function() {
+        const studentData = {
+            studentId: document.getElementById('modalStudentId').value.trim(),
+            studentName: document.getElementById('modalStudentName').value.trim(),
+            className: document.getElementById('modalClassName').value.trim(),
+            section: document.getElementById('modalSection').value.trim(),
+            roll: document.getElementById('modalRoll').value.trim(),
+            parentName: document.getElementById('modalParentName').value.trim(),
+            contact: document.getElementById('modalContact').value.trim(),
+            createdAt: new Date().toISOString()
+        };
+        
+        if (!studentData.studentId || !studentData.studentName || !studentData.className) {
+            alert("Please fill at least Student ID, Name, and Class");
+            return;
         }
         
-        // Refresh tables
-        await refreshTable();
-        await refreshStudentHistory("");
-        
-        setStatus("Ready - Auto Bill: " + nextBillNo);
-        
-    } catch(e) {
-        console.error("Initialization error:", e);
-        setStatus("Error initializing app");
-    }
-}
-
-// Event Listeners
-document.addEventListener("DOMContentLoaded", function() {
-    initializeApp();
-});
-
-// Student ID change event
-document.getElementById("studentId").addEventListener("change", async function(){
-    var id=this.value.trim();
-    if(!id) return;
-    var s=await getStudentById(id);
-    if(s){
-        document.getElementById("studentName").value = s.studentName || "";
-        document.getElementById("className").value = s.className || "";
-        document.getElementById("section").value = s.section || "";
-        document.getElementById("roll").value = s.roll || "";
-        setStatus("Student loaded");
-    }else{
-        document.getElementById("studentName").value = "";
-        document.getElementById("className").value = "";
-        document.getElementById("section").value = "";
-        document.getElementById("roll").value = "";
-        setStatus("Student not found");
-    }
-    await refreshStudentHistory(id);
-    applyKitLocks();
-});
-
-// Admission type change
-document.getElementById("admissionType").addEventListener("change", updateAdmissionControls);
-
-// Payment date change
-document.getElementById("payDate").addEventListener("change", function(){
-    document.getElementById("payDateFancy").textContent = formatFancy(this.value);
-    applyKitLocks();
-});
-
-// Calculate total for all input fields
-["admissionAmount","developmentAmount","uniformSets","tiffin","misc","picnic","fieldtrip","sports"]
-.forEach(function(id){
-    document.getElementById(id).addEventListener("input", calculateTotal);
-});
-
-// Save button
-document.getElementById("saveBtn").onclick = async function(){
-    var rec = getFormData();
-    
-    if(!rec.billNo){
-        rec.billNo = await generateNextBillNo();
-        document.getElementById("billNo").value = rec.billNo;
-    }
-    
-    if(!rec.studentId){
-        alert("Student ID is empty");
-        return;
-    }
-    
-    if(!rec.payMonth || !rec.payYear){
-        alert("Please select Month & Year");
-        return;
-    }
-    
-    // Recalculate total
-    calculateTotal();
-    rec.totalAmount = Number(document.getElementById("totalAmount").value||0);
-    
-    // Save kit items
-    var year = rec.payYear;
-    var kitRec = getKitYearRecord(rec.studentId, year);
-    rec.kitSelected.forEach(function(it){
-        if(kitRec.items.indexOf(it)===-1) kitRec.items.push(it);
-    });
-    saveKitYearRecord(rec.studentId, year, kitRec);
-    
-    // Save fee record
-    try {
-        await saveFee(rec);
-        alert("Fee entry saved for Bill: "+rec.billNo);
-        await clearForm();
-        await refreshTable();
-        await refreshStudentHistory(rec.studentId);
-        setStatus("Saved "+rec.billNo);
-    } catch(e) {
-        console.error("Save error:", e);
-        alert("Error saving: " + e.message);
-    }
-};
-
-// Edit button
-document.getElementById("editBtn").onclick = async function(){
-    var bill = prompt("Enter Bill Number to load:", document.getElementById("billNo").value);
-    if(!bill) return;
-    var rec=await getFee(bill.trim());
-    if(!rec){ 
-        alert("Bill not found"); 
-        return; 
-    }
-    fillForm(rec);
-    var all=await getAllFees();
-    all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
-    currentIndex=all.findIndex(function(r){return r.billNo===bill.trim();});
-    setStatus("Loaded bill: "+bill.trim());
-    await refreshStudentHistory(rec.studentId);
-};
-
-// Delete button
-document.getElementById("deleteBtn").onclick = async function(){
-    var bill=document.getElementById("billNo").value.trim();
-    if(!bill){ 
-        alert("No Bill Selected"); 
-        return; 
-    }
-    if(!confirm("Delete Bill "+bill+" ?")) return;
-    
-    await deleteFee(bill);
-    alert("Deleted: "+bill);
-    
-    var all=await getAllFees();
-    if(all.length>0) await loadByIndex(0);
-    else await clearForm();
-    
-    await refreshTable();
-    await refreshStudentHistory(document.getElementById("studentId").value.trim());
-};
-
-// Search button
-document.getElementById("searchBtn").onclick = async function(){
-    var bill=document.getElementById("searchBill").value.trim();
-    if(!bill){ 
-        alert("Enter Bill No"); 
-        return; 
-    }
-    var rec=await getFee(bill);
-    if(!rec){ 
-        alert("Not found"); 
-        return; 
-    }
-    fillForm(rec);
-    var all=await getAllFees();
-    all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
-    currentIndex=all.findIndex(function(r){return r.billNo===bill;});
-    setStatus("Loaded bill: "+bill);
-    await refreshStudentHistory(rec.studentId);
-};
-
-// Navigation buttons
-document.getElementById("nextBtn").onclick = async function(){
-    var all=await getAllFees();
-    all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
-    if(currentIndex<all.length-1){
-        currentIndex++;
-        fillForm(all[currentIndex]);
-        await refreshStudentHistory(all[currentIndex].studentId);
-    } else {
-        alert("Last record");
-    }
-};
-
-document.getElementById("prevBtn").onclick = async function(){
-    var all=await getAllFees();
-    all.sort(function(a,b){return a.billNo.localeCompare(b.billNo);});
-    if(currentIndex>0){
-        currentIndex--;
-        fillForm(all[currentIndex]);
-        await refreshStudentHistory(all[currentIndex].studentId);
-    } else {
-        alert("First record");
-    }
-};
-
-// CSV Export
-document.getElementById("csvExportBtn").onclick = async function(){
-    var all = await getAllFees();
-    if(!all.length){
-        alert("No records to export");
-        return;
-    }
-    
-    var csvContent = "Bill No,Student ID,Student Name,Class,Section,Roll,Payment Date,Month,Year,Admission Type,Admission Amount,Install Month,Development Type,Development Amount,Uniform Type,Uniform Sets,Tiffin,Misc,Picnic,Field Trip,Sports,Payment Mode,Total Amount\n";
-    
-    var monthsFull = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    
-    all.forEach(function(r){
-        var mName = "";
-        if(r.payMonth){
-            var mIndex = parseInt(r.payMonth,10)-1;
-            if(mIndex>=0 && mIndex<12) mName = monthsFull[mIndex];
+        if (storage.saveStudent(studentData)) {
+            // Update form fields
+            document.getElementById('studentId').value = studentData.studentId;
+            document.getElementById('studentName').value = studentData.studentName;
+            document.getElementById('className').value = studentData.className;
+            document.getElementById('section').value = studentData.section;
+            document.getElementById('roll').value = studentData.roll;
+            
+            hideStudentModal();
+            setStatus(`Student "${studentData.studentName}" saved successfully`);
+            
+            // Load payment history
+            refreshStudentHistory(studentData.studentId);
+        } else {
+            alert("Error saving student");
         }
-        
-        var row = [
-            (r.billNo||"").replace(/"/g,'""'),
-            (r.studentId||"").replace(/"/g,'""'),
-            (r.studentName||"").replace(/"/g,'""'),
-            (r.className||"").replace(/"/g,'""'),
-            (r.section||"").replace(/"/g,'""'),
-            (r.roll||"").replace(/"/g,'""'),
-            (r.payDate||"").replace(/"/g,'""'),
-            mName.replace(/"/g,'""'),
-            (r.payYear||"").replace(/"/g,'""'),
-            (r.admissionType||"").replace(/"/g,'""'),
-            (r.admissionAmount||0),
-            (r.installMonth||"").replace(/"/g,'""'),
-            (r.developmentType||"").replace(/"/g,'""'),
-            (r.developmentAmount||0),
-            (r.uniformType||"").replace(/"/g,'""'),
-            (r.uniformSets||0),
-            (r.tiffin||0),
-            (r.misc||0),
-            (r.picnic||0),
-            (r.fieldtrip||0),
-            (r.sports||0),
-            (r.paymentMode||"").replace(/"/g,'""'),
-            (r.totalAmount||0)
-        ];
-        
-        csvContent += row.map(field => `"${field}"`).join(",") + "\n";
     });
     
-    var blob = new Blob([csvContent], {type: "text/csv;charset=utf-8;"});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = "fee_records_" + new Date().toISOString().slice(0,10) + ".csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    // Date change
+    document.getElementById("payDate").addEventListener("change", function() {
+        document.getElementById("payDateFancy").textContent = formatFancy(this.value);
+        applyKitLocks();
+    });
     
-    setStatus("CSV exported successfully (" + all.length + " records)");
-};
-
-// Student Report
-document.getElementById("studentReportBtn").onclick = async function(){
-    var all = await getAllFees();
-    if(!all.length){
-        alert("No student records found");
-        return;
-    }
+    // Admission type change
+    document.getElementById("admissionType").addEventListener("change", updateAdmissionControls);
     
-    // Group by student ID
-    var studentSummary = {};
-    all.forEach(function(r){
-        var sid = r.studentId;
-        if(!studentSummary[sid]){
-            studentSummary[sid] = {
-                name: r.studentName,
-                className: r.className,
-                section: r.section || "",
-                roll: r.roll || "",
-                totalPaid: 0,
-                payments: [],
-                billCount: 0
-            };
-        }
-        studentSummary[sid].totalPaid += (r.totalAmount || 0);
-        studentSummary[sid].billCount++;
-        studentSummary[sid].payments.push({
-            billNo: r.billNo,
-            payDate: formatFancy(r.payDate),
-            amount: r.totalAmount,
-            mode: r.paymentMode
+    // Calculate total on input
+    ["admissionAmount", "developmentAmount", "uniformSets", "tiffin", "misc", "picnic", "fieldtrip", "sports"]
+        .forEach(id => {
+            document.getElementById(id).addEventListener("input", calculateTotal);
         });
+    
+    // Save button
+    document.getElementById("saveBtn").addEventListener("click", function() {
+        const formData = getFormData();
+        
+        // Validation
+        if (!formData.studentId) {
+            alert("❌ Please enter Student ID");
+            document.getElementById("studentId").focus();
+            return;
+        }
+        
+        if (!formData.studentName) {
+            alert("❌ Please enter Student Name");
+            document.getElementById("studentName").focus();
+            return;
+        }
+        
+        if (!formData.className) {
+            alert("❌ Please enter Class");
+            document.getElementById("className").focus();
+            return;
+        }
+        
+        if (!formData.payMonth || !formData.payYear) {
+            alert("❌ Please select Month and Year");
+            return;
+        }
+        
+        // Ensure bill number exists
+        if (!formData.billNo || formData.billNo === "BL0001") {
+            formData.billNo = generateNextBillNo();
+            document.getElementById("billNo").value = formData.billNo;
+        }
+        
+        // Calculate final total
+        calculateTotal();
+        formData.totalAmount = Number(document.getElementById("totalAmount").value || 0);
+        
+        if (formData.totalAmount <= 0) {
+            if (!confirm("Total amount is 0. Save anyway?")) {
+                return;
+            }
+        }
+        
+        // Save kit items
+        const kitRecord = getKitYearRecord(formData.studentId, formData.payYear);
+        formData.kitSelected.forEach(item => {
+            if (!kitRecord.items.includes(item)) {
+                kitRecord.items.push(item);
+            }
+        });
+        saveKitYearRecord(formData.studentId, formData.payYear, kitRecord);
+        
+        if (storage.saveFee(formData)) {
+            alert(`✅ Fee saved successfully!\n\nBill: ${formData.billNo}\nStudent: ${formData.studentName}\nAmount: ₹${formData.totalAmount}\nDate: ${formatFancy(formData.payDate)}`);
+            
+            clearForm();
+            refreshTable();
+            refreshStudentHistory(formData.studentId);
+            
+            setStatus(`Saved ${formData.billNo} for ${formData.studentName}`);
+            
+        } else {
+            alert("❌ Error saving fee");
+        }
     });
     
-    // Sort by total paid (descending)
-    var students = Object.keys(studentSummary).map(function(sid){
-        var student = studentSummary[sid];
-        student.id = sid;
-        return student;
-    }).sort(function(a,b){
-        return b.totalPaid - a.totalPaid;
+    // Edit button
+    document.getElementById("editBtn").addEventListener("click", function() {
+        const billNo = prompt("Enter Bill Number to edit:", document.getElementById("billNo").value);
+        if (!billNo) return;
+        
+        const fee = storage.getFee(billNo.trim());
+        if (!fee) {
+            alert("Bill not found");
+            return;
+        }
+        
+        fillForm(fee);
+        setStatus(`Editing: ${billNo}`);
+        refreshStudentHistory(fee.studentId);
     });
     
-    // Generate HTML Report
-    var reportHtml = `
+    // Delete button
+    document.getElementById("deleteBtn").addEventListener("click", function() {
+        const billNo = document.getElementById("billNo").value.trim();
+        if (!billNo || billNo === "BL0001") {
+            alert("No bill selected to delete");
+            return;
+        }
+        
+        if (!confirm(`Delete bill ${billNo}? This cannot be undone.`)) {
+            return;
+        }
+        
+        if (storage.deleteFee(billNo)) {
+            alert(`Deleted bill ${billNo}`);
+            
+            clearForm();
+            refreshTable();
+            refreshStudentHistory(document.getElementById("studentId").value);
+            
+            setStatus(`Deleted ${billNo}`);
+            
+        } else {
+            alert("Error deleting bill");
+        }
+    });
+    
+    // Search button
+    document.getElementById("searchBtn").addEventListener("click", function() {
+        const billNo = document.getElementById("searchBill").value.trim();
+        if (!billNo) {
+            alert("Enter bill number");
+            return;
+        }
+        
+        const fee = storage.getFee(billNo);
+        if (!fee) {
+            alert("Bill not found");
+            return;
+        }
+        
+        fillForm(fee);
+        setStatus(`Found: ${billNo}`);
+        refreshStudentHistory(fee.studentId);
+    });
+    
+    // Navigation buttons
+    document.getElementById("prevBtn").addEventListener("click", function() {
+        if (allFeesCache.length === 0) {
+            alert("No records available");
+            return;
+        }
+        
+        if (currentIndex > 0) {
+            currentIndex--;
+            fillForm(allFeesCache[currentIndex]);
+            refreshStudentHistory(allFeesCache[currentIndex].studentId);
+            setStatus(`Record ${currentIndex + 1} of ${allFeesCache.length}`);
+        } else {
+            alert("First record");
+        }
+    });
+    
+    document.getElementById("nextBtn").addEventListener("click", function() {
+        if (allFeesCache.length === 0) {
+            alert("No records available");
+            return;
+        }
+        
+        if (currentIndex < allFeesCache.length - 1) {
+            currentIndex++;
+            fillForm(allFeesCache[currentIndex]);
+            refreshStudentHistory(allFeesCache[currentIndex].studentId);
+            setStatus(`Record ${currentIndex + 1} of ${allFeesCache.length}`);
+        } else {
+            alert("Last record");
+        }
+    });
+    
+    // Filter buttons
+    document.getElementById("filterApply").addEventListener("click", refreshTable);
+    document.getElementById("filterReset").addEventListener("click", function() {
+        document.getElementById("filterName").value = "";
+        document.getElementById("filterId").value = "";
+        document.getElementById("filterClass").value = "";
+        document.getElementById("filterMonth").value = "";
+        document.getElementById("filterYear").value = "";
+        refreshTable();
+    });
+    
+    // Table button clicks
+    document.getElementById("feeTableBody").addEventListener("click", function(e) {
+        const button = e.target;
+        if (!button.classList.contains("small-btn")) return;
+        
+        const billNo = button.getAttribute("data-bill");
+        if (!billNo) return;
+        
+        const fee = storage.getFee(billNo);
+        if (!fee) return;
+        
+        if (button.classList.contains("sb-edit")) {
+            fillForm(fee);
+            setStatus(`Loaded ${billNo} for editing`);
+            refreshStudentHistory(fee.studentId);
+            
+        } else if (button.classList.contains("sb-del")) {
+            if (confirm(`Delete ${billNo}?`)) {
+                storage.deleteFee(billNo);
+                refreshTable();
+                refreshStudentHistory(fee.studentId);
+                setStatus(`Deleted ${billNo}`);
+            }
+            
+        } else if (button.classList.contains("sb-print")) {
+            window.open(`print_fee.html?bill=${billNo}`, "_blank");
+        }
+    });
+    
+    // Student history table clicks
+    document.getElementById("studentHistoryBody").addEventListener("click", function(e) {
+        const button = e.target;
+        if (!button.classList.contains("sb-view")) return;
+        
+        const billNo = button.getAttribute("data-bill");
+        if (!billNo) return;
+        
+        const fee = storage.getFee(billNo);
+        if (!fee) return;
+        
+        fillForm(fee);
+        setStatus(`Viewing: ${billNo}`);
+    });
+    
+    // CSV Export
+    document.getElementById("csvExportBtn").addEventListener("click", function() {
+        try {
+            const fees = storage.getAllFees();
+            if (fees.length === 0) {
+                alert("No data to export");
+                return;
+            }
+            
+            const headers = ["Bill No", "Student ID", "Student Name", "Class", "Section", "Roll", 
+                           "Payment Date", "Month", "Year", "Admission Type", "Admission Amount", 
+                           "Install Month", "Development Type", "Development Amount", "Uniform Type", 
+                           "Uniform Sets", "Tiffin", "Misc", "Picnic", "Field Trip", "Sports", 
+                           "Payment Mode", "Total Amount"];
+            
+            const months = ["January", "February", "March", "April", "May", "June", 
+                          "July", "August", "September", "October", "November", "December"];
+            
+            let csvContent = headers.join(",") + "\n";
+            
+            fees.forEach(fee => {
+                const monthName = fee.payMonth ? 
+                    months[parseInt(fee.payMonth, 10) - 1] || fee.payMonth : "";
+                
+                const row = [
+                    `"${fee.billNo || ""}"`,
+                    `"${fee.studentId || ""}"`,
+                    `"${fee.studentName || ""}"`,
+                    `"${fee.className || ""}"`,
+                    `"${fee.section || ""}"`,
+                    `"${fee.roll || ""}"`,
+                    `"${fee.payDate || ""}"`,
+                    `"${monthName}"`,
+                    `"${fee.payYear || ""}"`,
+                    `"${fee.admissionType || ""}"`,
+                    fee.admissionAmount || 0,
+                    `"${fee.installMonth || ""}"`,
+                    `"${fee.developmentType || ""}"`,
+                    fee.developmentAmount || 0,
+                    `"${fee.uniformType || ""}"`,
+                    fee.uniformSets || 0,
+                    fee.tiffin || 0,
+                    fee.misc || 0,
+                    fee.picnic || 0,
+                    fee.fieldtrip || 0,
+                    fee.sports || 0,
+                    `"${fee.paymentMode || ""}"`,
+                    fee.totalAmount || 0
+                ];
+                
+                csvContent += row.join(",") + "\n";
+            });
+            
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `fee_records_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            setStatus(`Exported ${fees.length} records to CSV`);
+            
+        } catch (error) {
+            console.error("CSV export error:", error);
+            alert("Error exporting CSV");
+        }
+    });
+    
+    // Student Report
+    document.getElementById("studentReportBtn").addEventListener("click", function() {
+        try {
+            const fees = storage.getAllFees();
+            if (fees.length === 0) {
+                alert("No student records found");
+                return;
+            }
+            
+            // Group by student
+            const students = {};
+            fees.forEach(fee => {
+                const sid = fee.studentId;
+                if (!students[sid]) {
+                    students[sid] = {
+                        id: sid,
+                        name: fee.studentName,
+                        className: fee.className,
+                        section: fee.section,
+                        roll: fee.roll,
+                        totalPaid: 0,
+                        payments: [],
+                        billCount: 0
+                    };
+                }
+                students[sid].totalPaid += (fee.totalAmount || 0);
+                students[sid].billCount++;
+                students[sid].payments.push({
+                    billNo: fee.billNo,
+                    date: formatFancy(fee.payDate),
+                    amount: fee.totalAmount,
+                    mode: fee.paymentMode
+                });
+            });
+            
+            const studentList = Object.values(students).sort((a, b) => b.totalPaid - a.totalPaid);
+            
+            // Generate report HTML
+            const reportHTML = `
 <!DOCTYPE html>
 <html>
 <head>
     <title>Student Fee Report - Chatushpathi Foundation</title>
     <style>
-        body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5;}
-        .header{text-align:center;background:#2e7d32;color:white;padding:20px;border-radius:8px;}
-        .student-card{background:white;margin:15px 0;padding:20px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-        .student-header{display:flex;justify-content:space-between;align-items:center;background:#e8f5e9;padding:15px;border-radius:5px;}
-        .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin:15px 0;}
-        .summary-item{background:#f1f8e9;padding:10px;border-radius:5px;text-align:center;}
-        .payment-list{background:#f9fbe7;padding:10px;border-radius:5px;max-height:200px;overflow:auto;}
-        .payment-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #ddd;}
-        .total-row{font-weight:bold;background:#fff3e0;padding:10px;border-radius:5px;margin-top:10px;}
-        @media(max-width:600px){.student-header{flex-direction:column;text-align:center;}}
+        body { font-family: Arial; margin: 20px; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; text-align: center; border-radius: 10px; }
+        .student { background: white; margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .student-header { background: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f1f8e9; }
+        .total { font-size: 24px; font-weight: bold; color: #2e7d32; }
+        @media print {
+            body { background: white; }
+            .student { box-shadow: none; border: 1px solid #ddd; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>📊 STUDENT FEE REPORT</h1>
-        <p>Chatushpathi Foundation - Fee Collection Summary</p>
-        <p>Generated: ${new Date().toLocaleDateString('en-IN')} ${new Date().toLocaleTimeString('en-IN')}</p>
-    </div>`;
-    
-    students.forEach(function(student, index){
-        reportHtml += `
-    <div class="student-card">
+        <h3>Chatushpathi Foundation</h3>
+        <p>Generated on ${new Date().toLocaleDateString('en-IN')} at ${new Date().toLocaleTimeString('en-IN')}</p>
+    </div>
+    <div style="text-align:center; margin:20px; padding:20px; background:#e3f2fd; border-radius:10px;">
+        <h2>Total Students: ${studentList.length}</h2>
+        <h1 class="total">Grand Total: ₹${studentList.reduce((sum, s) => sum + s.totalPaid, 0).toLocaleString('en-IN')}</h1>
+    </div>
+    ${studentList.map((student, idx) => `
+    <div class="student">
         <div class="student-header">
-            <div>
-                <h3>${student.name || 'N/A'}</h3>
-                <p><strong>ID:</strong> ${student.id || 'N/A'} | <strong>Class:</strong> ${student.className || 'N/A'}</p>
-                <p><strong>Section:</strong> ${student.section} | <strong>Roll:</strong> ${student.roll}</p>
-            </div>
-            <div style="text-align:right;">
-                <h2>₹${student.totalPaid.toLocaleString('en-IN')}</h2>
-                <p><em>${student.billCount} payment(s)</em></p>
-            </div>
+            <h2>${idx + 1}. ${student.name || 'Unknown'} (${student.id})</h2>
+            <p>Class: ${student.className || ''} | Section: ${student.section || ''} | Roll: ${student.roll || ''}</p>
+            <p style="font-size: 20px; font-weight: bold; color: #2e7d32;">
+                Total Paid: ₹${student.totalPaid.toLocaleString('en-IN')} (${student.billCount} bills)
+            </p>
         </div>
-        <div class="summary-grid">
-            <div class="summary-item">
-                <div style="font-size:24px;font-weight:bold;">${student.billCount}</div>
-                <div>Bills</div>
-            </div>
-            <div class="summary-item">
-                <div style="font-size:24px;font-weight:bold;">₹${student.totalPaid.toLocaleString('en-IN')}</div>
-                <div>Total Paid</div>
-            </div>
-        </div>
-        <div class="payment-list">
+        <table>
+            <tr>
+                <th>Bill No</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Payment Mode</th>
+            </tr>
             ${student.payments.map(p => `
-                <div class="payment-row">
-                    <span><strong>${p.billNo}</strong> - ${p.payDate}</span>
-                    <span>₹${p.amount.toLocaleString('en-IN')} (${p.mode})</span>
-                </div>
+            <tr>
+                <td>${p.billNo}</td>
+                <td>${p.date}</td>
+                <td>₹${p.amount.toLocaleString('en-IN')}</td>
+                <td>${p.mode}</td>
+            </tr>
             `).join('')}
-        </div>
-    </div>`;
-    });
-    
-    reportHtml += `
-    <div style="text-align:center;margin:30px 0;padding:20px;background:#e3f2fd;border-radius:8px;">
-        <h3>Total Students: ${students.length}</h3>
-        <h2>Grand Total: ₹${students.reduce((sum,s)=>sum+(s.totalPaid||0),0).toLocaleString('en-IN')}</h2>
+            <tr style="background: #fff3e0;">
+                <td colspan="2"><strong>Total</strong></td>
+                <td colspan="2"><strong>₹${student.totalPaid.toLocaleString('en-IN')}</strong></td>
+            </tr>
+        </table>
+    </div>
+    `).join('')}
+    <div style="text-align:center; margin-top:30px; padding:20px; background:#f5f5f5;">
+        <p>Report generated by Chatushpathi Foundation Fee Collection System</p>
+        <p>True education uplifts the self</p>
     </div>
 </body>
 </html>`;
-    
-    // Open report in new window
-    var reportWindow = window.open('', '_blank');
-    reportWindow.document.write(reportHtml);
-    reportWindow.document.close();
-    setStatus("Student Report generated (" + students.length + " students)");
-};
-
-// Navigation buttons
-document.getElementById("homeBtn").onclick = function(){ 
-    window.location.href="index.html"; 
-};
-
-document.getElementById("studentBtn").onclick = function(){ 
-    window.location.href="student.html"; 
-};
-
-// Print button
-document.getElementById("printBtn").onclick = async function(){
-    const rec = getFormData();
-    if(!rec.billNo) {
-        alert("No bill to print. Please save first.");
-        return;
-    }
-    window.open("print_fee.html?bill=" + rec.billNo, "_blank");
-};
-
-// Refresh table
-async function refreshTable(){
-    var all = await getAllFees();
-    var nameF = document.getElementById("filterName").value.toLowerCase();
-    var idF = document.getElementById("filterId").value.toLowerCase();
-    var clsF = document.getElementById("filterClass").value.toLowerCase();
-    var mF = document.getElementById("filterMonth").value;
-    var yF = document.getElementById("filterYear").value.trim();
-    
-    var filtered = all.filter(function(r){
-        if(nameF && String(r.studentName||"").toLowerCase().indexOf(nameF)===-1) return false;
-        if(idF && String(r.studentId||"").toLowerCase().indexOf(idF)===-1) return false;
-        if(clsF && String(r.className||"").toLowerCase().indexOf(clsF)===-1) return false;
-        if(mF && r.payMonth!==mF) return false;
-        if(yF && String(r.payYear)!==yF) return false;
-        return true;
-    });
-    
-    var tbody = document.getElementById("feeTableBody");
-    tbody.innerHTML="";
-    
-    filtered.sort(function(a,b){ 
-        return a.billNo.localeCompare(b.billNo); 
-    });
-    
-    var monthsFull = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    
-    filtered.forEach(function(r){
-        var mName="";
-        if(r.payMonth){
-            var mIndex=parseInt(r.payMonth,10)-1;
-            if(mIndex>=0 && mIndex<12) mName=monthsFull[mIndex];
+            
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(reportHTML);
+            reportWindow.document.close();
+            
+            setStatus(`Generated report for ${studentList.length} students`);
+            
+        } catch (error) {
+            console.error("Report error:", error);
+            alert("Error generating report");
         }
-        
-        var tr = document.createElement("tr");
-        tr.innerHTML=
-            "<td>"+(r.billNo||"")+"</td>"+
-            "<td>"+(r.studentId||"")+"</td>"+
-            "<td>"+(r.studentName||"")+"</td>"+
-            "<td>"+(r.className||"")+"</td>"+
-            "<td>"+mName+"</td>"+
-            "<td>"+(r.payYear||"")+"</td>"+
-            "<td>"+(r.admissionAmount||0)+"</td>"+
-            "<td>"+(r.developmentAmount||0)+"</td>"+
-            "<td>"+(r.uniformSets||0)+"</td>"+
-            "<td>"+(r.tiffin||0)+"</td>"+
-            "<td>"+(r.misc||0)+"</td>"+
-            "<td>"+(r.picnic||0)+"</td>"+
-            "<td>"+(r.fieldtrip||0)+"</td>"+
-            "<td>"+(r.sports||0)+"</td>"+
-            "<td>"+(r.totalAmount||0)+"</td>"+
-            "<td>"+(r.paymentMode||"")+"</td>"+
-            "<td><button class='small-btn sb-print' data-bill='"+r.billNo+"'>Print</button></td>"+
-            "<td><button class='small-btn sb-edit' data-bill='"+r.billNo+"'>Edit</button></td>"+
-            "<td><button class='small-btn sb-del' data-bill='"+r.billNo+"'>Del</button></td>";
-        
-        tbody.appendChild(tr);
+    });
+    
+    // Backup data
+    document.getElementById("backupBtn").addEventListener("click", function() {
+        try {
+            const fees = storage.getAllFees();
+            const students = storage.getAllStudents();
+            
+            const backupData = {
+                app: "Chatushpathi Fee System",
+                version: "2.0",
+                timestamp: new Date().toISOString(),
+                feeCount: fees.length,
+                studentCount: students.length,
+                fees: fees,
+                students: students
+            };
+            
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `chatushpathi_backup_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            setStatus(`Backup created with ${fees.length} fees and ${students.length} students`);
+            
+        } catch (error) {
+            console.error("Backup error:", error);
+            alert("Error creating backup");
+        }
+    });
+    
+    // Add sample data button
+    document.getElementById("addSampleBtn").addEventListener("click", function() {
+        if (confirm("Add sample students and fee records? This will help you test the system.")) {
+            addSampleData();
+        }
+    });
+    
+    // Print button
+    document.getElementById("printBtn").addEventListener("click", function() {
+        const billNo = document.getElementById("billNo").value.trim();
+        if (!billNo || billNo === "BL0001") {
+            alert("Please save the bill first before printing");
+            return;
+        }
+        window.open(`print_fee.html?bill=${billNo}`, "_blank");
+    });
+    
+    // Navigation buttons
+    document.getElementById("homeBtn").addEventListener("click", function() {
+        if (confirm("Go to Home page?")) {
+            window.location.href = "index.html";
+        }
+    });
+    
+    document.getElementById("studentBtn").addEventListener("click", function() {
+        if (confirm("Go to Student Management page?")) {
+            window.location.href = "student.html";
+        }
     });
 }
 
-// Filter buttons
-document.getElementById("filterApply").addEventListener("click", refreshTable);
-
-document.getElementById("filterReset").addEventListener("click", function(){
-    document.getElementById("filterName").value="";
-    document.getElementById("filterId").value="";
-    document.getElementById("filterClass").value="";
-    document.getElementById("filterMonth").value="";
-    document.getElementById("filterYear").value="";
-    refreshTable();
-});
-
-// Table button clicks
-document.getElementById("feeTableBody").addEventListener("click", async function(e){
-    var btn = e.target;
-    if(!(btn instanceof HTMLButtonElement)) return;
+// Auto-calculate total when page loads
+window.addEventListener('load', function() {
+    calculateTotal();
+    updateAdmissionControls();
     
-    var bill = btn.getAttribute("data-bill");
-    if(!bill) return;
+    // Check if there's any data
+    const fees = storage.getAllFees();
+    const students = storage.getAllStudents();
     
-    var rec = await getFee(bill);
-    if(!rec) return;
-    
-    if(btn.classList.contains("sb-print")){
-        window.open("print_fee.html?bill=" + bill, "_blank");
-    } else if(btn.classList.contains("sb-edit")){
-        fillForm(rec);
-        setStatus("Loaded "+bill+" for edit");
-        await refreshStudentHistory(rec.studentId);
-    } else if(btn.classList.contains("sb-del")){
-        if(confirm("Delete "+bill+" ?")){
-            await deleteFee(bill);
-            await refreshTable();
-            await refreshStudentHistory(rec.studentId);
-            setStatus("Deleted "+bill);
-        }
+    if (fees.length === 0 && students.length === 0) {
+        setStatus("Welcome! No data found. You can start by adding sample data or creating your first student.");
     }
 });
-
-// Refresh student history
-async function refreshStudentHistory(studentId){
-    var tbody=document.getElementById("studentHistoryBody");
-    tbody.innerHTML="";
-    if(!studentId) return;
-    
-    var all=await getAllFees();
-    var filtered=all.filter(function(r){ 
-        return r.studentId===studentId; 
-    });
-    
-    filtered.sort(function(a,b){ 
-        return (a.payDate||"").localeCompare(b.payDate||""); 
-    });
-    
-    filtered.forEach(function(r){
-        var tr=document.createElement("tr");
-        tr.innerHTML =
-            "<td>"+(r.billNo||"")+"</td>"+
-            "<td>"+formatFancy(r.payDate||"")+"</td>"+
-            "<td>"+(r.totalAmount||0)+"</td>"+
-            "<td>"+(r.paymentMode||"")+"</td>";
-        tbody.appendChild(tr);
-    });
-}
-
-// Initialize when page loads
-window.onload = initializeApp;
 </script>
 </body>
 </html>
